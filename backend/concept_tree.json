@@ -1,0 +1,461 @@
+[
+  {
+    "module_id": "bas_01",
+    "title": "Lewis Structures and Bonding",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": ["lewis_structure", "covalent_bond", "lone_pairs", "octet_rule", "valence_electrons"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Valence Electrons",
+        "short_definition": "Valence electrons are the outermost electrons of an atom that participate in chemical bonding. The number of valence electrons determines how many bonds an atom can form.",
+        "action_prompt": "Tap the electron dots around the carbon atom to count its 4 valence electrons."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Octet Rule",
+        "short_definition": "Most atoms are stable when surrounded by 8 electrons in their outer shell. Covalent bonds form by sharing electron pairs to satisfy this rule.",
+        "action_prompt": "Drag lone pairs from oxygen to complete the octet on the highlighted atom."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Lone Pairs",
+        "short_definition": "Lone pairs are pairs of valence electrons not involved in bonding. They are crucial for nucleophilicity and contribute to molecular geometry.",
+        "action_prompt": "Identify and tap all lone pairs on the nitrogen atom in the molecule shown."
+      }
+    ]
+  },
+  {
+    "module_id": "bas_02",
+    "title": "Electronegativity and Polarity",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": ["electronegativity", "polarity", "dipole_moment", "partial_charge", "bond_polarity"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Electronegativity",
+        "short_definition": "Electronegativity is an atom's ability to attract shared electrons toward itself. Fluorine is the most electronegative element; cesium is the least.",
+        "action_prompt": "Drag the electronegativity slider to rank C, N, O, and F from lowest to highest."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Bond Polarity",
+        "short_definition": "When two atoms of different electronegativity share a bond, the electrons shift toward the more electronegative atom, creating a polar bond with δ+ and δ− ends.",
+        "action_prompt": "Tap the atom that carries the δ− partial charge in the C–O bond shown."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Dipole Moment",
+        "short_definition": "A dipole moment is a vector quantity measuring the overall charge separation in a molecule. Symmetrical molecules can have polar bonds but zero net dipole.",
+        "action_prompt": "Rotate the 3D molecule until the net dipole arrow points away from you, then tap Confirm."
+      }
+    ]
+  },
+  {
+    "module_id": "bas_03",
+    "title": "Resonance Structures",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": ["resonance", "delocalization", "resonance_hybrid", "formal_charge", "pi_electrons"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Resonance",
+        "short_definition": "Resonance describes molecules that cannot be represented by a single Lewis structure. The true structure is a hybrid — a blend of all valid contributors.",
+        "action_prompt": "Swipe right to draw the second resonance contributor for the carboxylate anion."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Electron Delocalization",
+        "short_definition": "Delocalization spreads electron density over multiple atoms, lowering potential energy and increasing stability. Benzene is the classic example.",
+        "action_prompt": "Tap each bond in benzene that participates in the delocalized π system."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Formal Charge",
+        "short_definition": "Formal charge = valence electrons − lone pair electrons − ½ bonding electrons. The best resonance structure minimizes formal charges.",
+        "action_prompt": "Calculate and enter the formal charge on nitrogen in the nitro group shown."
+      }
+    ]
+  },
+  {
+    "module_id": "bas_04",
+    "title": "Nucleophiles and Electrophiles",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": ["nucleophile", "electrophile", "electron_donor", "electron_acceptor", "lewis_base", "lewis_acid"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Nucleophile",
+        "short_definition": "A nucleophile is an electron-rich species that donates electrons to form a new bond. Common nucleophiles include OH⁻, CN⁻, and NH₃.",
+        "action_prompt": "Tap all the nucleophiles from the list: OH⁻, H₂, BF₃, CN⁻, AlCl₃, Br⁻."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Electrophile",
+        "short_definition": "An electrophile is an electron-deficient species that accepts electrons to form a new bond. Carbocations, H⁺, and Lewis acids are all electrophiles.",
+        "action_prompt": "Drag the arrow from the nucleophile lone pair to the electrophilic carbon shown."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Nucleophilicity vs. Basicity",
+        "short_definition": "Nucleophilicity is kinetic (attack speed), while basicity is thermodynamic (affinity for H⁺). A species can be nucleophilic but weakly basic, or vice versa.",
+        "action_prompt": "Sort these four species by nucleophilicity in polar aprotic solvent: F⁻, Cl⁻, Br⁻, I⁻."
+      }
+    ]
+  },
+  {
+    "module_id": "bas_05",
+    "title": "Functional Groups Overview",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": ["functional_groups", "alkene", "alkyne", "alcohol", "aldehyde", "ketone", "amine", "carboxylic_acid"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Functional Group",
+        "short_definition": "A functional group is a specific arrangement of atoms that determines a molecule's reactivity. The rest of the molecule (the 'R group') is mostly inert.",
+        "action_prompt": "Tap and label the three functional groups visible on the amino acid structure."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Carbonyl Group",
+        "short_definition": "The carbonyl (C=O) is the most important functional group in organic chemistry. Aldehydes, ketones, esters, and carboxylic acids all contain a carbonyl.",
+        "action_prompt": "Circle the carbonyl carbon in each of the four molecules shown — which is most electrophilic?"
+      },
+      {
+        "slide": 3,
+        "concept_term": "Priority in Nomenclature",
+        "short_definition": "IUPAC nomenclature prioritizes functional groups: carboxylic acid > ester > aldehyde > ketone > alcohol > amine > alkene > alkyne.",
+        "action_prompt": "Drag the functional group names onto the correct atoms of the displayed compound."
+      }
+    ]
+  },
+  {
+    "module_id": "med_01",
+    "title": "Curved Arrow Notation",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": ["arrow_pushing", "curved_arrow", "electron_flow", "bond_breaking", "bond_forming", "mechanism"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Curved Arrow",
+        "short_definition": "A curved arrow shows the movement of a pair of electrons from a source (tail) to a destination (head). The tail always starts on an electron pair or bond.",
+        "action_prompt": "Draw a curved arrow from the lone pair on oxygen to the electrophilic carbon — tap tail, then tap head."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Bond-Breaking Arrow",
+        "short_definition": "When an arrow starts on a bond, it shows that bond breaking. The electrons move toward the arrow's head, generating either a radical or an ionic intermediate.",
+        "action_prompt": "Draw the heterolytic cleavage arrow that breaks the C–Br bond, sending both electrons to bromine."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Arrow Pushing Rules",
+        "short_definition": "Arrows always flow from electron-rich to electron-poor regions. Never draw an arrow backward (from positive to negative). Each step must be electronically balanced.",
+        "action_prompt": "Identify the one incorrect arrow in the mechanism shown and tap it to flag the error."
+      }
+    ]
+  },
+  {
+    "module_id": "med_02",
+    "title": "Carbocation Stability",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": ["carbocation", "stability", "hyperconjugation", "inductive_effect", "tertiary_carbocation", "rearrangement"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Carbocation",
+        "short_definition": "A carbocation is a carbon atom bearing only six electrons and a positive charge. Its stability increases with substitution: 3° > 2° > 1° > methyl.",
+        "action_prompt": "Rank these four carbocations from most to least stable by dragging them into order."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Hyperconjugation",
+        "short_definition": "Hyperconjugation is the delocalization of C–H σ-bond electrons into an adjacent empty p orbital. More C–H bonds adjacent to the cation means greater stabilization.",
+        "action_prompt": "Tap all C–H bonds that are hyperconjugating with the carbocation center shown."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Carbocation Rearrangement",
+        "short_definition": "Carbocations rearrange via 1,2-hydride or 1,2-methyl shifts to form a more stable cation. This can change the carbon skeleton and give unexpected products.",
+        "action_prompt": "Draw the 1,2-hydride shift arrow on the secondary carbocation to produce the tertiary cation."
+      }
+    ]
+  },
+  {
+    "module_id": "med_03",
+    "title": "SN1 and SN2 Mechanisms",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": ["SN1", "SN2", "nucleophilic_substitution", "leaving_group", "inversion", "racemisation", "backside_attack", "steric_hindrance"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "SN2 Mechanism",
+        "short_definition": "SN2 is a one-step substitution: the nucleophile attacks the back face of the electrophilic carbon while the leaving group departs simultaneously, causing inversion.",
+        "action_prompt": "Drag the hydroxide ion to the correct face of CH₃Br to initiate the SN2 backside attack."
+      },
+      {
+        "slide": 2,
+        "concept_term": "SN1 Mechanism",
+        "short_definition": "SN1 is a two-step process: first the leaving group departs to form a planar carbocation, then the nucleophile attacks from either face, giving racemisation.",
+        "action_prompt": "Tap the correct intermediate formed after Br⁻ departs from (CH₃)₃CBr in step 1 of SN1."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Steric Hindrance",
+        "short_definition": "Bulky groups around the electrophilic carbon block the backside attack required for SN2. Tertiary substrates cannot undergo SN2 — they exclusively follow SN1.",
+        "action_prompt": "Tap the carbon atom with the most bulky groups attached — this one will resist SN2."
+      }
+    ]
+  },
+  {
+    "module_id": "med_04",
+    "title": "E1 and E2 Elimination",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": ["E1", "E2", "elimination", "Saytzeff_rule", "anti_periplanar", "alkene", "base", "secondary_halide"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "E2 Mechanism",
+        "short_definition": "E2 is a one-step elimination: a base abstracts a β-hydrogen while the leaving group departs simultaneously, forming a π bond. The H and LG must be anti-periplanar.",
+        "action_prompt": "Rotate the Newman projection until the H and Br are anti-periplanar, then tap 'Eliminate'."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Saytzeff's Rule",
+        "short_definition": "Under E2 conditions with a non-bulky base, the more substituted (more stable) alkene is the major product — this is Saytzeff's (Zaitsev's) rule.",
+        "action_prompt": "Select the Saytzeff product from the two possible alkenes formed from 2-bromobutane."
+      },
+      {
+        "slide": 3,
+        "concept_term": "SN vs E Competition",
+        "short_definition": "Substitution and elimination compete. High temperature, strong bulky base, and tertiary substrate favour elimination. Weak nucleophile and primary substrate favour substitution.",
+        "action_prompt": "Given the reagent conditions shown, drag the arrow to either the SN2 or E2 pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "med_05",
+    "title": "Stereochemistry — Chirality and R/S",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": ["chirality", "stereocenter", "R_configuration", "S_configuration", "enantiomer", "diastereomer", "optical_activity", "CIP_rules"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Stereocentre",
+        "short_definition": "A stereocentre (chiral centre) is an atom — usually carbon — bonded to four different groups. Its mirror image is non-superimposable, giving two enantiomers.",
+        "action_prompt": "Tap every stereocentre in the displayed molecule. There may be more than one."
+      },
+      {
+        "slide": 2,
+        "concept_term": "R/S Configuration",
+        "short_definition": "Assign R or S by ranking substituents 1–4 by CIP priority, then trace 1→2→3. Clockwise = R (Rectus); counter-clockwise = S (Sinister). Swap if group 4 faces you.",
+        "action_prompt": "Drag the priority labels (1–4) onto the correct substituents, then tap R or S."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Enantiomers vs. Diastereomers",
+        "short_definition": "Enantiomers are non-superimposable mirror images (all stereocentres inverted). Diastereomers are stereoisomers that are NOT mirror images — some centres are the same, some differ.",
+        "action_prompt": "From the four structures shown, tap the one that is the enantiomer of the reference molecule."
+      }
+    ]
+  },
+  {
+    "module_id": "med_06",
+    "title": "Electrophilic Addition to Alkenes",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": ["electrophilic_addition", "Markovnikov", "anti_addition", "bromonium_ion", "HX_addition", "hydration"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Markovnikov's Rule",
+        "short_definition": "In HX addition to an asymmetric alkene, H⁺ adds to the carbon with more hydrogens (forming the more stable carbocation), and X⁻ adds to the other carbon.",
+        "action_prompt": "Tap the carbon that will receive the Br in Markovnikov addition of HBr to propene."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Bromonium Ion",
+        "short_definition": "Addition of Br₂ to an alkene proceeds through a cyclic bromonium ion intermediate. Br⁻ then attacks the back face, giving anti addition of two bromine atoms.",
+        "action_prompt": "Draw the bromonium ion intermediate by dragging Br₂ onto the double bond of cyclohexene."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Anti Addition",
+        "short_definition": "Anti addition means the two new groups add to opposite faces of the double bond. Br₂ addition to cyclic alkenes always gives trans (anti) dihalides.",
+        "action_prompt": "Select the correct stereochemical product of Br₂ addition to cyclohexene — trans or cis?"
+      }
+    ]
+  },
+  {
+    "module_id": "adv_01",
+    "title": "Electrophilic Aromatic Substitution (EAS)",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": ["EAS", "aromatic", "arenium_ion", "directing_effects", "ortho_para_director", "meta_director", "Friedel_Crafts", "nitration", "halogenation"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Arenium Ion",
+        "short_definition": "EAS proceeds via a resonance-stabilized arenium ion (Wheland intermediate) formed when the electrophile attacks the aromatic π system. A proton is then lost to restore aromaticity.",
+        "action_prompt": "Draw the arenium ion formed when NO₂⁺ attacks benzene — drag arrows to show the three resonance forms."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Ortho/Para Director",
+        "short_definition": "Electron-donating groups (–OH, –NH₂, –alkyl) activate the ring and direct electrophiles to ortho and para positions by stabilizing the arenium ion at those sites.",
+        "action_prompt": "Tap all positions on toluene where an incoming electrophile would preferentially attack."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Meta Director",
+        "short_definition": "Electron-withdrawing groups (–NO₂, –C≡N, –COOH) deactivate the ring and direct electrophiles to the meta position because o/p arenium ions are extra-destabilized.",
+        "action_prompt": "Given nitrobenzene, drag the incoming Br⁺ to the correct position for the major product."
+      }
+    ]
+  },
+  {
+    "module_id": "adv_02",
+    "title": "Carbonyl Chemistry — Nucleophilic Addition",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": ["carbonyl", "nucleophilic_addition", "aldehyde", "ketone", "cyanohydrin", "Grignard", "hydride_reduction", "hemiacetal"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Carbonyl Electrophilicity",
+        "short_definition": "The C=O carbon is electrophilic because oxygen's higher electronegativity pulls electron density away, creating a δ+ carbon that is attacked by nucleophiles.",
+        "action_prompt": "Tap the atom in the carbonyl group that a nucleophile will attack, then draw the attack arrow."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Grignard Reaction",
+        "short_definition": "A Grignard reagent (RMgX) acts as a carbanion nucleophile attacking a carbonyl. The product, after aqueous workup, is an alcohol whose type depends on the carbonyl substrate.",
+        "action_prompt": "Select the correct product of CH₃MgBr reacting with formaldehyde — primary, secondary, or tertiary alcohol?"
+      },
+      {
+        "slide": 3,
+        "concept_term": "Hemiacetal Formation",
+        "short_definition": "An alcohol attacking a carbonyl under acidic or basic conditions forms a tetrahedral hemiacetal intermediate. A second addition gives the stable acetal (protecting group).",
+        "action_prompt": "Draw the two-step mechanism from aldehyde to acetal by placing arrows and intermediates in the correct sequence."
+      }
+    ]
+  },
+  {
+    "module_id": "adv_03",
+    "title": "Aldol Condensation",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": ["aldol", "enolate", "alpha_carbon", "condensation", "dehydration", "crossed_aldol", "intramolecular_aldol", "C_C_bond_formation"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Enolate Ion",
+        "short_definition": "A base removes an α-hydrogen (adjacent to carbonyl) to generate a resonance-stabilized enolate ion. The carbanion character of the α-carbon makes it nucleophilic.",
+        "action_prompt": "Tap the α-hydrogen on acetaldehyde that will be removed by NaOH to generate the enolate."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Aldol Addition",
+        "short_definition": "The enolate (nucleophile) attacks the carbonyl carbon of another molecule (electrophile), forming a β-hydroxy carbonyl compound — the aldol product.",
+        "action_prompt": "Connect the enolate α-carbon to the electrophilic carbonyl carbon to complete the aldol addition step."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Aldol Condensation",
+        "short_definition": "When heated, the aldol product undergoes dehydration to form a α,β-unsaturated carbonyl compound (conjugated enone). This overall sequence is the aldol condensation.",
+        "action_prompt": "Identify which –OH group is eliminated in the dehydration step and tap it to complete the condensation."
+      }
+    ]
+  },
+  {
+    "module_id": "adv_04",
+    "title": "Retrosynthetic Analysis",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": ["retrosynthesis", "disconnection", "synthon", "FGI", "C_C_bond", "target_molecule", "synthetic_equivalent"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Retrosynthesis",
+        "short_definition": "Retrosynthetic analysis works backward from target to starting materials by identifying logical bond disconnections. The double arrow (⟹) means 'can be made from'.",
+        "action_prompt": "Draw the retrosynthetic double arrow to disconnect the C–C bond in the target alcohol — which bond would you break?"
+      },
+      {
+        "slide": 2,
+        "concept_term": "Synthon",
+        "short_definition": "A synthon is the idealized fragment from a disconnection, often a carbanion or carbocation. Each synthon must have a real 'synthetic equivalent' (an actual reagent).",
+        "action_prompt": "Match each synthon fragment to its correct synthetic equivalent reagent from the list provided."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Functional Group Interconversion (FGI)",
+        "short_definition": "FGI transforms a functional group in the target to one that is easier to disconnect. For example, convert an alcohol to a carbonyl before attempting a Grignard disconnection.",
+        "action_prompt": "Apply FGI to convert the amine in the target molecule to the functional group needed for the retrosynthetic disconnection shown."
+      }
+    ]
+  },
+  {
+    "module_id": "adv_05",
+    "title": "Oxidation and Reduction in Synthesis",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": ["oxidation", "reduction", "PCC", "LiAlH4", "NaBH4", "osmium_tetroxide", "ozonolysis", "oxidation_state", "selective_reduction"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Oxidation State of Carbon",
+        "short_definition": "Carbon's oxidation state increases with more C–O bonds and decreases with more C–H bonds. Moving from alkane → alcohol → aldehyde → carboxylic acid is progressive oxidation.",
+        "action_prompt": "Place the four functional groups in order of increasing oxidation state by dragging them into the correct sequence."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Selective Reduction",
+        "short_definition": "LiAlH₄ reduces all carbonyls (including esters and amides). NaBH₄ is milder and selectively reduces aldehydes and ketones without touching esters or C=C bonds.",
+        "action_prompt": "Choose the correct reagent (LiAlH₄ or NaBH₄) to selectively reduce only the ketone in a molecule that also contains an ester group."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Ozonolysis",
+        "short_definition": "Ozonolysis cleaves C=C double bonds using O₃ followed by workup. Reductive workup (Zn/H₂O or Me₂S) gives aldehydes/ketones; oxidative workup (H₂O₂) gives carboxylic acids.",
+        "action_prompt": "Predict both carbonyl fragments produced by ozonolysis of 2-pentene with reductive workup and enter their structures."
+      }
+    ]
+  },
+  {
+    "module_id": "adv_06",
+    "title": "Acyl Substitution and Ester Chemistry",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": ["acyl_substitution", "ester", "saponification", "Fischer_esterification", "tetrahedral_intermediate", "leaving_group_ability", "transesterification"],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Nucleophilic Acyl Substitution",
+        "short_definition": "Unlike ketones, acyl compounds (esters, acid chlorides) undergo substitution instead of addition because the leaving group can re-form the C=O after the tetrahedral intermediate collapses.",
+        "action_prompt": "Complete the mechanism of ester hydrolysis by placing the tetrahedral intermediate and the departing alkoxide in the correct sequence."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Reactivity Order of Acyl Compounds",
+        "short_definition": "Reactivity toward nucleophiles: acid chloride > anhydride > ester > amide. A better leaving group (weaker conjugate base) means faster substitution.",
+        "action_prompt": "Rank the four acyl compounds displayed from most to least reactive toward nucleophilic substitution."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Fischer Esterification",
+        "short_definition": "Fischer esterification is the acid-catalysed condensation of a carboxylic acid with an alcohol to give an ester and water. It is reversible — excess alcohol drives equilibrium.",
+        "action_prompt": "Identify the leaving group in the Fischer esterification mechanism and tap it to confirm the correct step."
+      }
+    ]
+  }
+]

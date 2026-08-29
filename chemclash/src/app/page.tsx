@@ -30,6 +30,18 @@ const GAME_MODES: GameMode[] = [
     plays: 580,
   },
   {
+    id: "adaptive-pyq",
+    title: "Adaptive PYQ",
+    level: "SMART",
+    description:
+      "AI matchmaker serves you the most relevant JEE Previous Year Questions based on your exact weakness profile. No hallucinations — verified questions only.",
+    icon: "🎯",
+    href: "/adaptive-pyq",
+    accentColor: "#a78bfa",
+    badge: "NEW",
+    plays: 420,
+  },
+  {
     id: "1v1-duel",
     title: "1v1 Duel",
     level: "RANKED",
@@ -49,7 +61,7 @@ const GAME_MODES: GameMode[] = [
       "Browse every JEE-relevant reagent — formula, reaction conditions, substrates, products, and Socratic notes. Searchable and filterable by category.",
     icon: "🧪",
     href: "/reagents",
-    accentColor: "#a78bfa",
+    accentColor: "#f59e0b",
     badge: "JEE READY",
     plays: 3100,
   },

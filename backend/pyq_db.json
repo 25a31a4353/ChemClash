@@ -1,0 +1,338 @@
+[
+  {
+    "id": "PYQ-001",
+    "exam": "JEE Advanced",
+    "exam_year": 2023,
+    "question_text": "In the reaction of (CH₃)₃CBr with NaOH in aqueous ethanol, the major product is formed by which mechanism, and what is the product?",
+    "image_url": null,
+    "options": {
+      "A": "SN2 — (CH₃)₃COH",
+      "B": "SN1 — (CH₃)₃COH",
+      "C": "E2 — isobutylene",
+      "D": "E1 — isobutylene"
+    },
+    "correct_answer": "D",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "SN1",
+      "E1",
+      "tertiary_halide",
+      "carbocation",
+      "steric_hindrance",
+      "elimination"
+    ]
+  },
+  {
+    "id": "PYQ-002",
+    "exam": "JEE Mains",
+    "exam_year": 2022,
+    "question_text": "Which of the following halides undergoes SN2 reaction at the fastest rate with NaCN in DMSO?",
+    "image_url": null,
+    "options": {
+      "A": "(CH₃)₃CCl",
+      "B": "(CH₃)₂CHBr",
+      "C": "CH₃CH₂Cl",
+      "D": "CH₃I"
+    },
+    "correct_answer": "D",
+    "difficulty_level": "easy",
+    "concept_tags": [
+      "SN2",
+      "primary_halide",
+      "nucleophilicity",
+      "leaving_group",
+      "reaction_rate"
+    ]
+  },
+  {
+    "id": "PYQ-003",
+    "exam": "JEE Mains",
+    "exam_year": 2021,
+    "question_text": "The correct statement about the SN2 reaction of alkyl halides is:",
+    "image_url": null,
+    "options": {
+      "A": "Inversion of configuration always occurs",
+      "B": "Racemization always occurs",
+      "C": "Retention of configuration always occurs",
+      "D": "Both inversion and retention occur in equal proportion"
+    },
+    "correct_answer": "A",
+    "difficulty_level": "easy",
+    "concept_tags": [
+      "SN2",
+      "stereochemistry",
+      "inversion",
+      "Walden_inversion",
+      "primary_halide"
+    ]
+  },
+  {
+    "id": "PYQ-004",
+    "exam": "JEE Advanced",
+    "exam_year": 2020,
+    "question_text": "In the Saytzeff elimination (E2) of 2-bromobutane with KOH/ethanol, the major alkene product is:",
+    "image_url": null,
+    "options": {
+      "A": "1-butene",
+      "B": "2-butene (trans)",
+      "C": "2-butene (cis)",
+      "D": "1,3-butadiene"
+    },
+    "correct_answer": "B",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "E2",
+      "Saytzeff_rule",
+      "elimination",
+      "secondary_halide",
+      "alkene",
+      "stereochemistry"
+    ]
+  },
+  {
+    "id": "PYQ-005",
+    "exam": "JEE Mains",
+    "exam_year": 2023,
+    "question_text": "Which nucleophile is most reactive in an SN2 reaction in a polar aprotic solvent like DMSO?",
+    "image_url": null,
+    "options": {
+      "A": "F⁻",
+      "B": "Cl⁻",
+      "C": "Br⁻",
+      "D": "I⁻"
+    },
+    "correct_answer": "D",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "SN2",
+      "nucleophilicity",
+      "polar_aprotic_solvent",
+      "halide_reactivity",
+      "DMSO"
+    ]
+  },
+  {
+    "id": "PYQ-006",
+    "exam": "JEE Advanced",
+    "exam_year": 2019,
+    "question_text": "An optically active compound undergoes SN1 solvolysis in aqueous acetone. The product is:",
+    "image_url": null,
+    "options": {
+      "A": "A pure enantiomer with retention",
+      "B": "A pure enantiomer with inversion",
+      "C": "A racemic mixture",
+      "D": "A meso compound"
+    },
+    "correct_answer": "C",
+    "difficulty_level": "hard",
+    "concept_tags": [
+      "SN1",
+      "racemisation",
+      "carbocation",
+      "stereochemistry",
+      "optically_active"
+    ]
+  },
+  {
+    "id": "PYQ-007",
+    "exam": "JEE Mains",
+    "exam_year": 2020,
+    "question_text": "Markovnikov's rule predicts that addition of HBr to propene gives which major product?",
+    "image_url": null,
+    "options": {
+      "A": "1-bromopropane",
+      "B": "2-bromopropane",
+      "C": "1,2-dibromopropane",
+      "D": "allyl bromide"
+    },
+    "correct_answer": "B",
+    "difficulty_level": "easy",
+    "concept_tags": [
+      "Markovnikov",
+      "electrophilic_addition",
+      "alkene",
+      "HBr",
+      "carbocation",
+      "regioselectivity"
+    ]
+  },
+  {
+    "id": "PYQ-008",
+    "exam": "JEE Advanced",
+    "exam_year": 2022,
+    "question_text": "In a free-radical halogenation of 2-methylpropane with Cl₂/hν, the ratio of tertiary to primary C–H abstraction product reflects:",
+    "image_url": null,
+    "options": {
+      "A": "The statistical ratio only (1:9)",
+      "B": "Tertiary radical is more stable, so tertiary product predominates",
+      "C": "Primary radical is more stable",
+      "D": "Both are equally reactive; products form in 1:1 ratio"
+    },
+    "correct_answer": "B",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "free_radical",
+      "halogenation",
+      "radical_stability",
+      "tertiary_radical",
+      "selectivity"
+    ]
+  },
+  {
+    "id": "PYQ-009",
+    "exam": "JEE Mains",
+    "exam_year": 2019,
+    "question_text": "Which reagent converts a primary alcohol to an aldehyde without over-oxidation to carboxylic acid?",
+    "image_url": null,
+    "options": {
+      "A": "KMnO₄/H⁺",
+      "B": "K₂Cr₂O₇/H₂SO₄",
+      "C": "PCC (Pyridinium chlorochromate)",
+      "D": "CrO₃ in acetic acid"
+    },
+    "correct_answer": "C",
+    "difficulty_level": "easy",
+    "concept_tags": [
+      "oxidation",
+      "PCC",
+      "aldehyde",
+      "primary_alcohol",
+      "selective_oxidation"
+    ]
+  },
+  {
+    "id": "PYQ-010",
+    "exam": "JEE Advanced",
+    "exam_year": 2021,
+    "question_text": "The reaction of benzene with CH₃Cl in the presence of anhydrous AlCl₃ proceeds via which mechanism and gives which product?",
+    "image_url": null,
+    "options": {
+      "A": "Free radical — chlorobenzene",
+      "B": "Electrophilic aromatic substitution — toluene",
+      "C": "Nucleophilic aromatic substitution — methylcyclohexane",
+      "D": "Nucleophilic addition — styrene"
+    },
+    "correct_answer": "B",
+    "difficulty_level": "easy",
+    "concept_tags": [
+      "EAS",
+      "Friedel_Crafts_alkylation",
+      "aromatic",
+      "electrophilic_aromatic_substitution",
+      "carbocation",
+      "AlCl3"
+    ]
+  },
+  {
+    "id": "PYQ-011",
+    "exam": "JEE Mains",
+    "exam_year": 2022,
+    "question_text": "Ozonolysis of 2-butene followed by reductive workup (Zn/H₂O) gives:",
+    "image_url": null,
+    "options": {
+      "A": "Two molecules of acetaldehyde",
+      "B": "Formaldehyde + propanaldehyde",
+      "C": "Acetic acid + formic acid",
+      "D": "Butanedial"
+    },
+    "correct_answer": "A",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "ozonolysis",
+      "alkene_cleavage",
+      "reductive_workup",
+      "aldehyde",
+      "oxidative_cleavage"
+    ]
+  },
+  {
+    "id": "PYQ-012",
+    "exam": "JEE Advanced",
+    "exam_year": 2018,
+    "question_text": "Which of the following species is the best leaving group in an SN1 reaction?",
+    "image_url": null,
+    "options": {
+      "A": "–NH₂",
+      "B": "–OH",
+      "C": "–OTs (tosylate)",
+      "D": "–F"
+    },
+    "correct_answer": "C",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "SN1",
+      "leaving_group",
+      "tosylate",
+      "steric_hindrance",
+      "nucleophilic_substitution"
+    ]
+  },
+  {
+    "id": "PYQ-013",
+    "exam": "JEE Mains",
+    "exam_year": 2023,
+    "question_text": "Treatment of acetaldehyde with excess HCN followed by hydrolysis gives which product?",
+    "image_url": null,
+    "options": {
+      "A": "Lactic acid",
+      "B": "Glycolic acid",
+      "C": "Pyruvic acid",
+      "D": "Oxalic acid"
+    },
+    "correct_answer": "A",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "nucleophilic_addition",
+      "cyanohydrin",
+      "HCN",
+      "carbonyl",
+      "hydrolysis",
+      "lactic_acid"
+    ]
+  },
+  {
+    "id": "PYQ-014",
+    "exam": "JEE Advanced",
+    "exam_year": 2017,
+    "question_text": "In the E2 elimination, the dihedral angle between the H being abstracted and the leaving group must be:",
+    "image_url": null,
+    "options": {
+      "A": "0°",
+      "B": "60°",
+      "C": "90°",
+      "D": "180°"
+    },
+    "correct_answer": "D",
+    "difficulty_level": "hard",
+    "concept_tags": [
+      "E2",
+      "anti_periplanar",
+      "dihedral_angle",
+      "stereoelectronics",
+      "elimination",
+      "stereochemistry"
+    ]
+  },
+  {
+    "id": "PYQ-015",
+    "exam": "JEE Mains",
+    "exam_year": 2021,
+    "question_text": "The Hofmann bromamide reaction converts an amide to a primary amine with:",
+    "image_url": null,
+    "options": {
+      "A": "The same number of carbon atoms",
+      "B": "One more carbon atom",
+      "C": "One fewer carbon atom",
+      "D": "Two fewer carbon atoms"
+    },
+    "correct_answer": "C",
+    "difficulty_level": "medium",
+    "concept_tags": [
+      "Hofmann_rearrangement",
+      "amide",
+      "primary_amine",
+      "carbon_loss",
+      "rearrangement"
+    ]
+  }
+]

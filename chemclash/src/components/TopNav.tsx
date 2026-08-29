@@ -102,9 +102,10 @@ export default function TopNav({
           className="hidden-mobile"
         >
           {[
-            { href: "/react-or-reject", label: "React or Reject", color: "#00ff88" },
-            { href: "/mechanism-builder", label: "Mechanism Builder", color: "#3b82f6" },
-            { href: "/reagents", label: "Reagents", color: "#a78bfa" },
+            { href: "/react-or-reject",  label: "React or Reject",   color: "#00ff88" },
+            { href: "/mechanism-builder",label: "Mechanism Builder",  color: "#3b82f6" },
+            { href: "/adaptive-pyq",     label: "Adaptive PYQ",      color: "#a78bfa" },
+            { href: "/reagents",         label: "Reagents",           color: "#f59e0b" },
           ].map((link) => (
             <Link
               key={link.href}
