@@ -1,3 +1,5 @@
+"use client";
+
 import TopNav from "@/components/TopNav";
 import GameModeCard, { GameMode } from "@/components/GameModeCard";
 
@@ -12,6 +14,8 @@ const GAME_MODES: GameMode[] = [
     href: "/react-or-reject",
     accentColor: "#00ff88",
     badge: "BEGINNER",
+    progress: 68,
+    plays: 1240,
   },
   {
     id: "mechanism-builder",
@@ -22,6 +26,8 @@ const GAME_MODES: GameMode[] = [
     icon: "🧬",
     href: "/mechanism-builder",
     accentColor: "#3b82f6",
+    progress: 34,
+    plays: 580,
   },
   {
     id: "1v1-duel",
@@ -33,6 +39,7 @@ const GAME_MODES: GameMode[] = [
     href: "/duel",
     accentColor: "#f59e0b",
     badge: "COMING SOON",
+    locked: true,
   },
   {
     id: "reagents",
@@ -44,120 +51,175 @@ const GAME_MODES: GameMode[] = [
     href: "/reagents",
     accentColor: "#a78bfa",
     badge: "JEE READY",
+    plays: 3100,
   },
+];
+
+const STATS = [
+  { label: "REACTIONS ATTEMPTED", value: "248", color: "#00ff88", icon: "⚗" },
+  { label: "ACCURACY RATE",        value: "73%", color: "#3b82f6", icon: "🎯" },
+  { label: "BEST STREAK",          value: "12d",  color: "#f59e0b", icon: "🔥" },
+  { label: "GLOBAL RANK",          value: "#84",  color: "#a78bfa", icon: "🏆" },
 ];
 
 export default function Dashboard() {
   return (
-    <div style={{ minHeight: "100vh", background: "#0d0d0d", fontFamily: "Courier New, monospace" }}>
+    <div style={{ minHeight: "100vh", background: "#080c10", fontFamily: "Courier New, monospace" }}>
       <TopNav eloRating={1337} dailyStreak={7} username="CH3M_L0RD" />
 
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px" }}>
-        {/* Header */}
-        <div style={{ marginBottom: 48 }}>
-          <p
-            style={{
-              color: "#00ff88",
-              fontSize: "0.75rem",
-              letterSpacing: "0.25em",
-              margin: "0 0 10px 0",
-              opacity: 0.7,
-            }}
-          >
+      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 80px" }}>
+
+        {/* ── Hero section ── */}
+        <div style={{ marginBottom: 52 }} className="animate-fade-in">
+
+          {/* Eyebrow */}
+          <p style={{ color: "#00ff88", fontSize: "0.7rem", letterSpacing: "0.3em", margin: "0 0 12px 0", opacity: 0.7 }}>
             // SELECT GAME MODE
           </p>
+
+          {/* Headline */}
           <h1
             style={{
               color: "#ffffff",
-              fontSize: "2.2rem",
-              fontWeight: 800,
-              margin: "0 0 12px 0",
-              letterSpacing: "0.03em",
+              fontSize: "clamp(1.6rem, 3vw, 2.4rem)",
+              fontWeight: 900,
+              margin: "0 0 10px 0",
+              letterSpacing: "0.02em",
+              lineHeight: 1.2,
             }}
           >
             Welcome back,{" "}
-            <span style={{ color: "#00ff88" }} className="glow">
+            <span className="glow" style={{ color: "#00ff88" }}>
               CH3M_L0RD
             </span>
           </h1>
-          <p style={{ color: "#6b7280", fontSize: "0.9rem", margin: 0 }}>
-            Your ELO is{" "}
-            <span style={{ color: "#00ff88", fontWeight: 700 }}>1337</span>. You
-            are in the top{" "}
-            <span style={{ color: "#f59e0b", fontWeight: 700 }}>12%</span> of
-            players. Keep reacting.
-          </p>
-        </div>
 
-        {/* Stats bar */}
-        <div
-          style={{
-            display: "flex",
-            gap: 16,
-            marginBottom: 48,
-            flexWrap: "wrap",
-          }}
-        >
-          {[
-            { label: "REACTIONS ATTEMPTED", value: "248", color: "#00ff88" },
-            { label: "ACCURACY", value: "73%", color: "#3b82f6" },
-            { label: "BEST STREAK", value: "12 days", color: "#f59e0b" },
-            { label: "RANK", value: "#84", color: "#a78bfa" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              style={{
-                background: "#111111",
-                border: "1px solid #1f2937",
-                borderRadius: 8,
-                padding: "14px 20px",
-                flex: "1 1 160px",
-              }}
-            >
+          <p style={{ color: "#64748b", fontSize: "0.88rem", margin: "0 0 36px 0", lineHeight: 1.6 }}>
+            Your ELO is{" "}
+            <span style={{ color: "#00ff88", fontWeight: 700 }}>1337</span> · Top{" "}
+            <span style={{ color: "#f59e0b", fontWeight: 700 }}>12%</span> globally · Keep reacting.
+          </p>
+
+          {/* Stats bar */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gap: 12,
+            }}
+          >
+            {STATS.map((stat, i) => (
               <div
+                key={stat.label}
+                className={`animate-slide-up delay-${(i + 1) * 100}`}
                 style={{
-                  fontSize: "0.62rem",
-                  color: "#6b7280",
-                  letterSpacing: "0.15em",
-                  marginBottom: 6,
+                  background: "#111820",
+                  border: "1px solid #1e2d3d",
+                  borderRadius: 10,
+                  padding: "14px 18px",
+                  position: "relative",
+                  overflow: "hidden",
+                  transition: "border-color 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = stat.color + "50";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = "#1e2d3d";
                 }}
               >
-                {stat.label}
+                {/* Background glow blob */}
+                <div style={{
+                  position: "absolute", top: -20, right: -20, width: 70, height: 70,
+                  borderRadius: "50%",
+                  background: `radial-gradient(circle, ${stat.color}18 0%, transparent 70%)`,
+                  pointerEvents: "none",
+                }} />
+                <div style={{ fontSize: "0.58rem", color: "#334155", letterSpacing: "0.14em", marginBottom: 6 }}>
+                  {stat.label}
+                </div>
+                <div style={{ fontSize: "1.5rem", fontWeight: 900, color: stat.color, lineHeight: 1 }}>
+                  {stat.value}
+                </div>
               </div>
-              <div
-                style={{ fontSize: "1.4rem", fontWeight: 800, color: stat.color }}
-              >
-                {stat.value}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Game mode grid */}
+        {/* ── Section divider ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
+          <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.2em", whiteSpace: "nowrap" }}>
+            // GAME MODES
+          </span>
+          <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, #1e2d3d, transparent)" }} />
+        </div>
+
+        {/* ── Game mode grid ── */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: 20,
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 18,
           }}
         >
-          {GAME_MODES.map((mode) => (
-            <GameModeCard key={mode.id} mode={mode} />
+          {GAME_MODES.map((mode, i) => (
+            <GameModeCard key={mode.id} mode={mode} index={i} />
           ))}
         </div>
 
-        {/* Footer hint */}
+        {/* ── Activity strip ── */}
+        <div
+          style={{
+            marginTop: 52,
+            background: "#111820",
+            border: "1px solid #1e2d3d",
+            borderRadius: 12,
+            padding: "20px 24px",
+          }}
+          className="animate-fade-in"
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+            <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.18em" }}>// WEEKLY ACTIVITY</span>
+            <span style={{ color: "#64748b", fontSize: "0.65rem" }}>last 7 days</span>
+          </div>
+          <div style={{ display: "flex", gap: 6, alignItems: "flex-end", height: 48 }}>
+            {[40, 70, 55, 90, 65, 80, 100].map((h, i) => (
+              <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
+                <div
+                  style={{
+                    width: "100%",
+                    height: `${h}%`,
+                    background: h === 100
+                      ? "linear-gradient(180deg, #00ff88, #00cc6a)"
+                      : `rgba(0,255,136,${0.15 + h / 300})`,
+                    borderRadius: "3px 3px 0 0",
+                    transition: "height 0.6s ease",
+                    minHeight: 4,
+                    border: h === 100 ? "none" : "1px solid rgba(0,255,136,0.15)",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+            {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+              <span key={i} style={{ color: "#334155", fontSize: "0.58rem", flex: 1, textAlign: "center" }}>{d}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Footer ── */}
         <p
           style={{
-            marginTop: 56,
-            color: "#374151",
-            fontSize: "0.75rem",
+            marginTop: 52,
+            color: "#1e2d3d",
+            fontSize: "0.68rem",
             textAlign: "center",
-            letterSpacing: "0.1em",
+            letterSpacing: "0.14em",
           }}
         >
-          // CHEMCLASH v0.1.0 — ORGANIC CHEMISTRY ARENA —{" "}
-          <span style={{ color: "#4b5563" }}>ALL REACTIONS WILL BE JUDGED</span>
+          CHEMCLASH v0.1.0 · ORGANIC CHEMISTRY ARENA ·{" "}
+          <span style={{ color: "#263245" }}>ALL REACTIONS WILL BE JUDGED</span>
         </p>
       </main>
     </div>

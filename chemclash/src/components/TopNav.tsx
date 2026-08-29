@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
+
 interface TopNavProps {
   eloRating?: number;
   dailyStreak?: number;
@@ -11,98 +14,275 @@ export default function TopNav({
   dailyStreak = 7,
   username = "CH3M_L0RD",
 }: TopNavProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <nav
       style={{
-        background: "#111111",
-        borderBottom: "1px solid #1f2937",
-        boxShadow: "0 0 20px rgba(0,255,136,0.08)",
+        background: "rgba(8,12,16,0.92)",
+        borderBottom: "1px solid #1e2d3d",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
       }}
-      className="w-full px-6 py-3 flex items-center justify-between"
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3">
-        <span
-          className="text-2xl font-bold tracking-widest glow"
-          style={{ color: "#00ff88", fontFamily: "Courier New, monospace" }}
-        >
-          ⚗ CHEM<span style={{ color: "#ffffff" }}>CLASH</span>
-        </span>
-        <span
-          className="text-xs px-2 py-0.5 rounded"
-          style={{
-            background: "rgba(0,255,136,0.1)",
-            color: "#00ff88",
-            border: "1px solid rgba(0,255,136,0.3)",
-          }}
-        >
-          v0.1.0
-        </span>
-      </div>
+      {/* Top accent line */}
+      <div style={{
+        height: 2,
+        background: "linear-gradient(90deg, transparent, #00ff88, #3b82f6, transparent)",
+        opacity: 0.6,
+      }} />
 
-      {/* Stats */}
-      <div className="flex items-center gap-6">
-        {/* Daily Streak */}
-        <div className="flex items-center gap-2">
-          <span style={{ fontSize: "1.1rem" }}>🔥</span>
-          <div style={{ fontFamily: "Courier New, monospace" }}>
-            <div style={{ color: "#6b7280", fontSize: "0.65rem", letterSpacing: "0.1em" }}>
-              DAILY STREAK
-            </div>
-            <div
-              style={{ color: "#f59e0b", fontSize: "1rem", fontWeight: 700, lineHeight: 1 }}
-            >
-              {dailyStreak} days
-            </div>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 32, background: "#1f2937" }} />
-
-        {/* ELO Rating */}
-        <div className="flex items-center gap-2">
-          <span style={{ fontSize: "1.1rem" }}>⚡</span>
-          <div style={{ fontFamily: "Courier New, monospace" }}>
-            <div style={{ color: "#6b7280", fontSize: "0.65rem", letterSpacing: "0.1em" }}>
-              ELO RATING
-            </div>
-            <div
-              className="glow"
-              style={{ color: "#00ff88", fontSize: "1rem", fontWeight: 700, lineHeight: 1 }}
-            >
-              {eloRating}
-            </div>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 32, background: "#1f2937" }} />
-
-        {/* User */}
-        <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded"
-          style={{
-            background: "rgba(0,255,136,0.06)",
-            border: "1px solid rgba(0,255,136,0.2)",
-            cursor: "pointer",
-          }}
-        >
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 20px",
+          height: 58,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+        }}
+      >
+        {/* ── Logo ── */}
+        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
           <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-            style={{ background: "#00ff88", color: "#0d0d0d" }}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: "rgba(0,255,136,0.1)",
+              border: "1px solid rgba(0,255,136,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1rem",
+            }}
           >
-            {username[0]}
+            ⚗
           </div>
           <span
             style={{
-              color: "#e5e7eb",
-              fontSize: "0.8rem",
+              color: "#00ff88",
+              fontFamily: "Courier New, monospace",
+              fontWeight: 800,
+              fontSize: "1.1rem",
+              letterSpacing: "0.08em",
+            }}
+            className="glow"
+          >
+            CHEM<span style={{ color: "#e2e8f0" }}>CLASH</span>
+          </span>
+          <span
+            style={{
+              fontSize: "0.6rem",
+              padding: "2px 7px",
+              borderRadius: 999,
+              background: "rgba(0,255,136,0.08)",
+              color: "#00ff88",
+              border: "1px solid rgba(0,255,136,0.2)",
+              letterSpacing: "0.1em",
               fontFamily: "Courier New, monospace",
             }}
           >
-            {username}
+            v0.1
           </span>
+        </Link>
+
+        {/* ── Center nav links ── */}
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            alignItems: "center",
+          }}
+          className="hidden-mobile"
+        >
+          {[
+            { href: "/react-or-reject", label: "React or Reject", color: "#00ff88" },
+            { href: "/mechanism-builder", label: "Mechanism Builder", color: "#3b82f6" },
+            { href: "/reagents", label: "Reagents", color: "#a78bfa" },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{
+                color: "#64748b",
+                textDecoration: "none",
+                fontSize: "0.72rem",
+                letterSpacing: "0.06em",
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: "1px solid transparent",
+                transition: "all 0.15s",
+                fontFamily: "Courier New, monospace",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = link.color;
+                (e.currentTarget as HTMLAnchorElement).style.background = `${link.color}10`;
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = `${link.color}30`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = "#64748b";
+                (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = "transparent";
+              }}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* ── Right stats + user ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+
+          {/* Streak */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              background: "rgba(245,158,11,0.07)",
+              border: "1px solid rgba(245,158,11,0.2)",
+              borderRadius: 8,
+              padding: "5px 12px",
+            }}
+          >
+            <span style={{ fontSize: "0.9rem" }}>🔥</span>
+            <div style={{ fontFamily: "Courier New, monospace", lineHeight: 1 }}>
+              <div style={{ color: "#64748b", fontSize: "0.55rem", letterSpacing: "0.12em", marginBottom: 1 }}>STREAK</div>
+              <div style={{ color: "#f59e0b", fontSize: "0.85rem", fontWeight: 800 }}>{dailyStreak}d</div>
+            </div>
+          </div>
+
+          {/* ELO */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              background: "rgba(0,255,136,0.07)",
+              border: "1px solid rgba(0,255,136,0.2)",
+              borderRadius: 8,
+              padding: "5px 12px",
+            }}
+          >
+            <span style={{ fontSize: "0.9rem" }}>⚡</span>
+            <div style={{ fontFamily: "Courier New, monospace", lineHeight: 1 }}>
+              <div style={{ color: "#64748b", fontSize: "0.55rem", letterSpacing: "0.12em", marginBottom: 1 }}>ELO</div>
+              <div className="glow" style={{ color: "#00ff88", fontSize: "0.85rem", fontWeight: 800 }}>{eloRating}</div>
+            </div>
+          </div>
+
+          {/* User avatar */}
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                background: "rgba(0,255,136,0.05)",
+                border: "1px solid rgba(0,255,136,0.2)",
+                borderRadius: 8,
+                padding: "5px 12px 5px 6px",
+                cursor: "pointer",
+                transition: "all 0.15s",
+                fontFamily: "Courier New, monospace",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,255,136,0.1)";
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,255,136,0.4)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,255,136,0.05)";
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,255,136,0.2)";
+              }}
+            >
+              <div
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 6,
+                  background: "linear-gradient(135deg, #00ff88, #00cc6a)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.7rem",
+                  fontWeight: 900,
+                  color: "#080c10",
+                }}
+              >
+                {username[0]}
+              </div>
+              <span style={{ color: "#e2e8f0", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em" }}>
+                {username}
+              </span>
+              <span style={{ color: "#64748b", fontSize: "0.7rem", marginLeft: 2, transform: menuOpen ? "rotate(180deg)" : "none", display: "inline-block", transition: "transform 0.2s" }}>▾</span>
+            </button>
+
+            {/* Dropdown */}
+            {menuOpen && (
+              <div
+                className="animate-slide-down"
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "calc(100% + 8px)",
+                  background: "#111820",
+                  border: "1px solid #1e2d3d",
+                  borderRadius: 10,
+                  minWidth: 180,
+                  overflow: "hidden",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                  zIndex: 200,
+                }}
+              >
+                {[
+                  { label: "Profile", icon: "👤" },
+                  { label: "Leaderboard", icon: "🏆" },
+                  { label: "Settings", icon: "⚙️" },
+                  { label: "Sign Out", icon: "→", danger: true },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      width: "100%",
+                      background: "transparent",
+                      border: "none",
+                      padding: "10px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      cursor: "pointer",
+                      color: item.danger ? "#f87171" : "#64748b",
+                      fontSize: "0.75rem",
+                      fontFamily: "Courier New, monospace",
+                      letterSpacing: "0.05em",
+                      transition: "all 0.12s",
+                      textAlign: "left",
+                      borderTop: item.label === "Sign Out" ? "1px solid #1e2d3d" : "none",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.background = "#161e28";
+                      (e.currentTarget as HTMLButtonElement).style.color = item.danger ? "#fca5a5" : "#e2e8f0";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                      (e.currentTarget as HTMLButtonElement).style.color = item.danger ? "#f87171" : "#64748b";
+                    }}
+                  >
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

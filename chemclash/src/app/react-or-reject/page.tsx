@@ -12,11 +12,12 @@ interface ChemCard {
   electrophile: string;
   shouldReact: boolean;
   hint: string;
+  mechanism?: string;
 }
 
 type Verdict = "react" | "reject" | null;
 
-// ─── Placeholder data ─────────────────────────────────────────────────────────
+// ─── Card data ────────────────────────────────────────────────────────────────
 
 const CARDS: ChemCard[] = [
   {
@@ -25,6 +26,7 @@ const CARDS: ChemCard[] = [
     electrophile: "CH₃Br",
     shouldReact: true,
     hint: "Hydroxide attacks the carbon bearing the leaving group (SN2).",
+    mechanism: "SN2",
   },
   {
     id: 2,
@@ -39,6 +41,7 @@ const CARDS: ChemCard[] = [
     electrophile: "CH₃Cl",
     shouldReact: true,
     hint: "Ammonia acts as a nucleophile toward the electrophilic carbon (SN2).",
+    mechanism: "SN2",
   },
   {
     id: 4,
@@ -53,52 +56,43 @@ const CARDS: ChemCard[] = [
     electrophile: "(CH₃)₃C⁺",
     shouldReact: true,
     hint: "Cyanide attacks the carbocation readily (SN1 scenario).",
+    mechanism: "SN1",
   },
 ];
 
-// ─── Feedback Overlay ─────────────────────────────────────────────────────────
+// ─── FeedbackOverlay ──────────────────────────────────────────────────────────
 
 function FeedbackOverlay({ verdict }: { verdict: Verdict }) {
   if (!verdict) return null;
   const isReact = verdict === "react";
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.6 }}
+      initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 1.3 }}
+      exit={{ opacity: 0, scale: 1.4 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
       style={{
         position: "absolute",
         inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 16,
-        background: isReact
-          ? "rgba(0, 255, 136, 0.12)"
-          : "rgba(255, 68, 68, 0.12)",
-        border: `2px solid ${isReact ? "#00ff88" : "#ff4444"}`,
+        borderRadius: 18,
+        background: isReact ? "rgba(0,255,136,0.1)" : "rgba(248,113,113,0.1)",
+        border: `2px solid ${isReact ? "#00ff88" : "#f87171"}`,
         zIndex: 10,
         pointerEvents: "none",
       }}
     >
-      <div
-        style={{
-          textAlign: "center",
-          fontFamily: "Courier New, monospace",
-        }}
-      >
-        <div style={{ fontSize: "2.5rem", marginBottom: 8 }}>
-          {isReact ? "✅" : "❌"}
-        </div>
-        <div
-          style={{
-            fontSize: "1.4rem",
-            fontWeight: 800,
-            color: isReact ? "#00ff88" : "#ff4444",
-            letterSpacing: "0.1em",
-            textShadow: `0 0 12px ${isReact ? "#00ff88" : "#ff4444"}`,
-          }}
-        >
+      <div style={{ textAlign: "center", fontFamily: "Courier New, monospace" }}>
+        <div style={{ fontSize: "3rem", marginBottom: 8 }}>{isReact ? "⚡" : "💥"}</div>
+        <div style={{
+          fontSize: "1.6rem",
+          fontWeight: 900,
+          color: isReact ? "#00ff88" : "#f87171",
+          letterSpacing: "0.1em",
+          textShadow: `0 0 20px ${isReact ? "#00ff88" : "#f87171"}`,
+        }}>
           {isReact ? "BOND FORMED!" : "NO REACTION"}
         </div>
       </div>
@@ -106,27 +100,26 @@ function FeedbackOverlay({ verdict }: { verdict: Verdict }) {
   );
 }
 
-// ─── Swipe Card ───────────────────────────────────────────────────────────────
+// ─── SwipeCard ────────────────────────────────────────────────────────────────
 
 interface SwipeCardProps {
   card: ChemCard;
   isTop: boolean;
+  stackIndex: number;
   onSwipe: (direction: "left" | "right") => void;
 }
 
-function SwipeCard({ card, isTop, onSwipe }: SwipeCardProps) {
+function SwipeCard({ card, isTop, stackIndex, onSwipe }: SwipeCardProps) {
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-18, 18]);
-  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
-
-  // Tint overlays
-  const reactOpacity = useTransform(x, [0, 120], [0, 1]);
-  const rejectOpacity = useTransform(x, [-120, 0], [1, 0]);
+  const rotate = useTransform(x, [-220, 220], [-20, 20]);
+  const opacity = useTransform(x, [-220, -80, 0, 80, 220], [0, 1, 1, 1, 0]);
+  const reactOpacity = useTransform(x, [0, 100], [0, 1]);
+  const rejectOpacity = useTransform(x, [-100, 0], [1, 0]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > 100) onSwipe("right");
     else if (info.offset.x < -100) onSwipe("left");
-    else animate(x, 0, { type: "spring", stiffness: 300 });
+    else animate(x, 0, { type: "spring", stiffness: 300, damping: 20 });
   };
 
   if (!isTop) {
@@ -135,10 +128,11 @@ function SwipeCard({ card, isTop, onSwipe }: SwipeCardProps) {
         style={{
           position: "absolute",
           inset: 0,
-          background: "#161616",
-          border: "1px solid #1f2937",
-          borderRadius: 16,
-          transform: "scale(0.95) translateY(12px)",
+          background: "#0d1520",
+          border: "1px solid #1e2d3d",
+          borderRadius: 18,
+          transform: `scale(${0.96 - stackIndex * 0.03}) translateY(${stackIndex * 14}px)`,
+          zIndex: -stackIndex,
         }}
       />
     );
@@ -146,170 +140,127 @@ function SwipeCard({ card, isTop, onSwipe }: SwipeCardProps) {
 
   return (
     <motion.div
-      style={{
-        x,
-        rotate,
-        opacity,
-        position: "absolute",
-        inset: 0,
-        cursor: "grab",
-        touchAction: "none",
-      }}
+      style={{ x, rotate, opacity, position: "absolute", inset: 0, cursor: "grab", touchAction: "none", zIndex: 5 }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
       whileTap={{ cursor: "grabbing" }}
     >
-      {/* REACT hint (right) */}
-      <motion.div
-        style={{
-          opacity: reactOpacity,
-          position: "absolute",
-          top: 20,
-          left: 20,
-          background: "rgba(0,255,136,0.15)",
-          border: "2px solid #00ff88",
-          borderRadius: 8,
-          padding: "4px 14px",
-          color: "#00ff88",
-          fontWeight: 800,
-          fontSize: "0.85rem",
-          letterSpacing: "0.1em",
-          fontFamily: "Courier New, monospace",
-          zIndex: 5,
-          rotate: "-15deg",
-        }}
-      >
+      {/* REACT label */}
+      <motion.div style={{
+        opacity: reactOpacity,
+        position: "absolute", top: 22, left: 22,
+        background: "rgba(0,255,136,0.12)",
+        border: "2px solid #00ff88",
+        borderRadius: 8, padding: "5px 14px",
+        color: "#00ff88", fontWeight: 900,
+        fontSize: "0.85rem", letterSpacing: "0.12em",
+        fontFamily: "Courier New, monospace", zIndex: 6,
+        rotate: "-12deg",
+      }}>
         REACT ⚡
       </motion.div>
 
-      {/* REJECT hint (left) */}
-      <motion.div
-        style={{
-          opacity: rejectOpacity,
-          position: "absolute",
-          top: 20,
-          right: 20,
-          background: "rgba(255,68,68,0.15)",
-          border: "2px solid #ff4444",
-          borderRadius: 8,
-          padding: "4px 14px",
-          color: "#ff4444",
-          fontWeight: 800,
-          fontSize: "0.85rem",
-          letterSpacing: "0.1em",
-          fontFamily: "Courier New, monospace",
-          zIndex: 5,
-          rotate: "15deg",
-        }}
-      >
+      {/* REJECT label */}
+      <motion.div style={{
+        opacity: rejectOpacity,
+        position: "absolute", top: 22, right: 22,
+        background: "rgba(248,113,113,0.12)",
+        border: "2px solid #f87171",
+        borderRadius: 8, padding: "5px 14px",
+        color: "#f87171", fontWeight: 900,
+        fontSize: "0.85rem", letterSpacing: "0.12em",
+        fontFamily: "Courier New, monospace", zIndex: 6,
+        rotate: "12deg",
+      }}>
         REJECT 💥
       </motion.div>
 
       {/* Card body */}
-      <div
-        style={{
-          height: "100%",
-          background: "linear-gradient(135deg, #111111 0%, #181818 100%)",
-          border: "1px solid #1f2937",
-          borderRadius: 16,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 32,
-          fontFamily: "Courier New, monospace",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-          userSelect: "none",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "0.65rem",
-            color: "#6b7280",
-            letterSpacing: "0.2em",
-            marginBottom: 32,
-          }}
-        >
-          WILL THESE SPECIES REACT?
+      <div style={{
+        height: "100%",
+        background: "linear-gradient(160deg, #111820 0%, #0d1520 100%)",
+        border: "1px solid #1e2d3d",
+        borderRadius: 18,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "28px 24px",
+        fontFamily: "Courier New, monospace",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+        userSelect: "none",
+      }}>
+        {/* Eyebrow */}
+        <div style={{ fontSize: "0.6rem", color: "#334155", letterSpacing: "0.24em", marginBottom: 28 }}>
+          // WILL THESE SPECIES REACT?
         </div>
 
-        {/* Molecule display */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 20,
-            marginBottom: 32,
-          }}
-        >
+        {/* Molecule pair */}
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 28 }}>
           {/* Nucleophile */}
           <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: "50%",
-                background: "rgba(0,255,136,0.08)",
-                border: "2px solid rgba(0,255,136,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1.6rem",
-                fontWeight: 800,
-                color: "#00ff88",
-                marginBottom: 8,
-              }}
-            >
+            <div style={{
+              width: 96, height: 96, borderRadius: "50%",
+              background: "rgba(0,255,136,0.07)",
+              border: "2px solid rgba(0,255,136,0.35)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: card.nucleophile.length > 4 ? "1.1rem" : "1.5rem",
+              fontWeight: 900, color: "#00ff88",
+              marginBottom: 8,
+              boxShadow: "0 0 20px rgba(0,255,136,0.1)",
+            }}>
               {card.nucleophile}
             </div>
-            <div style={{ color: "#6b7280", fontSize: "0.65rem", letterSpacing: "0.12em" }}>
-              NUCLEOPHILE
-            </div>
+            <div style={{ color: "#475569", fontSize: "0.58rem", letterSpacing: "0.14em" }}>NUCLEOPHILE</div>
           </div>
 
           {/* Plus */}
-          <div style={{ fontSize: "1.5rem", color: "#374151", fontWeight: 300 }}>+</div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <div style={{ fontSize: "1.4rem", color: "#1e2d3d", fontWeight: 300 }}>+</div>
+          </div>
 
           {/* Electrophile */}
           <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: "50%",
-                background: "rgba(59,130,246,0.08)",
-                border: "2px solid rgba(59,130,246,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1.6rem",
-                fontWeight: 800,
-                color: "#3b82f6",
-                marginBottom: 8,
-              }}
-            >
+            <div style={{
+              width: 96, height: 96, borderRadius: "50%",
+              background: "rgba(59,130,246,0.07)",
+              border: "2px solid rgba(59,130,246,0.35)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: card.electrophile.length > 5 ? "0.9rem" : "1.3rem",
+              fontWeight: 900, color: "#3b82f6",
+              marginBottom: 8,
+              boxShadow: "0 0 20px rgba(59,130,246,0.1)",
+            }}>
               {card.electrophile}
             </div>
-            <div style={{ color: "#6b7280", fontSize: "0.65rem", letterSpacing: "0.12em" }}>
-              ELECTROPHILE
-            </div>
+            <div style={{ color: "#475569", fontSize: "0.58rem", letterSpacing: "0.14em" }}>ELECTROPHILE</div>
           </div>
         </div>
 
-        <div
-          style={{
-            width: "100%",
-            height: 1,
-            background: "#1f2937",
-            marginBottom: 24,
-          }}
-        />
+        {/* Divider */}
+        <div style={{ width: "100%", height: 1, background: "linear-gradient(90deg, transparent, #1e2d3d, transparent)", marginBottom: 20 }} />
 
-        <p style={{ color: "#4b5563", fontSize: "0.75rem", textAlign: "center", margin: 0 }}>
-          Swipe <span style={{ color: "#00ff88" }}>right</span> to React ·{" "}
-          Swipe <span style={{ color: "#ff4444" }}>left</span> to Reject
+        {/* Instruction */}
+        <p style={{ color: "#334155", fontSize: "0.7rem", textAlign: "center", margin: 0, letterSpacing: "0.04em" }}>
+          Swipe <span style={{ color: "#00ff88" }}>right → REACT</span> · Swipe <span style={{ color: "#f87171" }}>left ← REJECT</span>
         </p>
+
+        {/* Mechanism tag */}
+        {card.mechanism && (
+          <div style={{
+            marginTop: 14,
+            fontSize: "0.62rem",
+            padding: "3px 10px",
+            borderRadius: 999,
+            background: "rgba(167,139,250,0.1)",
+            color: "#a78bfa",
+            border: "1px solid rgba(167,139,250,0.25)",
+            letterSpacing: "0.1em",
+          }}>
+            {card.mechanism}
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -322,6 +273,7 @@ export default function ReactOrRejectPage() {
   const [verdict, setVerdict] = useState<Verdict>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [lastHint, setLastHint] = useState<string>("");
+  const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const [finished, setFinished] = useState(false);
   const verdictTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -331,10 +283,8 @@ export default function ReactOrRejectPage() {
 
     setVerdict(direction === "right" ? "react" : "reject");
     setLastHint(card.hint);
-    setScore((s) => ({
-      correct: s.correct + (correct ? 1 : 0),
-      total: s.total + 1,
-    }));
+    setLastCorrect(correct);
+    setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
 
     if (verdictTimer.current) clearTimeout(verdictTimer.current);
     verdictTimer.current = setTimeout(() => {
@@ -344,7 +294,7 @@ export default function ReactOrRejectPage() {
         if (next.length === 0) setFinished(true);
         return next;
       });
-    }, 900);
+    }, 1000);
   };
 
   const handleButton = (direction: "left" | "right") => {
@@ -355,238 +305,267 @@ export default function ReactOrRejectPage() {
   // ── Finished screen
   if (finished) {
     const pct = Math.round((score.correct / score.total) * 100);
+    const emoji = pct >= 80 ? "🏆" : pct >= 50 ? "⚗️" : "💀";
+    const color = pct >= 80 ? "#00ff88" : pct >= 50 ? "#f59e0b" : "#f87171";
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#0d0d0d",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "Courier New, monospace",
-          padding: 24,
-          textAlign: "center",
-        }}
-      >
-        <div style={{ fontSize: "3rem", marginBottom: 16 }}>
-          {pct >= 80 ? "🏆" : pct >= 50 ? "⚗️" : "💀"}
-        </div>
-        <h1 style={{ color: "#ffffff", fontSize: "1.8rem", margin: "0 0 8px" }}>
-          Round Complete
-        </h1>
-        <p style={{ color: "#6b7280", fontSize: "0.9rem", margin: "0 0 32px" }}>
-          You scored{" "}
-          <span style={{ color: "#00ff88", fontWeight: 700 }}>
-            {score.correct}/{score.total}
-          </span>{" "}
-          ({pct}%)
-        </p>
-        <div style={{ display: "flex", gap: 12 }}>
-          <button
-            onClick={() => {
-              setCards(CARDS);
-              setScore({ correct: 0, total: 0 });
-              setFinished(false);
-              setLastHint("");
-            }}
-            style={{
-              background: "rgba(0,255,136,0.1)",
-              border: "1px solid #00ff88",
-              color: "#00ff88",
-              padding: "10px 24px",
-              borderRadius: 8,
-              fontFamily: "Courier New, monospace",
-              fontSize: "0.85rem",
-              cursor: "pointer",
-              letterSpacing: "0.1em",
-            }}
-          >
-            PLAY AGAIN
-          </button>
-          <Link href="/">
-            <button
-              style={{
-                background: "#111",
-                border: "1px solid #1f2937",
-                color: "#6b7280",
-                padding: "10px 24px",
-                borderRadius: 8,
-                fontFamily: "Courier New, monospace",
-                fontSize: "0.85rem",
-                cursor: "pointer",
-                letterSpacing: "0.1em",
-              }}
-            >
-              ← DASHBOARD
-            </button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
+      <div style={{
         minHeight: "100vh",
-        background: "#0d0d0d",
+        background: "#080c10",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "Courier New, monospace",
         padding: 24,
-      }}
-    >
-      {/* Header */}
-      <div style={{ width: "100%", maxWidth: 480, marginBottom: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Link
-            href="/"
-            style={{ color: "#6b7280", fontSize: "0.8rem", textDecoration: "none" }}
-          >
-            ← Dashboard
-          </Link>
-          <span
+        textAlign: "center",
+      }}>
+        {/* Result card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          style={{
+            background: "#111820",
+            border: `1px solid ${color}40`,
+            borderRadius: 20,
+            padding: "40px 48px",
+            maxWidth: 380,
+            width: "100%",
+            boxShadow: `0 0 40px ${color}15`,
+          }}
+        >
+          <div style={{ fontSize: "3.5rem", marginBottom: 16 }}>{emoji}</div>
+          <h1 style={{ color: "#e2e8f0", fontSize: "1.6rem", margin: "0 0 8px", fontWeight: 900 }}>
+            Round Complete
+          </h1>
+          <div style={{ fontSize: "2.5rem", fontWeight: 900, color, margin: "16px 0 4px" }}>
+            {score.correct}/{score.total}
+          </div>
+          <div style={{ color: "#475569", fontSize: "0.78rem", marginBottom: 28 }}>{pct}% accuracy</div>
+
+          {/* Score bar */}
+          <div style={{ height: 4, background: "#1e2d3d", borderRadius: 2, marginBottom: 28, overflow: "hidden" }}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              style={{ height: "100%", background: `linear-gradient(90deg, ${color}80, ${color})`, borderRadius: 2 }}
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              onClick={() => { setCards(CARDS); setScore({ correct: 0, total: 0 }); setFinished(false); setLastHint(""); setLastCorrect(null); }}
+              style={{
+                flex: 1,
+                background: `${color}12`,
+                border: `1px solid ${color}50`,
+                color,
+                padding: "11px 0",
+                borderRadius: 10,
+                fontFamily: "Courier New, monospace",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                letterSpacing: "0.1em",
+                transition: "all 0.15s",
+              }}
+            >
+              PLAY AGAIN
+            </button>
+            <Link href="/" style={{ flex: 1, textDecoration: "none" }}>
+              <button style={{
+                width: "100%",
+                background: "transparent",
+                border: "1px solid #1e2d3d",
+                color: "#64748b",
+                padding: "11px 0",
+                borderRadius: 10,
+                fontFamily: "Courier New, monospace",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                letterSpacing: "0.1em",
+              }}>
+                ← DASHBOARD
+              </button>
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const progressPct = ((CARDS.length - cards.length) / CARDS.length) * 100;
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "#080c10",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      fontFamily: "Courier New, monospace",
+    }}>
+      {/* Top bar */}
+      <div style={{
+        width: "100%",
+        background: "rgba(8,12,16,0.95)",
+        borderBottom: "1px solid #1e2d3d",
+        padding: "12px 24px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+      }}>
+        <Link href="/" style={{ color: "#475569", fontSize: "0.75rem", textDecoration: "none" }}>
+          ← Dashboard
+        </Link>
+        <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.16em" }}>// REACT OR REJECT</span>
+        <span style={{
+          fontSize: "0.72rem",
+          color: "#00ff88",
+          fontWeight: 700,
+          letterSpacing: "0.1em",
+        }}>
+          {score.correct}/{score.total}
+        </span>
+      </div>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 20px", width: "100%", maxWidth: 500 }}>
+
+        {/* Title + progress */}
+        <div style={{ width: "100%", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <h1 style={{ color: "#e2e8f0", fontSize: "1.2rem", fontWeight: 900, margin: 0, letterSpacing: "0.04em" }}>
+              ⚗️ React or <span style={{ color: "#f87171" }}>Reject</span>
+            </h1>
+            <span style={{ color: "#475569", fontSize: "0.68rem" }}>
+              {cards.length} remaining
+            </span>
+          </div>
+          {/* Progress bar */}
+          <div style={{ height: 3, background: "#1e2d3d", borderRadius: 2, overflow: "hidden" }}>
+            <motion.div
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.4 }}
+              style={{ height: "100%", background: "linear-gradient(90deg, #00ff88, #3b82f6)", borderRadius: 2 }}
+            />
+          </div>
+        </div>
+
+        {/* Card stack */}
+        <div style={{ position: "relative", width: "100%", height: 340, marginBottom: 20 }}>
+          {cards[2] && <SwipeCard card={cards[2]} isTop={false} stackIndex={2} onSwipe={() => {}} />}
+          {cards[1] && <SwipeCard card={cards[1]} isTop={false} stackIndex={1} onSwipe={() => {}} />}
+          {cards[0] && (
+            <SwipeCard
+              key={cards[0].id}
+              card={cards[0]}
+              isTop={true}
+              stackIndex={0}
+              onSwipe={(dir) => triggerVerdict(dir, cards[0])}
+            />
+          )}
+          <FeedbackOverlay verdict={verdict} />
+        </div>
+
+        {/* Hint box */}
+        {lastHint && (
+          <motion.div
+            key={lastHint}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
             style={{
-              fontSize: "0.75rem",
-              color: "#00ff88",
-              letterSpacing: "0.2em",
+              width: "100%",
+              background: lastCorrect ? "rgba(0,255,136,0.05)" : "rgba(248,113,113,0.05)",
+              border: `1px solid ${lastCorrect ? "rgba(0,255,136,0.2)" : "rgba(248,113,113,0.2)"}`,
+              borderRadius: 10,
+              padding: "11px 16px",
+              marginBottom: 18,
+              display: "flex",
+              gap: 10,
+              alignItems: "flex-start",
             }}
           >
-            {score.correct}/{score.total} CORRECT
-          </span>
-        </div>
-        <h1
-          style={{
-            color: "#ffffff",
-            fontSize: "1.4rem",
-            fontWeight: 800,
-            margin: "8px 0 0",
-            letterSpacing: "0.05em",
-          }}
-        >
-          ⚗️ React or{" "}
-          <span style={{ color: "#ff4444" }}>Reject</span>
-        </h1>
-        <p style={{ color: "#6b7280", fontSize: "0.75rem", margin: "4px 0 0" }}>
-          {cards.length} card{cards.length !== 1 ? "s" : ""} remaining
-        </p>
-      </div>
-
-      {/* Card stack */}
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: 480,
-          height: 340,
-          marginBottom: 24,
-        }}
-      >
-        {/* Render next card below */}
-        {cards[1] && <SwipeCard card={cards[1]} isTop={false} onSwipe={() => {}} />}
-        {/* Render top card */}
-        {cards[0] && (
-          <SwipeCard
-            key={cards[0].id}
-            card={cards[0]}
-            isTop={true}
-            onSwipe={(dir) => triggerVerdict(dir, cards[0])}
-          />
+            <span style={{ fontSize: "0.85rem", marginTop: 1, flexShrink: 0 }}>{lastCorrect ? "✓" : "✗"}</span>
+            <div>
+              <div style={{ color: lastCorrect ? "#00ff88" : "#f87171", fontSize: "0.62rem", letterSpacing: "0.12em", marginBottom: 3 }}>
+                {lastCorrect ? "CORRECT" : "INCORRECT"}
+              </div>
+              <p style={{ color: "#64748b", fontSize: "0.73rem", margin: 0, lineHeight: 1.6 }}>
+                {lastHint}
+              </p>
+            </div>
+          </motion.div>
         )}
-        {/* Verdict overlay */}
-        <FeedbackOverlay verdict={verdict} />
-      </div>
 
-      {/* Hint */}
-      {lastHint && (
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            width: "100%",
-            maxWidth: 480,
-            background: "#111",
-            border: "1px solid #1f2937",
-            borderRadius: 8,
-            padding: "10px 16px",
-            color: "#6b7280",
-            fontSize: "0.75rem",
-            marginBottom: 20,
-            lineHeight: 1.6,
-          }}
-        >
-          <span style={{ color: "#00ff88" }}>// hint: </span>
-          {lastHint}
-        </motion.div>
-      )}
+        {/* Buttons */}
+        <div style={{ display: "flex", gap: 12, width: "100%" }}>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => handleButton("left")}
+            disabled={verdict !== null || cards.length === 0}
+            style={{
+              flex: 1, padding: "14px 0", borderRadius: 12,
+              border: "1px solid rgba(248,113,113,0.45)",
+              background: "rgba(248,113,113,0.07)",
+              color: "#f87171",
+              fontFamily: "Courier New, monospace",
+              fontSize: "0.85rem", fontWeight: 800,
+              letterSpacing: "0.12em",
+              cursor: verdict !== null ? "not-allowed" : "pointer",
+              opacity: verdict !== null ? 0.45 : 1,
+              transition: "opacity 0.15s",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}
+          >
+            ← REJECT
+          </motion.button>
 
-      {/* Buttons */}
-      <div
-        style={{
-          display: "flex",
-          gap: 16,
-          width: "100%",
-          maxWidth: 480,
-        }}
-      >
-        {/* Reject */}
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => handleButton("left")}
-          disabled={verdict !== null || cards.length === 0}
-          style={{
-            flex: 1,
-            padding: "14px 0",
-            borderRadius: 10,
-            border: "1px solid rgba(255,68,68,0.5)",
-            background: "rgba(255,68,68,0.08)",
-            color: "#ff4444",
-            fontFamily: "Courier New, monospace",
-            fontSize: "0.9rem",
-            fontWeight: 700,
-            letterSpacing: "0.12em",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            opacity: verdict !== null ? 0.5 : 1,
-          }}
-        >
-          ← REJECT
-        </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => handleButton("right")}
+            disabled={verdict !== null || cards.length === 0}
+            style={{
+              flex: 1, padding: "14px 0", borderRadius: 12,
+              border: "1px solid rgba(0,255,136,0.45)",
+              background: "rgba(0,255,136,0.07)",
+              color: "#00ff88",
+              fontFamily: "Courier New, monospace",
+              fontSize: "0.85rem", fontWeight: 800,
+              letterSpacing: "0.12em",
+              cursor: verdict !== null ? "not-allowed" : "pointer",
+              opacity: verdict !== null ? 0.45 : 1,
+              transition: "opacity 0.15s",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}
+          >
+            REACT →
+          </motion.button>
+        </div>
 
-        {/* React */}
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => handleButton("right")}
-          disabled={verdict !== null || cards.length === 0}
-          style={{
-            flex: 1,
-            padding: "14px 0",
-            borderRadius: 10,
-            border: "1px solid rgba(0,255,136,0.5)",
-            background: "rgba(0,255,136,0.08)",
-            color: "#00ff88",
-            fontFamily: "Courier New, monospace",
-            fontSize: "0.9rem",
-            fontWeight: 700,
-            letterSpacing: "0.12em",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            opacity: verdict !== null ? 0.5 : 1,
-          }}
-        >
-          REACT →
-        </motion.button>
+        {/* Keyboard hint */}
+        <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
+          {[
+            { key: "←", label: "reject", color: "#f87171" },
+            { key: "→", label: "react", color: "#00ff88" },
+          ].map((k) => (
+            <div key={k.key} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span style={{
+                background: "#111820", border: "1px solid #1e2d3d",
+                borderRadius: 5, padding: "2px 8px",
+                color: "#334155", fontSize: "0.72rem",
+                fontFamily: "Courier New, monospace",
+              }}>{k.key}</span>
+              <span style={{ color: k.color, fontSize: "0.62rem" }}>{k.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
