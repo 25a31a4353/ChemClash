@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useChemStore } from "@/store/useChemStore";
 
 interface TopNavProps {
   eloRating?: number;
@@ -10,11 +11,20 @@ interface TopNavProps {
 }
 
 export default function TopNav({
-  eloRating = 1337,
-  dailyStreak = 7,
-  username = "CH3M_L0RD",
+  eloRating: eloProp = 1337,
+  dailyStreak: streakProp = 7,
+  username: usernameProp = "CH3M_L0RD",
 }: TopNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Live values from global store (props are fallback defaults)
+  const storeElo      = useChemStore((s) => s.eloRating);
+  const storeStreak   = useChemStore((s) => s.dailyStreak);
+  const storeUsername = useChemStore((s) => s.username);
+
+  const eloRating  = storeElo      ?? eloProp;
+  const dailyStreak = storeStreak  ?? streakProp;
+  const username   = storeUsername ?? usernameProp;
 
   return (
     <nav
@@ -105,7 +115,9 @@ export default function TopNav({
             { href: "/react-or-reject",  label: "React or Reject",   color: "#00ff88" },
             { href: "/mechanism-builder",label: "Mechanism Builder",  color: "#3b82f6" },
             { href: "/adaptive-pyq",     label: "Adaptive PYQ",      color: "#a78bfa" },
+            { href: "/curriculum",       label: "Curriculum",         color: "#3b82f6" },
             { href: "/reagents",         label: "Reagents",           color: "#f59e0b" },
+            { href: "/leaderboard",      label: "Leaderboard",        color: "#f59e0b" },
           ].map((link) => (
             <Link
               key={link.href}
@@ -243,14 +255,14 @@ export default function TopNav({
                 }}
               >
                 {[
-                  { label: "Profile", icon: "👤" },
-                  { label: "Leaderboard", icon: "🏆" },
-                  { label: "Settings", icon: "⚙️" },
-                  { label: "Sign Out", icon: "→", danger: true },
+                  { label: "Profile",      icon: "👤",  href: undefined      },
+                  { label: "Leaderboard",  icon: "🏆",  href: "/leaderboard" },
+                  { label: "Settings",     icon: "⚙️",  href: undefined      },
+                  { label: "Sign Out",     icon: "→",   href: undefined, danger: true },
                 ].map((item) => (
                   <button
                     key={item.label}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={() => { setMenuOpen(false); if (item.href) window.location.href = item.href; }}
                     style={{
                       width: "100%",
                       background: "transparent",

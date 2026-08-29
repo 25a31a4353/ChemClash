@@ -2,6 +2,7 @@
 
 import TopNav from "@/components/TopNav";
 import GameModeCard, { GameMode } from "@/components/GameModeCard";
+import { useChemStore } from "@/store/useChemStore";
 
 const GAME_MODES: GameMode[] = [
   {
@@ -65,6 +66,30 @@ const GAME_MODES: GameMode[] = [
     badge: "JEE READY",
     plays: 3100,
   },
+  {
+    id: "curriculum",
+    title: "Curriculum",
+    level: "LEVEL 0",
+    description:
+      "Work through concept modules in order. Each slide teaches a core idea and tests your understanding with a quick question. +5 ELO per correct answer.",
+    icon: "📚",
+    href: "/curriculum",
+    accentColor: "#3b82f6",
+    badge: "START HERE",
+    plays: 560,
+  },
+  {
+    id: "leaderboard",
+    title: "Leaderboard",
+    level: "RANKED",
+    description:
+      "See where you stand globally. Track your ELO progress, weekly gains, and compare accuracy + streak with top players.",
+    icon: "🏆",
+    href: "/leaderboard",
+    accentColor: "#f59e0b",
+    badge: "LIVE",
+    plays: 890,
+  },
 ];
 
 const STATS = [
@@ -75,9 +100,13 @@ const STATS = [
 ];
 
 export default function Dashboard() {
+  const eloRating  = useChemStore((s) => s.eloRating);
+  const dailyStreak = useChemStore((s) => s.dailyStreak);
+  const username   = useChemStore((s) => s.username);
+
   return (
     <div style={{ minHeight: "100vh", background: "#080c10", fontFamily: "Courier New, monospace" }}>
-      <TopNav eloRating={1337} dailyStreak={7} username="CH3M_L0RD" />
+      <TopNav eloRating={eloRating} dailyStreak={dailyStreak} username={username} />
 
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 80px" }}>
 
@@ -102,13 +131,13 @@ export default function Dashboard() {
           >
             Welcome back,{" "}
             <span className="glow" style={{ color: "#00ff88" }}>
-              CH3M_L0RD
+              {username}
             </span>
           </h1>
 
           <p style={{ color: "#64748b", fontSize: "0.88rem", margin: "0 0 36px 0", lineHeight: 1.6 }}>
             Your ELO is{" "}
-            <span style={{ color: "#00ff88", fontWeight: 700 }}>1337</span> · Top{" "}
+            <span style={{ color: "#00ff88", fontWeight: 700 }}>{eloRating}</span> · Top{" "}
             <span style={{ color: "#f59e0b", fontWeight: 700 }}>12%</span> globally · Keep reacting.
           </p>
 

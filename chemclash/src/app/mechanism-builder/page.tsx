@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useChemStore } from "@/store/useChemStore";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -180,6 +181,10 @@ export default function MechanismBuilderPage() {
   const [flash, setFlash] = useState<{ msg: string; type: "success" | "info" } | null>(null);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
+  // ── Zustand: live ELO — award +15 when mechanism is fully completed
+  const eloRating = useChemStore((s) => s.eloRating);
+  const eloAwarded = useRef(false);
+
   const svgPoint = useCallback((e: MouseEvent | React.MouseEvent): Vec2 => {
     const svg = svgRef.current;
     if (!svg) return { x: 0, y: 0 };
@@ -218,7 +223,17 @@ export default function MechanismBuilderPage() {
       if (dragFrom.id === "carbon" && hit.id === "bromine") {
         setCompletedSteps(prev => Array.from(new Set([...prev, 1, 2])));
         setTimeout(() => setCompletedSteps(prev => Array.from(new Set([...prev, 3]))), 800);
-        setTimeout(() => setCompletedSteps(prev => Array.from(new Set([...prev, 4]))), 1600);
+        setTimeout(() => {
+          setCompletedSteps(prev => {
+            const next = Array.from(new Set([...prev, 4]));
+            // Award ELO once on full completion
+            if (next.length >= STEPS.length && !eloAwarded.current) {
+              eloAwarded.current = true;
+              useChemStore.setState((s) => ({ eloRating: s.eloRating + 15 }));
+            }
+            return next;
+          });
+        }, 1600);
       }
     }
     setDragFrom(null);
@@ -267,6 +282,11 @@ export default function MechanismBuilderPage() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Live ELO */}
+          <span style={{ color: "#475569", fontSize: "0.65rem" }}>
+            ⚡ <span style={{ color: "#00ff88", fontWeight: 700 }}>{eloRating}</span>
+          </span>
+
           {/* Progress */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ color: "#475569", fontSize: "0.65rem" }}>PROGRESS</span>

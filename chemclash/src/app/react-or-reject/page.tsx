@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate, PanInfo } from "framer-motion";
 import Link from "next/link";
+import { useChemStore } from "@/store/useChemStore";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -277,6 +278,9 @@ export default function ReactOrRejectPage() {
   const [finished, setFinished] = useState(false);
   const verdictTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Zustand: live ELO shown in top bar, updated optimistically per answer
+  const eloRating = useChemStore((s) => s.eloRating);
+
   const triggerVerdict = (direction: "left" | "right", card: ChemCard) => {
     const userSaysReact = direction === "right";
     const correct = userSaysReact === card.shouldReact;
@@ -285,6 +289,8 @@ export default function ReactOrRejectPage() {
     setLastHint(card.hint);
     setLastCorrect(correct);
     setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
+    // Update global ELO optimistically
+    useChemStore.setState((s) => ({ eloRating: s.eloRating + (correct ? 8 : -4) }));
 
     if (verdictTimer.current) clearTimeout(verdictTimer.current);
     verdictTimer.current = setTimeout(() => {
@@ -301,6 +307,17 @@ export default function ReactOrRejectPage() {
     if (cards.length === 0 || verdict !== null) return;
     triggerVerdict(direction, cards[0]);
   };
+
+  // ── Keyboard shortcuts: ← = reject, → = react
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") handleButton("left");
+      if (e.key === "ArrowRight") handleButton("right");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cards, verdict]);
 
   // ── Finished screen
   if (finished) {
@@ -424,14 +441,19 @@ export default function ReactOrRejectPage() {
           ← Dashboard
         </Link>
         <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.16em" }}>// REACT OR REJECT</span>
-        <span style={{
-          fontSize: "0.72rem",
-          color: "#00ff88",
-          fontWeight: 700,
-          letterSpacing: "0.1em",
-        }}>
-          {score.correct}/{score.total}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ color: "#475569", fontSize: "0.65rem" }}>
+            ⚡ <span style={{ color: "#00ff88", fontWeight: 700 }}>{eloRating}</span>
+          </span>
+          <span style={{
+            fontSize: "0.72rem",
+            color: "#00ff88",
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+          }}>
+            {score.correct}/{score.total}
+          </span>
+        </div>
       </div>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 20px", width: "100%", maxWidth: 500 }}>
