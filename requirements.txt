@@ -1,0 +1,20 @@
+# ChemClash — Python dependencies
+# Used by Streamlit Cloud (root-level requirements.txt) and local dev.
+
+# ── Web framework + server ────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.7.0
+
+# ── Streamlit (Streamlit Cloud entry point) ───────────────────────────────────
+streamlit>=1.35.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── LLM SDKs (optional — app works without an API key) ───────────────────────
+openai>=1.30.0
+
+# ── Dev / testing ─────────────────────────────────────────────────────────────
+httpx>=0.27.0
+pytest>=8.2.0
