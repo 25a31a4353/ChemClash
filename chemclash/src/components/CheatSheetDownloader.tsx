@@ -26,9 +26,10 @@ export interface BasicRuleItem {
 
 export interface CoreConceptItem {
   concept: string;
-  core_rule: string;
-  exception: string;
-  keywords: string;
+  details?: string;
+  core_rule?: string;
+  exception?: string;
+  keywords?: string;
 }
 
 export interface OrganicDatabase {
@@ -282,23 +283,19 @@ export async function generateCustomCheatSheetPDF(
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(...primaryColor);
-    doc.text(`4. Core Mechanisms & High-Yield Concepts (${data.core_concepts.length} items)`, 12, currentY);
+    doc.text(`4. Core Concepts & Electronic Effects (${data.core_concepts.length} items)`, 12, currentY);
     currentY += 4;
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Concept", "Core Mechanism Rule", "Common Edge-Cases & Exceptions", "Keywords"]],
+      head: [["Core Concept / Intermediate", "Chemical Principles, Electronic Effects & Applications"]],
       body: data.core_concepts.map((cc) => [
         cc.concept,
-        cc.core_rule,
-        cc.exception,
-        cc.keywords,
+        cc.details || cc.core_rule || "",
       ]),
       columnStyles: {
-        0: { cellWidth: 32, fontStyle: "bold", textColor: [167, 139, 250] },
-        1: { cellWidth: 86 },
-        2: { cellWidth: 86 },
-        3: { cellWidth: 69, textColor: [148, 163, 184] },
+        0: { cellWidth: 70, fontStyle: "bold", textColor: [167, 139, 250] },
+        1: { cellWidth: 203 },
       },
       headStyles: {
         fillColor: headerBgColor,
@@ -307,7 +304,7 @@ export async function generateCustomCheatSheetPDF(
         fontSize: 8.5,
       },
       bodyStyles: {
-        fontSize: 7.2,
+        fontSize: 7.5,
         textColor: textColor,
         lineColor: borderColor,
         lineWidth: 0.15,

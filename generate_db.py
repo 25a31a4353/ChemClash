@@ -1,4 +1,32 @@
-{
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+generate_db.py — ChemClash Organic Chemistry Master Dataset Generator
+═════════════════════════════════════════════════════════════════════
+Populates a comprehensive, scientifically rigorous JSON database
+containing exactly:
+  - 40 Common Reagents (name, function, example)
+  - 30 Named Reactions (name, reactants, products)
+  - 15 Basic Rules (rule, definition)
+  - 15 Core Concepts (concept, details)
+
+Matches the exact JSON schema required by the ChemClash React frontend.
+"""
+
+import io
+import json
+import sys
+from pathlib import Path
+
+# Force UTF-8 output on Windows so emoji/Unicode characters render cleanly
+if hasattr(sys.stdout, "buffer") and (sys.stdout.encoding or "").lower() != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
+ORGANIC_MASTER_DATABASE = {
+    # ═════════════════════════════════════════════════════════════════
+    # 1. REAGENTS (40 items)
+    # ═════════════════════════════════════════════════════════════════
     "reagents": [
         {
             "name": "LiAlH4 (Lithium Aluminium Hydride)",
@@ -201,6 +229,10 @@
             "example": "Benzene + 3 H2 / Raney Ni (heat, pressure) -> Cyclohexane"
         }
     ],
+
+    # ═════════════════════════════════════════════════════════════════
+    # 2. NAMED REACTIONS (30 items)
+    # ═════════════════════════════════════════════════════════════════
     "named_reactions": [
         {
             "name": "Aldol Condensation",
@@ -353,6 +385,10 @@
             "products": "Ester (or cyclic lactone from cyclic ketone) via oxygen insertion adjacent to the more substituted carbon."
         }
     ],
+
+    # ═════════════════════════════════════════════════════════════════
+    # 3. BASIC RULES (15 items)
+    # ═════════════════════════════════════════════════════════════════
     "basic_rules": [
         {
             "rule": "Markovnikov's Rule",
@@ -415,6 +451,10 @@
             "definition": "Concerted bimolecular elimination requires the β-hydrogen, the two carbon atoms, and the leaving group to lie in the same plane with an anti-dihedral angle of 180° (anti-periplanar) to allow seamless overlap between the σ(C-H) and σ*(C-X) orbitals into the new π-bond."
         }
     ],
+
+    # ═════════════════════════════════════════════════════════════════
+    # 4. CORE CONCEPTS (15 items)
+    # ═════════════════════════════════════════════════════════════════
     "core_concepts": [
         {
             "concept": "Inductive Effect (+I and -I)",
@@ -478,3 +518,27 @@
         }
     ]
 }
+
+
+def generate_database(output_path: Path) -> None:
+    """Writes the master organic database dictionary to JSON with 4-space indentation."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as f:
+        json.dump(ORGANIC_MASTER_DATABASE, f, indent=4, ensure_ascii=False)
+
+    print(f"[OK] Generated {output_path.resolve()}")
+    print(f"   * Reagents:        {len(ORGANIC_MASTER_DATABASE['reagents'])} items")
+    print(f"   * Named Reactions: {len(ORGANIC_MASTER_DATABASE['named_reactions'])} items")
+    print(f"   * Basic Rules:     {len(ORGANIC_MASTER_DATABASE['basic_rules'])} items")
+    print(f"   * Core Concepts:   {len(ORGANIC_MASTER_DATABASE['core_concepts'])} items")
+    print(f"   * Total Items:     {sum(len(v) for v in ORGANIC_MASTER_DATABASE.values())} items")
+
+
+if __name__ == "__main__":
+    # Generate in root directory
+    root_json = Path(__file__).parent / "organic_db.json"
+    generate_database(root_json)
+
+    # Also automatically sync into the React frontend src/data directory
+    frontend_json = Path(__file__).parent / "chemclash" / "src" / "data" / "organic_db.json"
+    generate_database(frontend_json)
