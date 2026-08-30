@@ -178,6 +178,28 @@ const QuestionCard = memo(function QuestionCard({
         ))}
       </div>
 
+      {/* Socratic Hint when revealed */}
+      {revealed && question.socratic_hint && (
+        <div style={{
+          padding: "12px 20px",
+          background: "rgba(59,130,246,0.06)",
+          borderTop: "1px solid rgba(59,130,246,0.2)",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 10,
+        }}>
+          <span style={{ fontSize: "1rem" }}>💡</span>
+          <div>
+            <div style={{ color: "#60a5fa", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 2 }}>
+              SOCRATIC HINT & LOGIC
+            </div>
+            <div style={{ color: "#cbd5e1", fontSize: "0.78rem", lineHeight: 1.5 }}>
+              {question.socratic_hint}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Concept tags */}
       <div style={{
         padding: "12px 20px",

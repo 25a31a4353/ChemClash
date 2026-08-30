@@ -1,0 +1,286 @@
+{
+  "concepts": [
+    {
+      "concept_id": "concept_sn2",
+      "title": "SN2 — Bimolecular Nucleophilic Substitution",
+      "core_rule": "A single concerted step in which the nucleophile attacks the electrophilic carbon from the back (anti to the leaving group) simultaneously as the leaving group departs, producing inversion of configuration (Walden inversion). Rate = k[Nu][substrate].",
+      "common_exception": "Neopentyl halides ((CH3)3C-CH2-X) are primary but do NOT undergo SN2 at a useful rate because the three methyl groups on the adjacent carbon create severe steric crowding at the transition state, blocking backside attack.",
+      "tags": ["SN2", "nucleophilic substitution", "backside attack", "inversion", "Walden inversion", "primary alkyl halide", "polar aprotic solvent", "rate law", "transition state"]
+    },
+    {
+      "concept_id": "concept_sn1",
+      "title": "SN1 — Unimolecular Nucleophilic Substitution",
+      "core_rule": "A two-step mechanism: (1) slow, rate-determining ionisation of the substrate to form a planar carbocation intermediate; (2) fast attack by nucleophile on either face of the carbocation. Rate = k[substrate] only. Favoured by tertiary substrates, polar protic solvents, and weak nucleophiles.",
+      "common_exception": "Allylic and benzylic secondary substrates undergo SN1 far more readily than simple secondary alkyl halides because resonance delocalises the carbocation, lowering the activation energy of the ionisation step.",
+      "tags": ["SN1", "carbocation", "racemisation", "tertiary", "polar protic", "ionisation", "rate-determining step", "two-step mechanism"]
+    },
+    {
+      "concept_id": "concept_e2",
+      "title": "E2 — Bimolecular Elimination",
+      "core_rule": "A concerted one-step mechanism requiring a strong base, anti-periplanar geometry (H and leaving group must be 180 degrees apart), and a beta-hydrogen. Rate = k[base][substrate]. Follows Zaitsev's rule (most substituted alkene) unless a bulky base is used (Hofmann product favoured).",
+      "common_exception": "In cyclohexane rings, E2 requires the H and the leaving group to be diaxial (trans-diaxial). A cis-leaving group cannot achieve anti-periplanar geometry in a chair conformation and reacts much more slowly.",
+      "tags": ["E2", "elimination", "anti-periplanar", "Zaitsev rule", "Hofmann product", "strong base", "diaxial", "cyclohexane", "beta-hydrogen"]
+    },
+    {
+      "concept_id": "concept_markovnikov",
+      "title": "Markovnikov's Rule and Anti-Markovnikov Addition",
+      "core_rule": "In electrophilic addition of HX to an alkene, the proton adds to the carbon bearing more hydrogens (forming the more stable carbocation intermediate), and the halide adds to the carbon bearing fewer hydrogens. Anti-Markovnikov addition occurs via radical mechanism (HBr + ROOR) or hydroboration-oxidation.",
+      "common_exception": "HBr addition in the presence of peroxides (ROOR) follows a radical (anti-Markovnikov) pathway, NOT an ionic one. This applies ONLY to HBr — HCl and HI do not give clean anti-Markovnikov products via radicals due to energetics of the propagation steps.",
+      "tags": ["Markovnikov", "anti-Markovnikov", "electrophilic addition", "carbocation", "HBr", "radical addition", "hydroboration", "regioselectivity", "alkene"]
+    },
+    {
+      "concept_id": "concept_aldol",
+      "title": "Aldol Condensation",
+      "core_rule": "An enolate (or enol) formed alpha to a carbonyl attacks the carbonyl carbon of another aldehyde or ketone to give a beta-hydroxy carbonyl compound (aldol product). Under heat or acid/base, dehydration gives an alpha,beta-unsaturated carbonyl (aldol condensation product). Intramolecular aldol forms cyclic rings.",
+      "common_exception": "Crossed (mixed) aldol condensations are only synthetically useful when one carbonyl compound has no alpha-hydrogen (cannot form enolate) — e.g., benzaldehyde with acetaldehyde. Otherwise a statistical mixture of four products results.",
+      "tags": ["aldol", "enolate", "condensation", "beta-hydroxy carbonyl", "dehydration", "cross aldol", "Robinson annulation", "alpha carbon", "intramolecular aldol"]
+    },
+    {
+      "concept_id": "concept_stereocenter",
+      "title": "Stereocenter Configuration — R/S Assignment",
+      "core_rule": "A stereocenter is an sp3 carbon bearing four different substituents. Priority is assigned by CIP rules (atomic number; higher atomic number = higher priority). Arrange the lowest-priority group away from the viewer: clockwise = R, counterclockwise = S. Chiral molecules that are non-superimposable mirror images are enantiomers.",
+      "common_exception": "When the lowest-priority group points toward the viewer (on a wedge), the observed rotation must be INVERTED to get the correct R/S assignment — a very common source of sign errors on exams.",
+      "tags": ["R/S configuration", "CIP rules", "stereocenter", "enantiomer", "chirality", "priority rules", "optical isomer", "wedge dash notation"]
+    },
+    {
+      "concept_id": "concept_eas",
+      "title": "Electrophilic Aromatic Substitution (EAS) and Directing Effects",
+      "core_rule": "Benzene reacts with electrophiles via addition-elimination: the pi electrons attack E+ to form a resonance-stabilised arenium ion (sigma complex), which loses H+ to restore aromaticity. Electron-donating groups (EDG: OH, NH2, alkyl) activate the ring and direct ortho/para. Electron-withdrawing groups (EWG: NO2, COOH, CHO) deactivate and direct meta.",
+      "common_exception": "Halogens are a unique exception: they are ring-deactivators (inductive withdrawal) but ortho/para directors (lone-pair resonance donation). So halogenated benzenes react slower than benzene but still give predominantly ortho/para products.",
+      "tags": ["EAS", "electrophilic aromatic substitution", "arenium ion", "ortho para director", "meta director", "activating group", "deactivating group", "halogen anomaly", "Friedel-Crafts"]
+    },
+    {
+      "concept_id": "concept_carbocation_rearrangement",
+      "title": "Carbocation Rearrangements — Hydride and Methyl Shifts",
+      "core_rule": "Carbocations rearrange when a 1,2-hydride shift or 1,2-methyl shift converts a less stable carbocation to a more stable one. This is a common feature of SN1, E1, and acid-catalysed reactions. A secondary carbocation adjacent to a tertiary carbon will almost always rearrange.",
+      "common_exception": "3,3-Dimethyl-1-butanol undergoes dehydration to give predominantly 2,3-dimethyl-2-butene (not the expected 3,3-dimethyl-1-butene) because the initial secondary carbocation rearranges via a methyl shift to a more stable tertiary carbocation before elimination.",
+      "tags": ["carbocation rearrangement", "hydride shift", "methyl shift", "1,2-shift", "SN1", "E1", "stability", "Wagner-Meerwein", "tertiary carbocation"]
+    },
+    {
+      "concept_id": "concept_oxidation_states",
+      "title": "Oxidation State Changes in Organic Reactions",
+      "core_rule": "Oxidation of carbon = increase in bonds to O, N, or halogens, OR decrease in bonds to H. Reduction = increase in bonds to H, or decrease in bonds to O. Reagent guide: KMnO4 (acidic, hot) = strong oxidation (cleaves alkenes); NaBH4 = mild reduction (aldehydes/ketones only); LiAlH4 = strong reduction (includes carboxylic acids and esters).",
+      "common_exception": "NaBH4 reduces aldehydes and ketones but does NOT reduce carboxylic acids, esters, or amides — it is not strong enough. LiAlH4 reduces all of these. This selectivity is heavily tested in synthesis problems.",
+      "tags": ["oxidation state", "reduction", "oxidation", "KMnO4", "NaBH4", "LiAlH4", "ozonolysis", "selective reduction", "oxidation level"]
+    },
+    {
+      "concept_id": "concept_nucleophilicity_vs_basicity",
+      "title": "Nucleophilicity vs. Basicity — Solvent Dependence",
+      "core_rule": "Nucleophilicity measures kinetic attack on carbon; basicity measures thermodynamic affinity for H+. In polar aprotic solvents (DMSO, DMF), nucleophilicity parallels basicity: F- > Cl- > Br- > I-. In polar protic solvents (water, alcohols), solvation reverses nucleophilicity for halides: I- > Br- > Cl- > F-.",
+      "common_exception": "Iodide (I-) is a better nucleophile than fluoride (F-) in polar protic solvents despite F- being a far stronger base. This is because F- is heavily solvated by hydrogen bonds that must be broken before it can attack, while I- is large and diffuse with minimal solvation shell.",
+      "tags": ["nucleophilicity", "basicity", "polar aprotic", "polar protic", "solvation", "halide", "iodide", "fluoride", "solvent effect", "kinetics vs thermodynamics"]
+    }
+  ],
+  "pyq_bank": [
+    {
+      "question_id": "PYQ-101",
+      "exam_target": "JEE_Advanced_Level",
+      "question_text": "The major product obtained when (R)-2-bromobutane is treated with NaOH (aqueous) is:",
+      "options": [
+        "(S)-2-butanol with complete inversion of configuration",
+        "(R)-2-butanol with retention of configuration",
+        "A racemic mixture of (R)- and (S)-2-butanol",
+        "1-butanol via carbocation rearrangement"
+      ],
+      "correct_answer": "(S)-2-butanol with complete inversion of configuration",
+      "socratic_hint": "NaOH provides a strong, small nucleophile (OH-). Consider the substrate's structure: is it primary, secondary, or tertiary? Which mechanism — SN1 or SN2 — dominates, and what stereochemical outcome does each produce?",
+      "concept_tags": ["SN2", "inversion", "Walden inversion", "secondary alkyl halide", "concept_sn2"]
+    },
+    {
+      "question_id": "PYQ-102",
+      "exam_target": "JEE_Mains_Level",
+      "question_text": "Which of the following substrates will undergo SN1 reaction at the FASTEST rate in aqueous ethanol?",
+      "options": [
+        "CH3CH2CH2Cl (n-propyl chloride)",
+        "(CH3)2CHCl (isopropyl chloride)",
+        "(CH3)3CCl (tert-butyl chloride)",
+        "CH3Cl (methyl chloride)"
+      ],
+      "correct_answer": "(CH3)3CCl (tert-butyl chloride)",
+      "socratic_hint": "SN1 rate depends on how easily the substrate ionises to form a carbocation intermediate, not on nucleophile concentration. Which structural feature stabilises the resulting carbocation the most?",
+      "concept_tags": ["SN1", "carbocation", "tertiary", "ionisation", "concept_sn1"]
+    },
+    {
+      "question_id": "PYQ-103",
+      "exam_target": "JEE_Advanced_Level",
+      "question_text": "Treatment of (CH3)3CCH2Br (neopentyl bromide) with NaCN in DMSO gives an extremely slow reaction. The BEST explanation is:",
+      "options": [
+        "CN- is a weak nucleophile in DMSO",
+        "The primary carbon has severe steric hindrance from the adjacent quaternary carbon, blocking backside attack",
+        "Neopentyl bromide preferentially undergoes E2 elimination with CN-",
+        "DMSO solvates CN- too strongly, making it unreactive"
+      ],
+      "correct_answer": "The primary carbon has severe steric hindrance from the adjacent quaternary carbon, blocking backside attack",
+      "socratic_hint": "Although the reacting carbon is primary, look at what is directly attached to it. Draw the Newman projection along the C1-C2 bond and ask: is there a clear trajectory for backside approach by the nucleophile?",
+      "concept_tags": ["SN2", "steric hindrance", "neopentyl", "backside attack", "concept_sn2"]
+    },
+    {
+      "question_id": "PYQ-104",
+      "exam_target": "NEET_Level",
+      "question_text": "The addition of HBr to propene (CH3-CH=CH2) in the presence of benzoyl peroxide gives:",
+      "options": [
+        "2-bromopropane (Markovnikov product)",
+        "1-bromopropane (anti-Markovnikov product)",
+        "A 1:1 mixture of 1-bromopropane and 2-bromopropane",
+        "1,2-dibromopropane (addition across the double bond)"
+      ],
+      "correct_answer": "1-bromopropane (anti-Markovnikov product)",
+      "socratic_hint": "Benzoyl peroxide is a radical initiator. When radicals are involved, the mechanism changes completely. In the radical propagation step, which carbon does bromine radical add to first, and why does it prefer the less substituted carbon?",
+      "concept_tags": ["anti-Markovnikov", "radical addition", "HBr", "peroxide", "concept_markovnikov"]
+    },
+    {
+      "question_id": "PYQ-105",
+      "exam_target": "JEE_Mains_Level",
+      "question_text": "Hydroboration-oxidation of 1-methylcyclohexene gives predominantly:",
+      "options": [
+        "1-methylcyclohexan-1-ol (tertiary alcohol, Markovnikov)",
+        "trans-2-methylcyclohexan-1-ol",
+        "cis-2-methylcyclohexan-1-ol",
+        "Cyclohexanone after rearrangement"
+      ],
+      "correct_answer": "trans-2-methylcyclohexan-1-ol",
+      "socratic_hint": "Hydroboration delivers boron to the less hindered face of the double bond (anti-Markovnikov, syn addition). After oxidation, the OH replaces B with retention. Draw the cyclic transition state: from which face does BH3 approach, and what is the relative orientation of OH and CH3 in the product?",
+      "concept_tags": ["anti-Markovnikov", "hydroboration", "syn addition", "stereochemistry", "concept_markovnikov"]
+    },
+    {
+      "question_id": "PYQ-106",
+      "exam_target": "JEE_Advanced_Level",
+      "question_text": "The aldol condensation of two moles of acetaldehyde (CH3CHO) under dilute base conditions gives, after dehydration, the product:",
+      "options": [
+        "CH3CH(OH)CH2CHO (3-hydroxybutanal, aldol product only)",
+        "CH3CH=CHCHO (but-2-enal / crotonaldehyde)",
+        "CH3COCH3 (acetone, from retro-aldol)",
+        "CH2=CHCHO (acrolein, from formaldehyde elimination)"
+      ],
+      "correct_answer": "CH3CH=CHCHO (but-2-enal / crotonaldehyde)",
+      "socratic_hint": "Trace the mechanism: which carbon is alpha to the carbonyl and acts as the enolate? After the initial aldol addition, what structural feature of the beta-hydroxy aldehyde makes dehydration facile, and what conjugated system does the final product contain?",
+      "concept_tags": ["aldol condensation", "enolate", "dehydration", "conjugation", "concept_aldol"]
+    },
+    {
+      "question_id": "PYQ-107",
+      "exam_target": "JEE_Mains_Level",
+      "question_text": "In the crossed aldol reaction between benzaldehyde and acetaldehyde using dilute NaOH, the major product is:",
+      "options": [
+        "A mixture of all four possible aldol products",
+        "Cinnamaldehyde (PhCH=CH-CHO) via selective condensation",
+        "Benzoin (PhCOCH(OH)Ph) via benzoin condensation",
+        "Benzoic acid and acetaldehyde (no reaction under these conditions)"
+      ],
+      "correct_answer": "Cinnamaldehyde (PhCH=CH-CHO) via selective condensation",
+      "socratic_hint": "Benzaldehyde has no alpha-hydrogen. Which component can form the enolate? Then ask: which carbonyl is a better electrophile — the aromatic aldehyde or the aliphatic one? This selectivity is why crossed aldol is synthetically useful here.",
+      "concept_tags": ["cross aldol", "alpha hydrogen", "enolate selectivity", "concept_aldol"]
+    },
+    {
+      "question_id": "PYQ-108",
+      "exam_target": "JEE_Advanced_Level",
+      "question_text": "A compound with molecular formula C5H10O undergoes aldol condensation with itself. The product after dehydration has molecular formula C10H16O. The original compound is most likely:",
+      "options": [
+        "Cyclopentanol",
+        "3-methylbutanal (isovaleraldehyde)",
+        "Pentanal (valeraldehyde)",
+        "2-methylbutanal"
+      ],
+      "correct_answer": "Pentanal (valeraldehyde)",
+      "socratic_hint": "For self-aldol condensation to give the observed molecular formula, trace the atom count: two C5H10O molecules combine, losing H2O. Count the carbons and degrees of unsaturation in the product. Which C5H10O has alpha-hydrogens available and a terminal aldehyde that readily undergoes self-condensation?",
+      "concept_tags": ["aldol condensation", "molecular formula", "alpha hydrogen", "concept_aldol"]
+    },
+    {
+      "question_id": "PYQ-109",
+      "exam_target": "NEET_Level",
+      "question_text": "The nitration of nitrobenzene with HNO3/H2SO4 gives predominantly the:",
+      "options": [
+        "Ortho product (1,2-dinitrobenzene)",
+        "Para product (1,4-dinitrobenzene)",
+        "Meta product (1,3-dinitrobenzene)",
+        "An equal mixture of ortho and para products"
+      ],
+      "correct_answer": "Meta product (1,3-dinitrobenzene)",
+      "socratic_hint": "Identify the directing group already on the ring: the nitro group (-NO2) is electron-withdrawing by both induction and resonance. Draw the partial positive charges it induces on the ring. Which positions are electron-poor and which are relatively electron-rich toward an incoming electrophile (NO2+)?",
+      "concept_tags": ["EAS", "meta director", "deactivating group", "nitro group", "concept_eas"]
+    },
+    {
+      "question_id": "PYQ-110",
+      "exam_target": "JEE_Mains_Level",
+      "question_text": "Chlorobenzene undergoes electrophilic aromatic substitution more slowly than benzene, yet the products are predominantly ortho and para. This is because:",
+      "options": [
+        "Chlorine donates electrons by induction (sigma bond), activating ortho/para positions",
+        "Chlorine withdraws electrons by induction but donates by resonance (lone pair), net deactivating but ortho/para directing",
+        "Chlorine is a meta-director because it is electronegative",
+        "Chlorine converts benzene to a radical mechanism, giving ortho/para selectivity"
+      ],
+      "correct_answer": "Chlorine withdraws electrons by induction but donates by resonance (lone pair), net deactivating but ortho/para directing",
+      "socratic_hint": "Think about two separate effects from Cl: (1) electronegativity pulling electron density through the sigma bond (inductive), and (2) lone pairs on Cl overlapping with the pi system of the ring (resonance). Which effect controls overall reaction rate vs. which controls regioselectivity?",
+      "concept_tags": ["EAS", "halogen directing effect", "inductive vs resonance", "concept_eas"]
+    },
+    {
+      "question_id": "PYQ-111",
+      "exam_target": "JEE_Advanced_Level",
+      "question_text": "The dehydration of 3,3-dimethylbutan-1-ol with concentrated H2SO4 gives predominantly 2,3-dimethylbut-2-ene rather than the expected 3,3-dimethylbut-1-ene. This observation is explained by:",
+      "options": [
+        "E2 elimination requiring anti-periplanar geometry that is not available",
+        "A 1,2-methyl shift converting the initial secondary carbocation into a more stable tertiary carbocation before elimination",
+        "Markovnikov's rule applied to alcohol dehydration",
+        "The primary alcohol forming a primary carbocation that is too unstable to eliminate"
+      ],
+      "correct_answer": "A 1,2-methyl shift converting the initial secondary carbocation into a more stable tertiary carbocation before elimination",
+      "socratic_hint": "The initial carbocation formed by protonation and loss of water is secondary. Check whether a neighbouring methyl or hydride on the adjacent carbon can migrate to give a more stable tertiary carbocation. What product would then form by elimination from that rearranged carbocation?",
+      "concept_tags": ["carbocation rearrangement", "methyl shift", "1,2-shift", "E1", "concept_carbocation_rearrangement"]
+    },
+    {
+      "question_id": "PYQ-112",
+      "exam_target": "JEE_Advanced_Level",
+      "question_text": "Compound X (C4H9Br) reacts with alcoholic KOH to give a single alkene product (C4H8). Compound X does NOT react with AgNO3/ethanol to give an immediate precipitate. X is most likely:",
+      "options": [
+        "1-bromo-2-methylpropane (isobutyl bromide)",
+        "2-bromo-2-methylpropane (tert-butyl bromide)",
+        "1-bromobutane (n-butyl bromide)",
+        "2-bromobutane (sec-butyl bromide)"
+      ],
+      "correct_answer": "2-bromo-2-methylpropane (tert-butyl bromide)",
+      "socratic_hint": "AgNO3/EtOH tests for SN1 reactivity. Revisit the clue: which C4H9Br isomer gives only ONE possible alkene on E2 elimination? Check each isomer's beta-hydrogens — which has only one unique beta-hydrogen environment?",
+      "concept_tags": ["E2", "alkene product", "AgNO3 test", "concept_e2", "concept_sn1"]
+    },
+    {
+      "question_id": "PYQ-113",
+      "exam_target": "NEET_Level",
+      "question_text": "Which reagent selectively reduces an ester (-COOR) to a primary alcohol WITHOUT reducing an isolated C=C double bond in the same molecule?",
+      "options": [
+        "LiAlH4 in dry ether",
+        "NaBH4 in methanol",
+        "DIBAL-H at -78 degrees C (one equivalent)",
+        "H2 / Pd-C (catalytic hydrogenation)"
+      ],
+      "correct_answer": "LiAlH4 in dry ether",
+      "socratic_hint": "NaBH4 does not reduce esters at all under normal conditions. H2/Pd-C reduces C=C but not esters efficiently. Consider what LiAlH4 reduces — does it react with isolated, unconjugated alkenes? Weigh the reactivity order: esters vs. isolated alkenes toward LiAlH4.",
+      "concept_tags": ["selective reduction", "LiAlH4", "NaBH4", "ester reduction", "concept_oxidation_states"]
+    },
+    {
+      "question_id": "PYQ-114",
+      "exam_target": "JEE_Mains_Level",
+      "question_text": "When (2R,3S)-2-bromo-3-methylbutane is treated with KOtBu (potassium tert-butoxide), the predominant product and its geometry are:",
+      "options": [
+        "(E)-2-methylbut-2-ene via E2 with anti-periplanar elimination",
+        "(Z)-2-methylbut-2-ene via E2 with syn elimination",
+        "2-methyl-2-butanol via SN2 with inversion at C2",
+        "(R)-3-methylbut-1-ene via Hofmann elimination"
+      ],
+      "correct_answer": "(E)-2-methylbut-2-ene via E2 with anti-periplanar elimination",
+      "socratic_hint": "KOtBu is bulky, strongly basic, and non-nucleophilic — it strongly favours E2. E2 requires strict anti-periplanar geometry. Build a Newman projection along the C2-C3 bond. Identify the conformation where H (on C3) and Br (on C2) are 180 degrees apart, then assign E or Z to the alkene formed.",
+      "concept_tags": ["E2", "anti-periplanar", "Newman projection", "E/Z geometry", "concept_e2"]
+    },
+    {
+      "question_id": "PYQ-115",
+      "exam_target": "JEE_Advanced_Level",
+      "question_text": "The SN2 reaction of (S)-2-iodopentane with NaCN in DMSO gives a product. Which statement about the product is CORRECT?",
+      "options": [
+        "The product is (S)-2-methylpentanenitrile with retention of configuration",
+        "The product is (R)-2-methylpentanenitrile with inversion of configuration",
+        "The product is a racemic mixture because CN- attacks both faces equally",
+        "The product is (R)-2-methylpentanenitrile with retention, because CN- is larger than I-"
+      ],
+      "correct_answer": "The product is (R)-2-methylpentanenitrile with inversion of configuration",
+      "socratic_hint": "SN2 always inverts the configuration at the reaction centre (Walden inversion). However, the absolute descriptor (R or S) of the product may be the same letter or a different letter from the starting material — this depends entirely on where CN fits in the CIP priority ranking relative to the other substituents in the product. Assign priorities carefully in the product and check the rotation direction.",
+      "concept_tags": ["SN2", "inversion", "CIP rules", "R/S configuration", "concept_sn2", "concept_stereocenter"]
+    }
+  ]
+}

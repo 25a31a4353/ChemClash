@@ -26,6 +26,7 @@ export interface PYQQuestion {
   correct_answer: string;
   difficulty_level: "easy" | "medium" | "hard";
   concept_tags: string[];
+  socratic_hint?: string;
 }
 
 export interface AdaptivePYQResponse {
