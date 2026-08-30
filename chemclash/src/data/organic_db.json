@@ -1,0 +1,84 @@
+{
+  "reagents": [
+    {
+      "name": "LiAlH4 (Lithium Aluminium Hydride)",
+      "function": "Powerful reducing agent; reduces aldehydes, ketones, esters, carboxylic acids, and amides to alcohols/amines.",
+      "example": "CH3COOCH2CH3 + LiAlH4 / dry ether -> 2 CH3CH2OH"
+    },
+    {
+      "name": "PCC (Pyridinium Chlorochromate)",
+      "function": "Mild oxidising agent in anhydrous CH2Cl2; selectively oxidises 1° alcohols to aldehydes (avoids over-oxidation to carboxylic acids) and 2° alcohols to ketones.",
+      "example": "CH3CH2CH2OH + PCC / CH2Cl2 -> CH3CH2CHO"
+    },
+    {
+      "name": "O3 followed by Zn/H2O (Reductive Ozonolysis)",
+      "function": "Cleaves carbon-carbon double bonds oxidatively to form aldehydes and ketones without over-oxidising to carboxylic acids.",
+      "example": "(CH3)2C=CHCH3 + O3, then Zn/H2O -> (CH3)2C=O + CH3CHO"
+    },
+    {
+      "name": "mCPBA (meta-Chloroperoxybenzoic Acid)",
+      "function": "Epoxidation of alkenes via syn-addition; also used in Baeyer-Villiger oxidation of ketones to esters.",
+      "example": "Cyclohexene + mCPBA -> Cyclohexene oxide (7-oxabicyclo[4.1.0]heptane)"
+    }
+  ],
+  "named_reactions": [
+    {
+      "name": "Aldol Condensation",
+      "reactants": "Aldehydes or ketones containing α-hydrogens in the presence of dilute base (NaOH) or acid with heat.",
+      "products": "α,β-Unsaturated aldehyde or ketone via dehydration of β-hydroxy intermediate (e.g., 2 CH3CHO -> But-2-enal + H2O)."
+    },
+    {
+      "name": "Cannizzaro Reaction",
+      "reactants": "Non-enolisable aldehydes (no α-hydrogens, e.g., Formaldehyde, Benzaldehyde) treated with concentrated alkali (50% KOH).",
+      "products": "Equimolar redox disproportionation mixture of a 1° alcohol and a carboxylic acid salt (e.g., 2 PhCHO -> PhCH2OH + PhCOOK)."
+    },
+    {
+      "name": "Friedel-Crafts Alkylation / Acylation",
+      "reactants": "Benzene or activated aromatic ring + Alkyl/Acyl halide in the presence of anhydrous Lewis acid (AlCl3, FeBr3).",
+      "products": "Alkylbenzene or aryl ketone + HX (e.g., Benzene + CH3COCl / AlCl3 -> Acetophenone + HCl)."
+    },
+    {
+      "name": "Hoffmann Bromamide Degradation",
+      "reactants": "Primary aliphatic or aromatic amide + Br2 in aqueous or ethanolic NaOH / KOH.",
+      "products": "Primary amine with one fewer carbon atom + Na2CO3 + 2 NaBr + 2 H2O (e.g., CH3CONH2 + Br2/KOH -> CH3NH2)."
+    }
+  ],
+  "basic_rules": [
+    {
+      "rule": "Zaitsev's (Saytzeff's) Rule",
+      "definition": "In β-elimination (E1/E2) reactions of alkyl halides or alcohols, the predominant alkene product is the most substituted, thermodynamically stable alkene (having the greatest number of alkyl substituents attached to the sp2 carbons)."
+    },
+    {
+      "rule": "Markovnikov's Rule",
+      "definition": "In electrophilic addition of an unsymmetrical reagent (HX) to an unsymmetrical alkene, the acidic proton adds to the double-bonded carbon bearing more hydrogen atoms, yielding the more stable carbocation intermediate."
+    },
+    {
+      "rule": "Hückel's Rule of Aromaticity (4n + 2)",
+      "definition": "A planar, monocyclic, fully conjugated ring system is aromatic if it possesses (4n + 2) π-electrons (where n is a non-negative integer: 0, 1, 2, 3...). Rings with 4n π-electrons are anti-aromatic and especially unstable."
+    },
+    {
+      "rule": "Cahn-Ingold-Prelog (CIP) Priority Rule",
+      "definition": "Substituents on chiral carbons or geometric double bonds are ranked by atomic number of directly attached atoms. Higher atomic number gets higher priority. Used to determine absolute R/S configurations and E/Z isomerism."
+    }
+  ],
+  "core_concepts": [
+    {
+      "concept": "SN2 vs SN1 Competition",
+      "core_rule": "SN2 is a concerted, bimolecular mechanism favoured by strong nucleophiles, primary substrates, and polar aprotic solvents (Walden inversion). SN1 is a two-step, unimolecular mechanism via carbocation favoured by tertiary substrates, polar protic solvents, and weak nucleophiles (racemisation).",
+      "exception": "Neopentyl halides are primary but cannot undergo SN2 due to severe steric congestion from the β-quaternary carbon. Allylic and benzylic substrates readily undergo both SN1 and SN2.",
+      "keywords": "Walden inversion · carbocation · steric hindrance · polar aprotic · polar protic · transition state"
+    },
+    {
+      "concept": "Electrophilic Aromatic Substitution (EAS) Directing Groups",
+      "core_rule": "Electron-donating groups (EDGs: -OH, -NH2, -OCH3, -CH3) activate the benzene ring by increasing electron density (resonance/hyperconjugation) and direct incoming electrophiles to ortho and para positions. Electron-withdrawing groups (EWGs: -NO2, -CN, -COOH) deactivate and direct meta.",
+      "exception": "Halogens (-F, -Cl, -Br, -I) deactivate the ring through strong inductive electron withdrawal (-I) yet direct ortho/para due to weak resonance donation (+M) of lone pairs.",
+      "keywords": "sigma complex · arenium ion · ortho/para director · meta director · activating · deactivating · halogen anomaly"
+    },
+    {
+      "concept": "Carbocation Rearrangements",
+      "core_rule": "Carbocation intermediates spontaneously rearrange via 1,2-hydride or 1,2-alkyl (methyl/phenyl) shifts whenever the shift transforms a less stable carbocation (1° or 2°) into a more stable one (3° or resonance-stabilised allylic/benzylic).",
+      "exception": "Ring expansion (e.g., cyclobutylcarbinyl to cyclopentyl carbocation) provides additional thermodynamic driving force by relieving severe ring strain in 4-membered rings.",
+      "keywords": "1,2-hydride shift · 1,2-methyl shift · Wagner-Meerwein · ring expansion · thermodynamic stability"
+    }
+  ]
+}

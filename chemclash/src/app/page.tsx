@@ -2,7 +2,7 @@
 
 import TopNav from "@/components/TopNav";
 import GameModeCard, { GameMode } from "@/components/GameModeCard";
-import DownloadCheatSheet from "@/components/DownloadCheatSheet";
+import CheatSheetDownloader from "@/components/CheatSheetDownloader";
 import { useChemStore } from "@/store/useChemStore";
 
 const GAME_MODES: GameMode[] = [
@@ -250,32 +250,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Cheat Sheet Download ── */}
-        <div
-          style={{
-            marginTop: 36,
-            background: "#111820",
-            border: "1px solid #1e2d3d",
-            borderRadius: 12,
-            padding: "20px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 16,
-          }}
-          className="animate-fade-in"
-        >
-          <div>
-            <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.18em" }}>
-              // STUDY RESOURCES
-            </span>
-            <p style={{ color: "#64748b", fontSize: "0.78rem", margin: "6px 0 0 0", lineHeight: 1.5 }}>
-              Download the complete Organic Chemistry reference as a PDF.
-              10 high-yield concepts · JEE / NEET patterns.
-            </p>
-          </div>
-          <DownloadCheatSheet />
+        {/* ── Custom Cheat Sheet Downloader ── */}
+        <div style={{ marginTop: 40 }} className="animate-fade-in">
+          <CheatSheetDownloader />
         </div>
 
         {/* ── Footer ── */}
