@@ -9,8 +9,10 @@ pydantic>=2.7.0
 # ── Streamlit (Streamlit Cloud entry point) ───────────────────────────────────
 streamlit>=1.35.0
 
-# ── Utilities ─────────────────────────────────────────────────────────────────
+# ── Utilities & Database ──────────────────────────────────────────────────────
 python-dotenv>=1.0.0
+motor>=3.5.0
+pymongo>=4.8.0
 
 # ── LLM SDKs (optional — app works without an API key) ───────────────────────
 openai>=1.30.0

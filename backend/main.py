@@ -18,10 +18,11 @@ import json
 import logging
 import os
 import time
+import datetime
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Dict, Optional
 
 # ── Third-party ───────────────────────────────────────────────────────────────
 import uvicorn
@@ -30,6 +31,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
+from motor.motor_asyncio import AsyncIOMotorClient
 
 # ── Load .env (optional — safe to run without one) ────────────────────────────
 load_dotenv()
@@ -53,6 +55,11 @@ LLM_MAX_TOKENS:   int       = int(os.getenv("LLM_MAX_TOKENS", "512"))
 LLM_TEMPERATURE:  float     = float(os.getenv("LLM_TEMPERATURE", "0.2"))
 
 _NO_KEY = {"sk-...", "", "your-key-here"}
+
+MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+client = AsyncIOMotorClient(MONGO_URI)
+db = client.chemclash
+users_collection = db.users
 
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 2 — RULE-BASED FAST VALIDATOR  (<1 ms, no API key needed)
@@ -734,7 +741,55 @@ async def curriculum_summary():
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# SECTION 14 — IGNITION BLOCK
+# SECTION 14 — USER PROFILES (MongoDB)
+# ═════════════════════════════════════════════════════════════════════════════
+
+class UserProfile(BaseModel):
+    user_id: str
+    elo_rating: int = 1200
+    streak_days: int = 0
+    last_played: Optional[datetime.datetime] = None
+    concept_weaknesses: Dict[str, float] = Field(default_factory=dict)
+
+class MatchUpdate(BaseModel):
+    elo_change: int
+    weakness_updates: Dict[str, float] = Field(default_factory=dict)
+
+@app.get("/user/{user_id}", response_model=UserProfile, tags=["User"])
+async def get_user(user_id: str):
+    """Fetch a user profile from MongoDB, or create one if it doesn't exist."""
+    user = await users_collection.find_one({"user_id": user_id})
+    if not user:
+        new_profile = UserProfile(user_id=user_id)
+        await users_collection.insert_one(new_profile.model_dump())
+        return new_profile
+    return UserProfile(**user)
+
+@app.post("/user/{user_id}/update-match", response_model=UserProfile, tags=["User"])
+async def update_match(user_id: str, update: MatchUpdate):
+    """Update a user's ELO and weaknesses after a match."""
+    user = await users_collection.find_one({"user_id": user_id})
+    if not user:
+        profile = UserProfile(user_id=user_id)
+    else:
+        profile = UserProfile(**user)
+
+    profile.elo_rating += update.elo_change
+    profile.last_played = datetime.datetime.now(datetime.timezone.utc)
+    
+    # Simple logic to merge weaknesses
+    for concept, value in update.weakness_updates.items():
+        profile.concept_weaknesses[concept] = profile.concept_weaknesses.get(concept, 0.0) + value
+
+    await users_collection.update_one(
+        {"user_id": user_id},
+        {"$set": profile.model_dump()},
+        upsert=True
+    )
+    return profile
+
+# ═════════════════════════════════════════════════════════════════════════════
+# SECTION 15 — IGNITION BLOCK
 # ═════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":

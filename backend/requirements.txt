@@ -5,6 +5,10 @@ uvicorn[standard]>=0.30.0
 pydantic>=2.7.0
 python-dotenv>=1.0.0
 
+# Database (MongoDB async)
+motor>=3.5.0
+pymongo>=4.8.0
+
 # LLM SDKs — install only what you need
 openai>=1.30.0
 
