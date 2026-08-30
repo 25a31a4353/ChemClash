@@ -4,7 +4,13 @@
     "title": "Lewis Structures and Bonding",
     "difficulty": "basics",
     "difficulty_tier": 1,
-    "game_tags": ["lewis_structure", "covalent_bond", "lone_pairs", "octet_rule", "valence_electrons"],
+    "game_tags": [
+      "lewis_structure",
+      "covalent_bond",
+      "lone_pairs",
+      "octet_rule",
+      "valence_electrons"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -31,7 +37,13 @@
     "title": "Electronegativity and Polarity",
     "difficulty": "basics",
     "difficulty_tier": 1,
-    "game_tags": ["electronegativity", "polarity", "dipole_moment", "partial_charge", "bond_polarity"],
+    "game_tags": [
+      "electronegativity",
+      "polarity",
+      "dipole_moment",
+      "partial_charge",
+      "bond_polarity"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -58,7 +70,13 @@
     "title": "Resonance Structures",
     "difficulty": "basics",
     "difficulty_tier": 1,
-    "game_tags": ["resonance", "delocalization", "resonance_hybrid", "formal_charge", "pi_electrons"],
+    "game_tags": [
+      "resonance",
+      "delocalization",
+      "resonance_hybrid",
+      "formal_charge",
+      "pi_electrons"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -85,7 +103,14 @@
     "title": "Nucleophiles and Electrophiles",
     "difficulty": "basics",
     "difficulty_tier": 1,
-    "game_tags": ["nucleophile", "electrophile", "electron_donor", "electron_acceptor", "lewis_base", "lewis_acid"],
+    "game_tags": [
+      "nucleophile",
+      "electrophile",
+      "electron_donor",
+      "electron_acceptor",
+      "lewis_base",
+      "lewis_acid"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -112,7 +137,16 @@
     "title": "Functional Groups Overview",
     "difficulty": "basics",
     "difficulty_tier": 1,
-    "game_tags": ["functional_groups", "alkene", "alkyne", "alcohol", "aldehyde", "ketone", "amine", "carboxylic_acid"],
+    "game_tags": [
+      "functional_groups",
+      "alkene",
+      "alkyne",
+      "alcohol",
+      "aldehyde",
+      "ketone",
+      "amine",
+      "carboxylic_acid"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -139,7 +173,14 @@
     "title": "Curved Arrow Notation",
     "difficulty": "medium",
     "difficulty_tier": 2,
-    "game_tags": ["arrow_pushing", "curved_arrow", "electron_flow", "bond_breaking", "bond_forming", "mechanism"],
+    "game_tags": [
+      "arrow_pushing",
+      "curved_arrow",
+      "electron_flow",
+      "bond_breaking",
+      "bond_forming",
+      "mechanism"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -166,7 +207,14 @@
     "title": "Carbocation Stability",
     "difficulty": "medium",
     "difficulty_tier": 2,
-    "game_tags": ["carbocation", "stability", "hyperconjugation", "inductive_effect", "tertiary_carbocation", "rearrangement"],
+    "game_tags": [
+      "carbocation",
+      "stability",
+      "hyperconjugation",
+      "inductive_effect",
+      "tertiary_carbocation",
+      "rearrangement"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -193,7 +241,16 @@
     "title": "SN1 and SN2 Mechanisms",
     "difficulty": "medium",
     "difficulty_tier": 2,
-    "game_tags": ["SN1", "SN2", "nucleophilic_substitution", "leaving_group", "inversion", "racemisation", "backside_attack", "steric_hindrance"],
+    "game_tags": [
+      "SN1",
+      "SN2",
+      "nucleophilic_substitution",
+      "leaving_group",
+      "inversion",
+      "racemisation",
+      "backside_attack",
+      "steric_hindrance"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -220,7 +277,16 @@
     "title": "E1 and E2 Elimination",
     "difficulty": "medium",
     "difficulty_tier": 2,
-    "game_tags": ["E1", "E2", "elimination", "Saytzeff_rule", "anti_periplanar", "alkene", "base", "secondary_halide"],
+    "game_tags": [
+      "E1",
+      "E2",
+      "elimination",
+      "Saytzeff_rule",
+      "anti_periplanar",
+      "alkene",
+      "base",
+      "secondary_halide"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -247,7 +313,16 @@
     "title": "Stereochemistry — Chirality and R/S",
     "difficulty": "medium",
     "difficulty_tier": 2,
-    "game_tags": ["chirality", "stereocenter", "R_configuration", "S_configuration", "enantiomer", "diastereomer", "optical_activity", "CIP_rules"],
+    "game_tags": [
+      "chirality",
+      "stereocenter",
+      "R_configuration",
+      "S_configuration",
+      "enantiomer",
+      "diastereomer",
+      "optical_activity",
+      "CIP_rules"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -274,7 +349,14 @@
     "title": "Electrophilic Addition to Alkenes",
     "difficulty": "medium",
     "difficulty_tier": 2,
-    "game_tags": ["electrophilic_addition", "Markovnikov", "anti_addition", "bromonium_ion", "HX_addition", "hydration"],
+    "game_tags": [
+      "electrophilic_addition",
+      "Markovnikov",
+      "anti_addition",
+      "bromonium_ion",
+      "HX_addition",
+      "hydration"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -301,7 +383,17 @@
     "title": "Electrophilic Aromatic Substitution (EAS)",
     "difficulty": "advanced",
     "difficulty_tier": 3,
-    "game_tags": ["EAS", "aromatic", "arenium_ion", "directing_effects", "ortho_para_director", "meta_director", "Friedel_Crafts", "nitration", "halogenation"],
+    "game_tags": [
+      "EAS",
+      "aromatic",
+      "arenium_ion",
+      "directing_effects",
+      "ortho_para_director",
+      "meta_director",
+      "Friedel_Crafts",
+      "nitration",
+      "halogenation"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -328,7 +420,16 @@
     "title": "Carbonyl Chemistry — Nucleophilic Addition",
     "difficulty": "advanced",
     "difficulty_tier": 3,
-    "game_tags": ["carbonyl", "nucleophilic_addition", "aldehyde", "ketone", "cyanohydrin", "Grignard", "hydride_reduction", "hemiacetal"],
+    "game_tags": [
+      "carbonyl",
+      "nucleophilic_addition",
+      "aldehyde",
+      "ketone",
+      "cyanohydrin",
+      "Grignard",
+      "hydride_reduction",
+      "hemiacetal"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -355,7 +456,16 @@
     "title": "Aldol Condensation",
     "difficulty": "advanced",
     "difficulty_tier": 3,
-    "game_tags": ["aldol", "enolate", "alpha_carbon", "condensation", "dehydration", "crossed_aldol", "intramolecular_aldol", "C_C_bond_formation"],
+    "game_tags": [
+      "aldol",
+      "enolate",
+      "alpha_carbon",
+      "condensation",
+      "dehydration",
+      "crossed_aldol",
+      "intramolecular_aldol",
+      "C_C_bond_formation"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -382,7 +492,15 @@
     "title": "Retrosynthetic Analysis",
     "difficulty": "advanced",
     "difficulty_tier": 3,
-    "game_tags": ["retrosynthesis", "disconnection", "synthon", "FGI", "C_C_bond", "target_molecule", "synthetic_equivalent"],
+    "game_tags": [
+      "retrosynthesis",
+      "disconnection",
+      "synthon",
+      "FGI",
+      "C_C_bond",
+      "target_molecule",
+      "synthetic_equivalent"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -409,7 +527,17 @@
     "title": "Oxidation and Reduction in Synthesis",
     "difficulty": "advanced",
     "difficulty_tier": 3,
-    "game_tags": ["oxidation", "reduction", "PCC", "LiAlH4", "NaBH4", "osmium_tetroxide", "ozonolysis", "oxidation_state", "selective_reduction"],
+    "game_tags": [
+      "oxidation",
+      "reduction",
+      "PCC",
+      "LiAlH4",
+      "NaBH4",
+      "osmium_tetroxide",
+      "ozonolysis",
+      "oxidation_state",
+      "selective_reduction"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -436,7 +564,15 @@
     "title": "Acyl Substitution and Ester Chemistry",
     "difficulty": "advanced",
     "difficulty_tier": 3,
-    "game_tags": ["acyl_substitution", "ester", "saponification", "Fischer_esterification", "tetrahedral_intermediate", "leaving_group_ability", "transesterification"],
+    "game_tags": [
+      "acyl_substitution",
+      "ester",
+      "saponification",
+      "Fischer_esterification",
+      "tetrahedral_intermediate",
+      "leaving_group_ability",
+      "transesterification"
+    ],
     "tutorial_sequence": [
       {
         "slide": 1,
@@ -455,6 +591,375 @@
         "concept_term": "Fischer Esterification",
         "short_definition": "Fischer esterification is the acid-catalysed condensation of a carboxylic acid with an alcohol to give an ester and water. It is reversible — excess alcohol drives equilibrium.",
         "action_prompt": "Identify the leaving group in the Fischer esterification mechanism and tap it to confirm the correct step."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_sn2",
+    "title": "SN2 — Bimolecular Nucleophilic Substitution",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": [
+      "sn2",
+      "nucleophilic_substitution",
+      "backside_attack",
+      "inversion",
+      "walden_inversion",
+      "primary_alkyl_halide",
+      "polar_aprotic_solvent",
+      "rate_law",
+      "transition_state"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "A single concerted step in which the nucleophile attacks the electrophilic carbon from the back (anti to the leaving group) simultaneously as the leaving group departs, producing inversion of configuration (Walden inversion). Rate = k[Nu][substrate].",
+        "action_prompt": "Review the fundamental rule of SN2 — Bimolecular Nucleophilic Substitution."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "Neopentyl halides ((CH3)3C-CH2-X) are primary but do NOT undergo SN2 at a useful rate because the three methyl groups on the adjacent carbon create severe steric crowding at the transition state, blocking backside attack.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: SN2 · nucleophilic substitution · backside attack · inversion · Walden inversion · primary alkyl halide · polar aprotic solvent · rate law · transition state",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_sn1",
+    "title": "SN1 — Unimolecular Nucleophilic Substitution",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": [
+      "sn1",
+      "carbocation",
+      "racemisation",
+      "tertiary",
+      "polar_protic",
+      "ionisation",
+      "rate-determining_step",
+      "two-step_mechanism"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "A two-step mechanism: (1) slow, rate-determining ionisation of the substrate to form a planar carbocation intermediate; (2) fast attack by nucleophile on either face of the carbocation. Rate = k[substrate] only. Favoured by tertiary substrates, polar protic solvents, and weak nucleophiles.",
+        "action_prompt": "Review the fundamental rule of SN1 — Unimolecular Nucleophilic Substitution."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "Allylic and benzylic secondary substrates undergo SN1 far more readily than simple secondary alkyl halides because resonance delocalises the carbocation, lowering the activation energy of the ionisation step.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: SN1 · carbocation · racemisation · tertiary · polar protic · ionisation · rate-determining step · two-step mechanism",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_e2",
+    "title": "E2 — Bimolecular Elimination",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": [
+      "e2",
+      "elimination",
+      "anti-periplanar",
+      "zaitsev_rule",
+      "hofmann_product",
+      "strong_base",
+      "diaxial",
+      "cyclohexane",
+      "beta-hydrogen"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "A concerted one-step mechanism requiring a strong base, anti-periplanar geometry (H and leaving group must be 180 degrees apart), and a beta-hydrogen. Rate = k[base][substrate]. Follows Zaitsev's rule (most substituted alkene) unless a bulky base is used (Hofmann product favoured).",
+        "action_prompt": "Review the fundamental rule of E2 — Bimolecular Elimination."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "In cyclohexane rings, E2 requires the H and the leaving group to be diaxial (trans-diaxial). A cis-leaving group cannot achieve anti-periplanar geometry in a chair conformation and reacts much more slowly.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: E2 · elimination · anti-periplanar · Zaitsev rule · Hofmann product · strong base · diaxial · cyclohexane · beta-hydrogen",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_markovnikov",
+    "title": "Markovnikov's Rule and Anti-Markovnikov Addition",
+    "difficulty": "basics",
+    "difficulty_tier": 1,
+    "game_tags": [
+      "markovnikov",
+      "anti-markovnikov",
+      "electrophilic_addition",
+      "carbocation",
+      "hbr",
+      "radical_addition",
+      "hydroboration",
+      "regioselectivity",
+      "alkene"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "In electrophilic addition of HX to an alkene, the proton adds to the carbon bearing more hydrogens (forming the more stable carbocation intermediate), and the halide adds to the carbon bearing fewer hydrogens. Anti-Markovnikov addition occurs via radical mechanism (HBr + ROOR) or hydroboration-oxidation.",
+        "action_prompt": "Review the fundamental rule of Markovnikov's Rule and Anti-Markovnikov Addition."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "HBr addition in the presence of peroxides (ROOR) follows a radical (anti-Markovnikov) pathway, NOT an ionic one. This applies ONLY to HBr — HCl and HI do not give clean anti-Markovnikov products via radicals due to energetics of the propagation steps.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: Markovnikov · anti-Markovnikov · electrophilic addition · carbocation · HBr · radical addition · hydroboration · regioselectivity · alkene",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_aldol",
+    "title": "Aldol Condensation",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": [
+      "aldol",
+      "enolate",
+      "condensation",
+      "beta-hydroxy_carbonyl",
+      "dehydration",
+      "cross_aldol",
+      "robinson_annulation",
+      "alpha_carbon",
+      "intramolecular_aldol"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "An enolate (or enol) formed alpha to a carbonyl attacks the carbonyl carbon of another aldehyde or ketone to give a beta-hydroxy carbonyl compound (aldol product). Under heat or acid/base, dehydration gives an alpha,beta-unsaturated carbonyl (aldol condensation product). Intramolecular aldol forms cyclic rings.",
+        "action_prompt": "Review the fundamental rule of Aldol Condensation."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "Crossed (mixed) aldol condensations are only synthetically useful when one carbonyl compound has no alpha-hydrogen (cannot form enolate) — e.g., benzaldehyde with acetaldehyde. Otherwise a statistical mixture of four products results.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: aldol · enolate · condensation · beta-hydroxy carbonyl · dehydration · cross aldol · Robinson annulation · alpha carbon · intramolecular aldol",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_stereocenter",
+    "title": "Stereocenter Configuration — R/S Assignment",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": [
+      "r/s_configuration",
+      "cip_rules",
+      "stereocenter",
+      "enantiomer",
+      "chirality",
+      "priority_rules",
+      "optical_isomer",
+      "wedge_dash_notation"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "A stereocenter is an sp3 carbon bearing four different substituents. Priority is assigned by CIP rules (atomic number; higher atomic number = higher priority). Arrange the lowest-priority group away from the viewer: clockwise = R, counterclockwise = S. Chiral molecules that are non-superimposable mirror images are enantiomers.",
+        "action_prompt": "Review the fundamental rule of Stereocenter Configuration — R/S Assignment."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "When the lowest-priority group points toward the viewer (on a wedge), the observed rotation must be INVERTED to get the correct R/S assignment — a very common source of sign errors on exams.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: R/S configuration · CIP rules · stereocenter · enantiomer · chirality · priority rules · optical isomer · wedge dash notation",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_eas",
+    "title": "Electrophilic Aromatic Substitution (EAS) and Directing Effects",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": [
+      "eas",
+      "electrophilic_aromatic_substitution",
+      "arenium_ion",
+      "ortho_para_director",
+      "meta_director",
+      "activating_group",
+      "deactivating_group",
+      "halogen_anomaly",
+      "friedel-crafts"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "Benzene reacts with electrophiles via addition-elimination: the pi electrons attack E+ to form a resonance-stabilised arenium ion (sigma complex), which loses H+ to restore aromaticity. Electron-donating groups (EDG: OH, NH2, alkyl) activate the ring and direct ortho/para. Electron-withdrawing groups (EWG: NO2, COOH, CHO) deactivate and direct meta.",
+        "action_prompt": "Review the fundamental rule of Electrophilic Aromatic Substitution (EAS) and Directing Effects."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "Halogens are a unique exception: they are ring-deactivators (inductive withdrawal) but ortho/para directors (lone-pair resonance donation). So halogenated benzenes react slower than benzene but still give predominantly ortho/para products.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: EAS · electrophilic aromatic substitution · arenium ion · ortho para director · meta director · activating group · deactivating group · halogen anomaly · Friedel-Crafts",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_carbocation_rearrangement",
+    "title": "Carbocation Rearrangements — Hydride and Methyl Shifts",
+    "difficulty": "advanced",
+    "difficulty_tier": 3,
+    "game_tags": [
+      "carbocation_rearrangement",
+      "hydride_shift",
+      "methyl_shift",
+      "1,2-shift",
+      "sn1",
+      "e1",
+      "stability",
+      "wagner-meerwein",
+      "tertiary_carbocation"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "Carbocations rearrange when a 1,2-hydride shift or 1,2-methyl shift converts a less stable carbocation to a more stable one. This is a common feature of SN1, E1, and acid-catalysed reactions. A secondary carbocation adjacent to a tertiary carbon will almost always rearrange.",
+        "action_prompt": "Review the fundamental rule of Carbocation Rearrangements — Hydride and Methyl Shifts."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "3,3-Dimethyl-1-butanol undergoes dehydration to give predominantly 2,3-dimethyl-2-butene (not the expected 3,3-dimethyl-1-butene) because the initial secondary carbocation rearranges via a methyl shift to a more stable tertiary carbocation before elimination.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: carbocation rearrangement · hydride shift · methyl shift · 1,2-shift · SN1 · E1 · stability · Wagner-Meerwein · tertiary carbocation",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_oxidation_states",
+    "title": "Oxidation State Changes in Organic Reactions",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": [
+      "oxidation_state",
+      "reduction",
+      "oxidation",
+      "kmno4",
+      "nabh4",
+      "lialh4",
+      "ozonolysis",
+      "selective_reduction",
+      "oxidation_level"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "Oxidation of carbon = increase in bonds to O, N, or halogens, OR decrease in bonds to H. Reduction = increase in bonds to H, or decrease in bonds to O. Reagent guide: KMnO4 (acidic, hot) = strong oxidation (cleaves alkenes); NaBH4 = mild reduction (aldehydes/ketones only); LiAlH4 = strong reduction (includes carboxylic acids and esters).",
+        "action_prompt": "Review the fundamental rule of Oxidation State Changes in Organic Reactions."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "NaBH4 reduces aldehydes and ketones but does NOT reduce carboxylic acids, esters, or amides — it is not strong enough. LiAlH4 reduces all of these. This selectivity is heavily tested in synthesis problems.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: oxidation state · reduction · oxidation · KMnO4 · NaBH4 · LiAlH4 · ozonolysis · selective reduction · oxidation level",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
+      }
+    ]
+  },
+  {
+    "module_id": "concept_nucleophilicity_vs_basicity",
+    "title": "Nucleophilicity vs. Basicity — Solvent Dependence",
+    "difficulty": "medium",
+    "difficulty_tier": 2,
+    "game_tags": [
+      "nucleophilicity",
+      "basicity",
+      "polar_aprotic",
+      "polar_protic",
+      "solvation",
+      "halide",
+      "iodide",
+      "fluoride",
+      "solvent_effect",
+      "kinetics_vs_thermodynamics"
+    ],
+    "tutorial_sequence": [
+      {
+        "slide": 1,
+        "concept_term": "Core Mechanism Rule",
+        "short_definition": "Nucleophilicity measures kinetic attack on carbon; basicity measures thermodynamic affinity for H+. In polar aprotic solvents (DMSO, DMF), nucleophilicity parallels basicity: F- > Cl- > Br- > I-. In polar protic solvents (water, alcohols), solvation reverses nucleophilicity for halides: I- > Br- > Cl- > F-.",
+        "action_prompt": "Review the fundamental rule of Nucleophilicity vs. Basicity — Solvent Dependence."
+      },
+      {
+        "slide": 2,
+        "concept_term": "Exam Edge-Case & Common Exception",
+        "short_definition": "Iodide (I-) is a better nucleophile than fluoride (F-) in polar protic solvents despite F- being a far stronger base. This is because F- is heavily solvated by hydrogen bonds that must be broken before it can attack, while I- is large and diffuse with minimal solvation shell.",
+        "action_prompt": "Memorise this high-yield trap tested in JEE Advanced and NEET."
+      },
+      {
+        "slide": 3,
+        "concept_term": "Key Keywords & Diagnostic Triggers",
+        "short_definition": "Keywords: nucleophilicity · basicity · polar aprotic · polar protic · solvation · halide · iodide · fluoride · solvent effect · kinetics vs thermodynamics",
+        "action_prompt": "Identify the reaction conditions and solvent environment required for this pathway."
       }
     ]
   }

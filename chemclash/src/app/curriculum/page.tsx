@@ -98,6 +98,83 @@ const MODULES: Module[] = [
       { slide: 3, concept_term: "Arrow Pushing Rules", short_definition: "Arrows always flow from electron-rich to electron-poor regions. Never draw an arrow backward (from positive to negative). Each step must be electronically balanced.", action_prompt: "True or False: A curved arrow can point FROM a positively charged atom TO a negatively charged atom." },
     ],
   },
+  {
+    module_id: "concept_sn2",
+    title: "SN2 — Bimolecular Nucleophilic Substitution",
+    difficulty: "basics",
+    difficulty_tier: 1,
+    game_tags: ["sn2", "backside_attack", "walden_inversion", "primary_halide", "polar_aprotic"],
+    tutorial_sequence: [
+      { slide: 1, concept_term: "SN2 Mechanism", short_definition: "Concerted backside attack by nucleophile while leaving group departs simultaneously. Rate = k[Nu][substrate]. Produces 100% Walden inversion.", action_prompt: "What is the stereochemical outcome of an SN2 reaction on a chiral carbon?" },
+      { slide: 2, concept_term: "Neopentyl Exception", short_definition: "Neopentyl halides are primary but do NOT undergo SN2 due to severe steric crowding from the adjacent quaternary carbon blocking backside attack.", action_prompt: "Why does neopentyl bromide fail to undergo SN2 despite being a primary alkyl halide?" },
+      { slide: 3, concept_term: "SN2 Solvent", short_definition: "Polar aprotic solvents (DMSO, DMF, acetone) accelerate SN2 by leaving nucleophiles unencumbered by hydrogen-bonding shells.", action_prompt: "Which solvent favours SN2: DMSO or Ethanol?" },
+    ],
+  },
+  {
+    module_id: "concept_sn1",
+    title: "SN1 — Unimolecular Nucleophilic Substitution",
+    difficulty: "basics",
+    difficulty_tier: 1,
+    game_tags: ["sn1", "carbocation", "racemisation", "tertiary_halide", "polar_protic"],
+    tutorial_sequence: [
+      { slide: 1, concept_term: "SN1 Mechanism", short_definition: "Two-step mechanism: slow rate-determining carbocation formation followed by fast nucleophile capture on either face (racemisation). Rate = k[substrate].", action_prompt: "What happens to the rate of an SN1 reaction if nucleophile concentration is doubled?" },
+      { slide: 2, concept_term: "SN1 Substrates", short_definition: "Favoured by tertiary substrates and resonance-stabilised allylic/benzylic halides that form stable carbocations.", action_prompt: "Rank in order of SN1 reactivity: tert-butyl chloride, isopropyl chloride, methyl chloride." },
+    ],
+  },
+  {
+    module_id: "concept_e2",
+    title: "E2 — Bimolecular Elimination",
+    difficulty: "medium",
+    difficulty_tier: 2,
+    game_tags: ["e2", "elimination", "anti_periplanar", "zaitsev", "hofmann"],
+    tutorial_sequence: [
+      { slide: 1, concept_term: "E2 Geometry", short_definition: "Concerted elimination requiring a strong base and strict anti-periplanar geometry (H and LG 180° apart).", action_prompt: "What dihedral angle between H and leaving group is required for concerted E2?" },
+      { slide: 2, concept_term: "Zaitsev vs Hofmann", short_definition: "Small bases yield the more substituted Zaitsev alkene; bulky bases (KOtBu) yield the less substituted Hofmann alkene.", action_prompt: "Which base yields the Hofmann product from 2-bromobutane: NaOMe or KOtBu?" },
+    ],
+  },
+  {
+    module_id: "concept_markovnikov",
+    title: "Markovnikov & Anti-Markovnikov Addition",
+    difficulty: "basics",
+    difficulty_tier: 1,
+    game_tags: ["markovnikov", "anti_markovnikov", "hbr_peroxide", "hydroboration"],
+    tutorial_sequence: [
+      { slide: 1, concept_term: "Markovnikov Rule", short_definition: "Proton adds to the carbon with more hydrogens, generating the more stable carbocation intermediate.", action_prompt: "What is the major product of propene + HCl?" },
+      { slide: 2, concept_term: "Peroxide Effect", short_definition: "HBr with peroxides follows a radical chain mechanism giving anti-Markovnikov 1-bromopropane (applies ONLY to HBr).", action_prompt: "Does HCl + peroxide give anti-Markovnikov product? (Yes/No)" },
+    ],
+  },
+  {
+    module_id: "concept_aldol",
+    title: "Aldol Condensation",
+    difficulty: "advanced",
+    difficulty_tier: 3,
+    game_tags: ["aldol", "enolate", "condensation", "alpha_hydrogen", "dehydration"],
+    tutorial_sequence: [
+      { slide: 1, concept_term: "Aldol Addition", short_definition: "Enolate attacks carbonyl of another aldehyde/ketone to give β-hydroxy carbonyl; heat eliminates water to give conjugated enone.", action_prompt: "What functional group is formed after aldol condensation and dehydration?" },
+      { slide: 2, concept_term: "Crossed Aldol Selectivity", short_definition: "Synthetically clean only when one partner has no α-hydrogens (e.g., Benzaldehyde + Acetaldehyde -> Cinnamaldehyde).", action_prompt: "Why is benzaldehyde ideal for crossed aldol reactions?" },
+    ],
+  },
+  {
+    module_id: "concept_eas",
+    title: "EAS & Directing Effects",
+    difficulty: "advanced",
+    difficulty_tier: 3,
+    game_tags: ["eas", "arenium_ion", "ortho_para", "meta", "halogen_anomaly"],
+    tutorial_sequence: [
+      { slide: 1, concept_term: "Directing Groups", short_definition: "EDGs (-OH, -NH2, -R) activate and direct ortho/para; EWGs (-NO2, -COOH) deactivate and direct meta.", action_prompt: "Where does incoming NO2+ attack on nitrobenzene: ortho, meta, or para?" },
+      { slide: 2, concept_term: "Halogen Anomaly", short_definition: "Halogens are deactivating by induction (-I) yet ortho/para directing due to lone-pair resonance (+M).", action_prompt: "Why is chlorobenzene ortho/para directing despite being deactivated?" },
+    ],
+  },
+  {
+    module_id: "concept_carbocation_rearrangement",
+    title: "Carbocation Rearrangements",
+    difficulty: "advanced",
+    difficulty_tier: 3,
+    game_tags: ["carbocation_shift", "hydride_shift", "methyl_shift", "wagner_meerwein"],
+    tutorial_sequence: [
+      { slide: 1, concept_term: "1,2-Shifts", short_definition: "1,2-hydride or 1,2-methyl shifts convert less stable carbocations to more stable 3° or benzylic/allylic cations.", action_prompt: "What type of shift occurs when 3,3-dimethylbutan-1-ol is dehydrated?" },
+    ],
+  },
 ];
 
 // ─── Answer keys (for the quiz mode) ─────────────────────────────────────────
@@ -121,6 +198,20 @@ const ANSWERS: Record<string, string> = {
   "Curved Arrow":                 "(b) an electron pair",
   "Bond-Breaking Arrow":          "Toward Br",
   "Arrow Pushing Rules":          "False",
+  "SN2 Mechanism":                "Inversion (Walden inversion)",
+  "Neopentyl Exception":          "Steric hindrance from quaternary carbon",
+  "SN2 Solvent":                  "DMSO",
+  "SN1 Mechanism":                "No effect (zero order in nucleophile)",
+  "SN1 Substrates":               "tert-butyl > isopropyl > methyl",
+  "E2 Geometry":                  "180° (anti-periplanar)",
+  "Zaitsev vs Hofmann":           "KOtBu",
+  "Markovnikov Rule":             "2-chloropropane",
+  "Peroxide Effect":              "No (only HBr)",
+  "Aldol Addition":               "α,β-unsaturated carbonyl (enone)",
+  "Crossed Aldol Selectivity":    "No alpha-hydrogens",
+  "Directing Groups":             "Meta",
+  "Halogen Anomaly":              "Resonance donation of lone pairs (+M)",
+  "1,2-Shifts":                   "1,2-methyl shift",
 };
 
 // ─── Difficulty colours ────────────────────────────────────────────────────

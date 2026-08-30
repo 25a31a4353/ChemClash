@@ -475,6 +475,46 @@
         {
             "concept": "Keto-Enol Tautomerism",
             "details": "Dynamic chemical equilibrium between a carbonyl compound (keto form) and an unsaturated alcohol (enol form) via α-proton migration. The keto form is thermodynamically favoured for simple aldehydes and ketones due to the strong C=O bond (~745 kJ/mol), but the enol form predominates in β-dicarbonyls (acetylacetone 80% enol) due to intramolecular hydrogen bonding and extended conjugation."
+        },
+        {
+            "concept": "SN2 — Bimolecular Nucleophilic Substitution",
+            "details": "A single concerted step in which the nucleophile attacks the electrophilic carbon from the back (anti to the leaving group) simultaneously as the leaving group departs, producing inversion of configuration (Walden inversion). Rate = k[Nu][substrate]. EXCEPTION/TRAP: Neopentyl halides ((CH3)3C-CH2-X) are primary but do NOT undergo SN2 at a useful rate because the three methyl groups on the adjacent carbon create severe steric crowding at the transition state, blocking backside attack. KEYWORDS: SN2 · nucleophilic substitution · backside attack · inversion · Walden inversion · primary alkyl halide · polar aprotic solvent · rate law · transition state"
+        },
+        {
+            "concept": "SN1 — Unimolecular Nucleophilic Substitution",
+            "details": "A two-step mechanism: (1) slow, rate-determining ionisation of the substrate to form a planar carbocation intermediate; (2) fast attack by nucleophile on either face of the carbocation. Rate = k[substrate] only. Favoured by tertiary substrates, polar protic solvents, and weak nucleophiles. EXCEPTION/TRAP: Allylic and benzylic secondary substrates undergo SN1 far more readily than simple secondary alkyl halides because resonance delocalises the carbocation, lowering the activation energy of the ionisation step. KEYWORDS: SN1 · carbocation · racemisation · tertiary · polar protic · ionisation · rate-determining step · two-step mechanism"
+        },
+        {
+            "concept": "E2 — Bimolecular Elimination",
+            "details": "A concerted one-step mechanism requiring a strong base, anti-periplanar geometry (H and leaving group must be 180 degrees apart), and a beta-hydrogen. Rate = k[base][substrate]. Follows Zaitsev's rule (most substituted alkene) unless a bulky base is used (Hofmann product favoured). EXCEPTION/TRAP: In cyclohexane rings, E2 requires the H and the leaving group to be diaxial (trans-diaxial). A cis-leaving group cannot achieve anti-periplanar geometry in a chair conformation and reacts much more slowly. KEYWORDS: E2 · elimination · anti-periplanar · Zaitsev rule · Hofmann product · strong base · diaxial · cyclohexane · beta-hydrogen"
+        },
+        {
+            "concept": "Markovnikov's Rule and Anti-Markovnikov Addition",
+            "details": "In electrophilic addition of HX to an alkene, the proton adds to the carbon bearing more hydrogens (forming the more stable carbocation intermediate), and the halide adds to the carbon bearing fewer hydrogens. Anti-Markovnikov addition occurs via radical mechanism (HBr + ROOR) or hydroboration-oxidation. EXCEPTION/TRAP: HBr addition in the presence of peroxides (ROOR) follows a radical (anti-Markovnikov) pathway, NOT an ionic one. This applies ONLY to HBr — HCl and HI do not give clean anti-Markovnikov products via radicals due to energetics of the propagation steps. KEYWORDS: Markovnikov · anti-Markovnikov · electrophilic addition · carbocation · HBr · radical addition · hydroboration · regioselectivity · alkene"
+        },
+        {
+            "concept": "Aldol Condensation",
+            "details": "An enolate (or enol) formed alpha to a carbonyl attacks the carbonyl carbon of another aldehyde or ketone to give a beta-hydroxy carbonyl compound (aldol product). Under heat or acid/base, dehydration gives an alpha,beta-unsaturated carbonyl (aldol condensation product). Intramolecular aldol forms cyclic rings. EXCEPTION/TRAP: Crossed (mixed) aldol condensations are only synthetically useful when one carbonyl compound has no alpha-hydrogen (cannot form enolate) — e.g., benzaldehyde with acetaldehyde. Otherwise a statistical mixture of four products results. KEYWORDS: aldol · enolate · condensation · beta-hydroxy carbonyl · dehydration · cross aldol · Robinson annulation · alpha carbon · intramolecular aldol"
+        },
+        {
+            "concept": "Stereocenter Configuration — R/S Assignment",
+            "details": "A stereocenter is an sp3 carbon bearing four different substituents. Priority is assigned by CIP rules (atomic number; higher atomic number = higher priority). Arrange the lowest-priority group away from the viewer: clockwise = R, counterclockwise = S. Chiral molecules that are non-superimposable mirror images are enantiomers. EXCEPTION/TRAP: When the lowest-priority group points toward the viewer (on a wedge), the observed rotation must be INVERTED to get the correct R/S assignment — a very common source of sign errors on exams. KEYWORDS: R/S configuration · CIP rules · stereocenter · enantiomer · chirality · priority rules · optical isomer · wedge dash notation"
+        },
+        {
+            "concept": "Electrophilic Aromatic Substitution (EAS) and Directing Effects",
+            "details": "Benzene reacts with electrophiles via addition-elimination: the pi electrons attack E+ to form a resonance-stabilised arenium ion (sigma complex), which loses H+ to restore aromaticity. Electron-donating groups (EDG: OH, NH2, alkyl) activate the ring and direct ortho/para. Electron-withdrawing groups (EWG: NO2, COOH, CHO) deactivate and direct meta. EXCEPTION/TRAP: Halogens are a unique exception: they are ring-deactivators (inductive withdrawal) but ortho/para directors (lone-pair resonance donation). So halogenated benzenes react slower than benzene but still give predominantly ortho/para products. KEYWORDS: EAS · electrophilic aromatic substitution · arenium ion · ortho para director · meta director · activating group · deactivating group · halogen anomaly · Friedel-Crafts"
+        },
+        {
+            "concept": "Carbocation Rearrangements — Hydride and Methyl Shifts",
+            "details": "Carbocations rearrange when a 1,2-hydride shift or 1,2-methyl shift converts a less stable carbocation to a more stable one. This is a common feature of SN1, E1, and acid-catalysed reactions. A secondary carbocation adjacent to a tertiary carbon will almost always rearrange. EXCEPTION/TRAP: 3,3-Dimethyl-1-butanol undergoes dehydration to give predominantly 2,3-dimethyl-2-butene (not the expected 3,3-dimethyl-1-butene) because the initial secondary carbocation rearranges via a methyl shift to a more stable tertiary carbocation before elimination. KEYWORDS: carbocation rearrangement · hydride shift · methyl shift · 1,2-shift · SN1 · E1 · stability · Wagner-Meerwein · tertiary carbocation"
+        },
+        {
+            "concept": "Oxidation State Changes in Organic Reactions",
+            "details": "Oxidation of carbon = increase in bonds to O, N, or halogens, OR decrease in bonds to H. Reduction = increase in bonds to H, or decrease in bonds to O. Reagent guide: KMnO4 (acidic, hot) = strong oxidation (cleaves alkenes); NaBH4 = mild reduction (aldehydes/ketones only); LiAlH4 = strong reduction (includes carboxylic acids and esters). EXCEPTION/TRAP: NaBH4 reduces aldehydes and ketones but does NOT reduce carboxylic acids, esters, or amides — it is not strong enough. LiAlH4 reduces all of these. This selectivity is heavily tested in synthesis problems. KEYWORDS: oxidation state · reduction · oxidation · KMnO4 · NaBH4 · LiAlH4 · ozonolysis · selective reduction · oxidation level"
+        },
+        {
+            "concept": "Nucleophilicity vs. Basicity — Solvent Dependence",
+            "details": "Nucleophilicity measures kinetic attack on carbon; basicity measures thermodynamic affinity for H+. In polar aprotic solvents (DMSO, DMF), nucleophilicity parallels basicity: F- > Cl- > Br- > I-. In polar protic solvents (water, alcohols), solvation reverses nucleophilicity for halides: I- > Br- > Cl- > F-. EXCEPTION/TRAP: Iodide (I-) is a better nucleophile than fluoride (F-) in polar protic solvents despite F- being a far stronger base. This is because F- is heavily solvated by hydrogen bonds that must be broken before it can attack, while I- is large and diffuse with minimal solvation shell. KEYWORDS: nucleophilicity · basicity · polar aprotic · polar protic · solvation · halide · iodide · fluoride · solvent effect · kinetics vs thermodynamics"
         }
     ]
 }
