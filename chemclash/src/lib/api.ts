@@ -1,10 +1,11 @@
 /**
  * ChemClash — API Client
  * Typed fetch wrappers for every backend endpoint.
- * All calls go to http://localhost:8000 in dev.
+ * Reads NEXT_PUBLIC_BACKEND_URL at build time (set in Vercel dashboard).
+ * Falls back to http://localhost:8000 for local development — no config needed.
  */
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
