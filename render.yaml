@@ -1,0 +1,46 @@
+# render.yaml — Render Blueprint for ChemClash FastAPI Backend
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Deploy steps on Render:
+#   1. Push this file to your GitHub repo root.
+#   2. Go to https://dashboard.render.com → New → Blueprint.
+#   3. Connect the repo — Render auto-reads this file.
+#   4. Set OPENAI_API_KEY in the Render dashboard (Environment tab).
+
+services:
+  - type: web
+    name: chemclash-api
+    runtime: python
+    region: oregon           # change to singapore / frankfurt if closer to your users
+    plan: free               # upgrade to starter for always-on (free tier spins down)
+
+    # Root of the repo is the working directory for the build
+    rootDir: .
+
+    # Install backend dependencies only
+    buildCommand: pip install -r backend/requirements.txt
+
+    # Start Command — Render injects $PORT automatically
+    # EXACT string to paste in the Render "Start Command" field:
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+
+    # Health check — Render pings this to know the service is alive
+    healthCheckPath: /
+
+    envVars:
+      # Required — paste your real key in the Render dashboard; never commit it here
+      - key: OPENAI_API_KEY
+        sync: false          # marks it as a secret; Render will prompt you to fill it in
+
+      # Optional — switch to "watsonx" and fill in the Watson vars if needed
+      - key: LLM_PROVIDER
+        value: openai
+
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+
+      - key: LLM_MAX_TOKENS
+        value: "512"
+
+      - key: LLM_TEMPERATURE
+        value: "0.2"
