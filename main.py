@@ -1,26 +1,33 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from __future__ import annotations
 """
-╔══════════════════════════════════════════════════════════════╗
-║                  ⚗️  ChemClash  ⚗️                          ║
-║     AI-powered Gamified Organic Chemistry Platform           ║
-║                                                              ║
-║  USAGE:                                                      ║
-║    python main.py              → start everything (default)  ║
-║    python main.py --backend    → backend only                ║
-║    python main.py --frontend   → frontend only               ║
-║    python main.py --check      → dependency/env check only   ║
-║    python main.py --help       → show this help              ║
-╚══════════════════════════════════════════════════════════════╝
++----------------------------------------------------------+
+|              ChemClash  (AI Organic Chemistry)           |
+|      AI-Powered Gamified Organic Chemistry               |
+|                                                          |
+|  USAGE:                                                  |
+|    python main.py              -> start everything       |
+|    python main.py --backend    -> backend only           |
+|    python main.py --frontend   -> frontend only          |
+|    python main.py --check      -> dependency/env check   |
+|    python main.py --help       -> show this help         |
++----------------------------------------------------------+
 """
 
-from __future__ import annotations
+import io
+import sys
+
+# Force UTF-8 output on Windows so special characters render correctly
+if hasattr(sys.stdout, "buffer") and (sys.stdout.encoding or "").lower() != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 import argparse
 import os
 import platform
 import shutil
 import subprocess
-import sys
 import threading
 import time
 from pathlib import Path
@@ -82,12 +89,14 @@ def tag(label: str, colour: str = CYAN) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def print_banner():
-    banner = f"""
-{MAGENTA}{BOLD}╔══════════════════════════════════════════════════════════╗
-║              ⚗️   C H E M C L A S H   ⚗️                  ║
-║        AI-Powered Gamified Organic Chemistry               ║
-╚══════════════════════════════════════════════════════════╝{RESET}
-"""
+    banner = (
+        f"\n{MAGENTA}{BOLD}"
+        "+----------------------------------------------------------+\n"
+        "|          *** C H E M C L A S H ***                      |\n"
+        "|      AI-Powered Gamified Organic Chemistry               |\n"
+        "+----------------------------------------------------------+"
+        f"{RESET}\n"
+    )
     print(banner)
 
 
@@ -96,19 +105,19 @@ def print_banner():
 # ─────────────────────────────────────────────────────────────────────────────
 
 def step(msg: str):
-    print(f"  {c('>', CYAN)} {msg}")
+    print(f"  {c('>>', CYAN)} {msg}")
 
 def ok(msg: str):
-    print(f"  {c('OK', GREEN)} {msg}")
+    print(f"  {c('[OK]', GREEN)} {msg}")
 
 def warn(msg: str):
-    print(f"  {c('!!', YELLOW)} {msg}")
+    print(f"  {c('[!!]', YELLOW)} {msg}")
 
 def fail(msg: str):
-    print(f"  {c('XX', RED)} {msg}")
+    print(f"  {c('[XX]', RED)} {msg}")
 
 def info(msg: str):
-    print(f"  {c('ii', BLUE)} {msg}")
+    print(f"  {c('[ii]', BLUE)} {msg}")
 
 def section(title: str):
     print(f"\n{BOLD}{c('-' * 58, DIM)}{RESET}")
@@ -300,9 +309,9 @@ def launch_frontend(port: int) -> subprocess.Popen:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _wait_for_backend(port: int, timeout: int = 40) -> bool:
-    """Poll /health until the backend is responsive."""
+    """Poll /docs until the backend is responsive (FastAPI always serves /docs)."""
     import urllib.request
-    url = f"http://localhost:{port}/health"
+    url = f"http://localhost:{port}/docs"
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -316,7 +325,7 @@ def _wait_for_backend(port: int, timeout: int = 40) -> bool:
 def _health_monitor(port: int):
     """Background thread: warn if backend goes down after initial startup."""
     import urllib.request
-    url = f"http://localhost:{port}/health"
+    url = f"http://localhost:{port}/docs"
     # Wait for first successful ping
     while True:
         try:
@@ -347,7 +356,7 @@ def print_startup_card(backend: bool = True, frontend: bool = True):
     if backend:
         print(f"  {c('Backend  API', GREEN + BOLD)}   ->  http://localhost:{BACKEND_PORT}")
         print(f"  {c('Swagger  UI ', BLUE)}   ->  http://localhost:{BACKEND_PORT}/docs")
-        print(f"  {c('Health check', DIM)}   ->  http://localhost:{BACKEND_PORT}/health")
+        print(f"  {c('OpenAPI JSON', DIM)}   ->  http://localhost:{BACKEND_PORT}/openapi.json")
     if frontend:
         print(f"  {c('Frontend App', MAGENTA + BOLD)}   ->  http://localhost:{FRONTEND_PORT}")
 
