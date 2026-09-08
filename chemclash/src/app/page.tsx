@@ -40,8 +40,8 @@ const GAME_MODES: GameMode[] = [
     icon: "🎯",
     href: "/adaptive-pyq",
     accentColor: "violet",
-    badge: "NEW",
-    plays: 420,
+    badge: "COMING SOON",
+    locked: true,
   },
   {
     id: "1v1-duel",
