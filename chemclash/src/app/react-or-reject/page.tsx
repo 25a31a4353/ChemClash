@@ -5,8 +5,6 @@ import { motion, useMotionValue, useTransform, animate, PanInfo } from "framer-m
 import Link from "next/link";
 import { useChemStore } from "@/store/useChemStore";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface ChemCard {
   id: number;
   nucleophile: string;
@@ -18,50 +16,13 @@ interface ChemCard {
 
 type Verdict = "react" | "reject" | null;
 
-// ─── Card data ────────────────────────────────────────────────────────────────
-
 const CARDS: ChemCard[] = [
-  {
-    id: 1,
-    nucleophile: "OH⁻",
-    electrophile: "CH₃Br",
-    shouldReact: true,
-    hint: "Hydroxide attacks the carbon bearing the leaving group (SN2).",
-    mechanism: "SN2",
-  },
-  {
-    id: 2,
-    nucleophile: "H₂O",
-    electrophile: "CH₄",
-    shouldReact: false,
-    hint: "Methane has no electrophilic carbon — no leaving group, no reaction.",
-  },
-  {
-    id: 3,
-    nucleophile: "NH₃",
-    electrophile: "CH₃Cl",
-    shouldReact: true,
-    hint: "Ammonia acts as a nucleophile toward the electrophilic carbon (SN2).",
-    mechanism: "SN2",
-  },
-  {
-    id: 4,
-    nucleophile: "Cl⁻",
-    electrophile: "Benzene",
-    shouldReact: false,
-    hint: "Cl⁻ alone cannot react with benzene — a Lewis acid catalyst is required.",
-  },
-  {
-    id: 5,
-    nucleophile: "CN⁻",
-    electrophile: "(CH₃)₃C⁺",
-    shouldReact: true,
-    hint: "Cyanide attacks the carbocation readily (SN1 scenario).",
-    mechanism: "SN1",
-  },
+  { id: 1, nucleophile: "OH⁻",       electrophile: "CH₃Br",       shouldReact: true,  hint: "Hydroxide attacks the carbon bearing the leaving group (SN2).", mechanism: "SN2" },
+  { id: 2, nucleophile: "H₂O",       electrophile: "CH₄",         shouldReact: false, hint: "Methane has no electrophilic carbon — no leaving group, no reaction." },
+  { id: 3, nucleophile: "NH₃",       electrophile: "CH₃Cl",       shouldReact: true,  hint: "Ammonia acts as a nucleophile toward the electrophilic carbon (SN2).", mechanism: "SN2" },
+  { id: 4, nucleophile: "Cl⁻",       electrophile: "Benzene",     shouldReact: false, hint: "Cl⁻ alone cannot react with benzene — a Lewis acid catalyst is required." },
+  { id: 5, nucleophile: "CN⁻",       electrophile: "(CH₃)₃C⁺",   shouldReact: true,  hint: "Cyanide attacks the carbocation readily (SN1 scenario).", mechanism: "SN1" },
 ];
-
-// ─── FeedbackOverlay ──────────────────────────────────────────────────────────
 
 function FeedbackOverlay({ verdict }: { verdict: Verdict }) {
   if (!verdict) return null;
@@ -72,36 +33,19 @@ function FeedbackOverlay({ verdict }: { verdict: Verdict }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.4 }}
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 18,
-        background: isReact ? "rgba(0,255,136,0.1)" : "rgba(248,113,113,0.1)",
-        border: `2px solid ${isReact ? "#00ff88" : "#f87171"}`,
-        zIndex: 10,
-        pointerEvents: "none",
-      }}
+      className={`absolute inset-0 flex items-center justify-center rounded-2xl z-10 pointer-events-none border-2 ${
+        isReact ? "bg-emerald-50/80 border-emerald-400" : "bg-red-50/80 border-red-400"
+      }`}
     >
-      <div style={{ textAlign: "center", fontFamily: "Courier New, monospace" }}>
-        <div style={{ fontSize: "3rem", marginBottom: 8 }}>{isReact ? "⚡" : "💥"}</div>
-        <div style={{
-          fontSize: "1.6rem",
-          fontWeight: 900,
-          color: isReact ? "#00ff88" : "#f87171",
-          letterSpacing: "0.1em",
-          textShadow: `0 0 20px ${isReact ? "#00ff88" : "#f87171"}`,
-        }}>
+      <div className="text-center">
+        <div className="text-5xl mb-2">{isReact ? "✅" : "❌"}</div>
+        <div className={`text-2xl font-black tracking-wide ${isReact ? "text-emerald-600" : "text-red-500"}`}>
           {isReact ? "BOND FORMED!" : "NO REACTION"}
         </div>
       </div>
     </motion.div>
   );
 }
-
-// ─── SwipeCard ────────────────────────────────────────────────────────────────
 
 interface SwipeCardProps {
   card: ChemCard;
@@ -126,15 +70,8 @@ function SwipeCard({ card, isTop, stackIndex, onSwipe }: SwipeCardProps) {
   if (!isTop) {
     return (
       <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "#0d1520",
-          border: "1px solid #1e2d3d",
-          borderRadius: 18,
-          transform: `scale(${0.96 - stackIndex * 0.03}) translateY(${stackIndex * 14}px)`,
-          zIndex: -stackIndex,
-        }}
+        className="absolute inset-0 bg-white border border-slate-200 rounded-2xl shadow-sm"
+        style={{ transform: `scale(${0.96 - stackIndex * 0.03}) translateY(${stackIndex * 14}px)`, zIndex: -stackIndex }}
       />
     );
   }
@@ -148,126 +85,57 @@ function SwipeCard({ card, isTop, stackIndex, onSwipe }: SwipeCardProps) {
       whileTap={{ cursor: "grabbing" }}
     >
       {/* REACT label */}
-      <motion.div style={{
-        opacity: reactOpacity,
-        position: "absolute", top: 22, left: 22,
-        background: "rgba(0,255,136,0.12)",
-        border: "2px solid #00ff88",
-        borderRadius: 8, padding: "5px 14px",
-        color: "#00ff88", fontWeight: 900,
-        fontSize: "0.85rem", letterSpacing: "0.12em",
-        fontFamily: "Courier New, monospace", zIndex: 6,
-        rotate: "-12deg",
-      }}>
-        REACT ⚡
+      <motion.div style={{ opacity: reactOpacity, rotate: "-12deg" }}
+        className="absolute top-5 left-5 bg-emerald-50 border-2 border-emerald-400 rounded-lg px-3 py-1 text-emerald-600 font-black text-sm tracking-wide z-10">
+        REACT ✅
       </motion.div>
 
       {/* REJECT label */}
-      <motion.div style={{
-        opacity: rejectOpacity,
-        position: "absolute", top: 22, right: 22,
-        background: "rgba(248,113,113,0.12)",
-        border: "2px solid #f87171",
-        borderRadius: 8, padding: "5px 14px",
-        color: "#f87171", fontWeight: 900,
-        fontSize: "0.85rem", letterSpacing: "0.12em",
-        fontFamily: "Courier New, monospace", zIndex: 6,
-        rotate: "12deg",
-      }}>
-        REJECT 💥
+      <motion.div style={{ opacity: rejectOpacity, rotate: "12deg" }}
+        className="absolute top-5 right-5 bg-red-50 border-2 border-red-400 rounded-lg px-3 py-1 text-red-500 font-black text-sm tracking-wide z-10">
+        REJECT ❌
       </motion.div>
 
       {/* Card body */}
-      <div style={{
-        height: "100%",
-        background: "linear-gradient(160deg, #111820 0%, #0d1520 100%)",
-        border: "1px solid #1e2d3d",
-        borderRadius: 18,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "28px 24px",
-        fontFamily: "Courier New, monospace",
-        boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
-        userSelect: "none",
-      }}>
-        {/* Eyebrow */}
-        <div style={{ fontSize: "0.6rem", color: "#334155", letterSpacing: "0.24em", marginBottom: 28 }}>
-          // WILL THESE SPECIES REACT?
-        </div>
-
-        {/* Molecule pair */}
-        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 28 }}>
-          {/* Nucleophile */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{
-              width: 96, height: 96, borderRadius: "50%",
-              background: "rgba(0,255,136,0.07)",
-              border: "2px solid rgba(0,255,136,0.35)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: card.nucleophile.length > 4 ? "1.1rem" : "1.5rem",
-              fontWeight: 900, color: "#00ff88",
-              marginBottom: 8,
-              boxShadow: "0 0 20px rgba(0,255,136,0.1)",
-            }}>
-              {card.nucleophile}
-            </div>
-            <div style={{ color: "#475569", fontSize: "0.58rem", letterSpacing: "0.14em" }}>NUCLEOPHILE</div>
-          </div>
-
-          {/* Plus */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-            <div style={{ fontSize: "1.4rem", color: "#1e2d3d", fontWeight: 300 }}>+</div>
-          </div>
-
-          {/* Electrophile */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{
-              width: 96, height: 96, borderRadius: "50%",
-              background: "rgba(59,130,246,0.07)",
-              border: "2px solid rgba(59,130,246,0.35)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: card.electrophile.length > 5 ? "0.9rem" : "1.3rem",
-              fontWeight: 900, color: "#3b82f6",
-              marginBottom: 8,
-              boxShadow: "0 0 20px rgba(59,130,246,0.1)",
-            }}>
-              {card.electrophile}
-            </div>
-            <div style={{ color: "#475569", fontSize: "0.58rem", letterSpacing: "0.14em" }}>ELECTROPHILE</div>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: "100%", height: 1, background: "linear-gradient(90deg, transparent, #1e2d3d, transparent)", marginBottom: 20 }} />
-
-        {/* Instruction */}
-        <p style={{ color: "#334155", fontSize: "0.7rem", textAlign: "center", margin: 0, letterSpacing: "0.04em" }}>
-          Swipe <span style={{ color: "#00ff88" }}>right → REACT</span> · Swipe <span style={{ color: "#f87171" }}>left ← REJECT</span>
+      <div className="h-full bg-white border border-slate-200 rounded-2xl shadow-lg flex flex-col items-center justify-center px-6 py-7 select-none">
+        <p className="text-xs font-semibold tracking-widest text-slate-400 uppercase mb-7">
+          Will these species react?
         </p>
 
-        {/* Mechanism tag */}
-        {card.mechanism && (
-          <div style={{
-            marginTop: 14,
-            fontSize: "0.62rem",
-            padding: "3px 10px",
-            borderRadius: 999,
-            background: "rgba(167,139,250,0.1)",
-            color: "#a78bfa",
-            border: "1px solid rgba(167,139,250,0.25)",
-            letterSpacing: "0.1em",
-          }}>
-            {card.mechanism}
+        {/* Molecule pair */}
+        <div className="flex items-center gap-5 mb-7">
+          <div className="text-center">
+            <div className="w-24 h-24 rounded-full bg-emerald-50 border-2 border-emerald-300 flex items-center justify-center text-2xl font-black text-emerald-600 mb-2 shadow-sm">
+              {card.nucleophile}
+            </div>
+            <div className="text-[0.6rem] font-semibold tracking-widest text-slate-400 uppercase">Nucleophile</div>
           </div>
+
+          <div className="text-2xl text-slate-300 font-light">+</div>
+
+          <div className="text-center">
+            <div className="w-24 h-24 rounded-full bg-blue-50 border-2 border-blue-300 flex items-center justify-center text-2xl font-black text-blue-600 mb-2 shadow-sm">
+              {card.electrophile}
+            </div>
+            <div className="text-[0.6rem] font-semibold tracking-widest text-slate-400 uppercase">Electrophile</div>
+          </div>
+        </div>
+
+        <div className="w-full h-px bg-slate-100 mb-5" />
+
+        <p className="text-sm text-slate-500 text-center leading-relaxed">
+          Swipe <span className="text-emerald-600 font-bold">right → REACT</span> · Swipe <span className="text-red-500 font-bold">left ← REJECT</span>
+        </p>
+
+        {card.mechanism && (
+          <span className="mt-3 text-[0.68rem] font-bold px-3 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-600 tracking-wide">
+            {card.mechanism}
+          </span>
         )}
       </div>
     </motion.div>
   );
 }
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ReactOrRejectPage() {
   const [cards, setCards] = useState<ChemCard[]>(CARDS);
@@ -278,20 +146,16 @@ export default function ReactOrRejectPage() {
   const [finished, setFinished] = useState(false);
   const verdictTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Zustand: live ELO shown in top bar, updated optimistically per answer
   const eloRating = useChemStore((s) => s.eloRating);
 
   const triggerVerdict = (direction: "left" | "right", card: ChemCard) => {
     const userSaysReact = direction === "right";
     const correct = userSaysReact === card.shouldReact;
-
     setVerdict(direction === "right" ? "react" : "reject");
     setLastHint(card.hint);
     setLastCorrect(correct);
     setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
-    // Update global ELO optimistically
     useChemStore.setState((s) => ({ eloRating: s.eloRating + (correct ? 8 : -4) }));
-
     if (verdictTimer.current) clearTimeout(verdictTimer.current);
     verdictTimer.current = setTimeout(() => {
       setVerdict(null);
@@ -308,7 +172,6 @@ export default function ReactOrRejectPage() {
     triggerVerdict(direction, cards[0]);
   };
 
-  // ── Keyboard shortcuts: ← = reject, → = react
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") handleButton("left");
@@ -319,92 +182,44 @@ export default function ReactOrRejectPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards, verdict]);
 
-  // ── Finished screen
   if (finished) {
     const pct = Math.round((score.correct / score.total) * 100);
-    const emoji = pct >= 80 ? "🏆" : pct >= 50 ? "⚗️" : "💀";
-    const color = pct >= 80 ? "#00ff88" : pct >= 50 ? "#f59e0b" : "#f87171";
+    const emoji = pct >= 80 ? "🎉" : pct >= 50 ? "🙂" : "😕";
+    const colorCls = pct >= 80 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-red-500";
+    const borderCls = pct >= 80 ? "border-emerald-200" : pct >= 50 ? "border-amber-200" : "border-red-200";
+    const barCls = pct >= 80 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-red-500";
     return (
-      <div style={{
-        minHeight: "100vh",
-        background: "#080c10",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "Courier New, monospace",
-        padding: 24,
-        textAlign: "center",
-      }}>
-        {/* Result card */}
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 200 }}
-          style={{
-            background: "#111820",
-            border: `1px solid ${color}40`,
-            borderRadius: 20,
-            padding: "40px 48px",
-            maxWidth: 380,
-            width: "100%",
-            boxShadow: `0 0 40px ${color}15`,
-          }}
+          className={`bg-white border ${borderCls} rounded-2xl p-10 max-w-sm w-full shadow-sm`}
         >
-          <div style={{ fontSize: "3.5rem", marginBottom: 16 }}>{emoji}</div>
-          <h1 style={{ color: "#e2e8f0", fontSize: "1.6rem", margin: "0 0 8px", fontWeight: 900 }}>
-            Round Complete
-          </h1>
-          <div style={{ fontSize: "2.5rem", fontWeight: 900, color, margin: "16px 0 4px" }}>
-            {score.correct}/{score.total}
-          </div>
-          <div style={{ color: "#475569", fontSize: "0.78rem", marginBottom: 28 }}>{pct}% accuracy</div>
+          <div className="text-5xl mb-4">{emoji}</div>
+          <h1 className="text-2xl font-black text-slate-900 mb-2">Round Complete</h1>
+          <div className={`text-4xl font-black ${colorCls} my-4`}>{score.correct}/{score.total}</div>
+          <p className="text-slate-500 text-sm mb-6">{pct}% accuracy</p>
 
-          {/* Score bar */}
-          <div style={{ height: 4, background: "#1e2d3d", borderRadius: 2, marginBottom: 28, overflow: "hidden" }}>
+          <div className="h-1.5 bg-slate-100 rounded-full mb-6 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
               transition={{ delay: 0.3, duration: 0.8 }}
-              style={{ height: "100%", background: `linear-gradient(90deg, ${color}80, ${color})`, borderRadius: 2 }}
+              className={`h-full ${barCls} rounded-full`}
             />
           </div>
 
-          <div style={{ display: "flex", gap: 10 }}>
+          <div className="flex gap-3">
             <button
               onClick={() => { setCards(CARDS); setScore({ correct: 0, total: 0 }); setFinished(false); setLastHint(""); setLastCorrect(null); }}
-              style={{
-                flex: 1,
-                background: `${color}12`,
-                border: `1px solid ${color}50`,
-                color,
-                padding: "11px 0",
-                borderRadius: 10,
-                fontFamily: "Courier New, monospace",
-                fontSize: "0.78rem",
-                fontWeight: 700,
-                cursor: "pointer",
-                letterSpacing: "0.1em",
-                transition: "all 0.15s",
-              }}
+              className={`flex-1 border ${borderCls} ${colorCls} bg-white hover:bg-slate-50 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-colors`}
             >
-              PLAY AGAIN
+              Play Again
             </button>
-            <Link href="/" style={{ flex: 1, textDecoration: "none" }}>
-              <button style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid #1e2d3d",
-                color: "#64748b",
-                padding: "11px 0",
-                borderRadius: 10,
-                fontFamily: "Courier New, monospace",
-                fontSize: "0.78rem",
-                fontWeight: 700,
-                cursor: "pointer",
-                letterSpacing: "0.1em",
-              }}>
-                ← DASHBOARD
+            <Link href="/" className="flex-1">
+              <button className="w-full border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-colors">
+                ← Dashboard
               </button>
             </Link>
           </div>
@@ -416,70 +231,42 @@ export default function ReactOrRejectPage() {
   const progressPct = ((CARDS.length - cards.length) / CARDS.length) * 100;
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#080c10",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      fontFamily: "Courier New, monospace",
-    }}>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center">
       {/* Top bar */}
-      <div style={{
-        width: "100%",
-        background: "rgba(8,12,16,0.95)",
-        borderBottom: "1px solid #1e2d3d",
-        padding: "12px 24px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
-      }}>
-        <Link href="/" style={{ color: "#475569", fontSize: "0.75rem", textDecoration: "none" }}>
+      <div className="w-full bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <Link href="/" className="text-slate-500 text-sm font-medium no-underline hover:text-slate-700 transition-colors">
           ← Dashboard
         </Link>
-        <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.16em" }}>// REACT OR REJECT</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ color: "#475569", fontSize: "0.65rem" }}>
-            ⚡ <span style={{ color: "#00ff88", fontWeight: 700 }}>{eloRating}</span>
+        <span className="text-xs font-semibold tracking-widest text-slate-400 uppercase">React or Reject</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-500">
+            ⚡ <span className="text-emerald-600 font-bold">{eloRating}</span>
           </span>
-          <span style={{
-            fontSize: "0.72rem",
-            color: "#00ff88",
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-          }}>
-            {score.correct}/{score.total}
-          </span>
+          <span className="text-sm font-bold text-slate-700">{score.correct}/{score.total}</span>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 20px", width: "100%", maxWidth: 500 }}>
+      <div className="flex-1 flex flex-col items-center px-5 py-7 w-full max-w-lg">
 
         {/* Title + progress */}
-        <div style={{ width: "100%", marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <h1 style={{ color: "#e2e8f0", fontSize: "1.2rem", fontWeight: 900, margin: 0, letterSpacing: "0.04em" }}>
-              ⚗️ React or <span style={{ color: "#f87171" }}>Reject</span>
+        <div className="w-full mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-xl font-black text-slate-900">
+              ⚗️ React or <span className="text-red-500">Reject</span>
             </h1>
-            <span style={{ color: "#475569", fontSize: "0.68rem" }}>
-              {cards.length} remaining
-            </span>
+            <span className="text-sm text-slate-400 font-medium">{cards.length} remaining</span>
           </div>
-          {/* Progress bar */}
-          <div style={{ height: 3, background: "#1e2d3d", borderRadius: 2, overflow: "hidden" }}>
+          <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
             <motion.div
               animate={{ width: `${progressPct}%` }}
               transition={{ duration: 0.4 }}
-              style={{ height: "100%", background: "linear-gradient(90deg, #00ff88, #3b82f6)", borderRadius: 2 }}
+              className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full"
             />
           </div>
         </div>
 
         {/* Card stack */}
-        <div style={{ position: "relative", width: "100%", height: 340, marginBottom: 20 }}>
+        <div className="relative w-full h-80 mb-5">
           {cards[2] && <SwipeCard card={cards[2]} isTop={false} stackIndex={2} onSwipe={() => {}} />}
           {cards[1] && <SwipeCard card={cards[1]} isTop={false} stackIndex={1} onSwipe={() => {}} />}
           {cards[0] && (
@@ -500,91 +287,46 @@ export default function ReactOrRejectPage() {
             key={lastHint}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            style={{
-              width: "100%",
-              background: lastCorrect ? "rgba(0,255,136,0.05)" : "rgba(248,113,113,0.05)",
-              border: `1px solid ${lastCorrect ? "rgba(0,255,136,0.2)" : "rgba(248,113,113,0.2)"}`,
-              borderRadius: 10,
-              padding: "11px 16px",
-              marginBottom: 18,
-              display: "flex",
-              gap: 10,
-              alignItems: "flex-start",
-            }}
+            className={`w-full rounded-xl border p-3.5 mb-5 flex gap-3 items-start ${
+              lastCorrect ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"
+            }`}
           >
-            <span style={{ fontSize: "0.85rem", marginTop: 1, flexShrink: 0 }}>{lastCorrect ? "✓" : "✗"}</span>
+            <span className="text-lg mt-0.5 flex-shrink-0">{lastCorrect ? "✅" : "❌"}</span>
             <div>
-              <div style={{ color: lastCorrect ? "#00ff88" : "#f87171", fontSize: "0.62rem", letterSpacing: "0.12em", marginBottom: 3 }}>
-                {lastCorrect ? "CORRECT" : "INCORRECT"}
+              <div className={`text-xs font-bold tracking-widest uppercase mb-1 ${lastCorrect ? "text-emerald-600" : "text-red-500"}`}>
+                {lastCorrect ? "Correct" : "Incorrect"}
               </div>
-              <p style={{ color: "#64748b", fontSize: "0.73rem", margin: 0, lineHeight: 1.6 }}>
-                {lastHint}
-              </p>
+              <p className="text-sm text-slate-600 leading-relaxed m-0">{lastHint}</p>
             </div>
           </motion.div>
         )}
 
         {/* Buttons */}
-        <div style={{ display: "flex", gap: 12, width: "100%" }}>
+        <div className="flex gap-3 w-full">
           <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
             onClick={() => handleButton("left")}
             disabled={verdict !== null || cards.length === 0}
-            style={{
-              flex: 1, padding: "14px 0", borderRadius: 12,
-              border: "1px solid rgba(248,113,113,0.45)",
-              background: "rgba(248,113,113,0.07)",
-              color: "#f87171",
-              fontFamily: "Courier New, monospace",
-              fontSize: "0.85rem", fontWeight: 800,
-              letterSpacing: "0.12em",
-              cursor: verdict !== null ? "not-allowed" : "pointer",
-              opacity: verdict !== null ? 0.45 : 1,
-              transition: "opacity 0.15s",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            }}
+            className="flex-1 py-3.5 rounded-xl border-2 border-red-200 bg-red-50 text-red-500 text-sm font-bold tracking-wide hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
           >
             ← REJECT
           </motion.button>
-
           <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
             onClick={() => handleButton("right")}
             disabled={verdict !== null || cards.length === 0}
-            style={{
-              flex: 1, padding: "14px 0", borderRadius: 12,
-              border: "1px solid rgba(0,255,136,0.45)",
-              background: "rgba(0,255,136,0.07)",
-              color: "#00ff88",
-              fontFamily: "Courier New, monospace",
-              fontSize: "0.85rem", fontWeight: 800,
-              letterSpacing: "0.12em",
-              cursor: verdict !== null ? "not-allowed" : "pointer",
-              opacity: verdict !== null ? 0.45 : 1,
-              transition: "opacity 0.15s",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            }}
+            className="flex-1 py-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 text-emerald-600 text-sm font-bold tracking-wide hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
           >
             REACT →
           </motion.button>
         </div>
 
         {/* Keyboard hint */}
-        <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
-          {[
-            { key: "←", label: "reject", color: "#f87171" },
-            { key: "→", label: "react", color: "#00ff88" },
-          ].map((k) => (
-            <div key={k.key} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{
-                background: "#111820", border: "1px solid #1e2d3d",
-                borderRadius: 5, padding: "2px 8px",
-                color: "#334155", fontSize: "0.72rem",
-                fontFamily: "Courier New, monospace",
-              }}>{k.key}</span>
-              <span style={{ color: k.color, fontSize: "0.62rem" }}>{k.label}</span>
+        <div className="flex gap-4 mt-4">
+          {[{ key: "←", label: "reject", cls: "text-red-400" }, { key: "→", label: "react", cls: "text-emerald-500" }].map((k) => (
+            <div key={k.key} className="flex items-center gap-1.5">
+              <span className="bg-white border border-slate-200 rounded px-2 py-0.5 text-slate-500 text-xs font-mono shadow-sm">{k.key}</span>
+              <span className={`text-xs font-medium ${k.cls}`}>{k.label}</span>
             </div>
           ))}
         </div>
