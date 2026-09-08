@@ -118,89 +118,103 @@ export const CHEM_CONCEPTS: ChemConcept[] = [
 // ─────────────────────────────────────────────────────────────────
 
 async function generatePDF(concepts: ChemConcept[]): Promise<void> {
-  // Dynamic import keeps jspdf out of the SSR bundle
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
 
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-  // ── Page metadata ──────────────────────────────────────────────
-  const pageW  = doc.internal.pageSize.getWidth();
-  const pageH  = doc.internal.pageSize.getHeight();
-  const now    = new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const now = new Date().toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
-  // ── Dark header bar ────────────────────────────────────────────
-  doc.setFillColor(8, 12, 16);           // #080c10 — app background
+  // ── Light-theme colour tokens ─────────────────────────────────
+  const emerald:    [number, number, number] = [5,   150, 105]; // emerald-600
+  const bodyText:   [number, number, number] = [15,   23,  42]; // slate-900
+  const mutedText:  [number, number, number] = [71,   85, 105]; // slate-600
+  const headerBg:   [number, number, number] = [241, 245, 249]; // slate-100
+  const borderColor:[number, number, number] = [226, 232, 240]; // slate-200
+  const altRow:     [number, number, number] = [248, 250, 252]; // slate-50
+
+  // ── Light header banner ────────────────────────────────────────
+  doc.setFillColor(...headerBg);
   doc.rect(0, 0, pageW, 22, "F");
 
-  // ── Title ─────────────────────────────────────────────────────
+  // Thin emerald top accent line
+  doc.setDrawColor(...emerald);
+  doc.setLineWidth(1.2);
+  doc.line(0, 0, pageW, 0);
+
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(0, 255, 136);         // #00ff88 — brand green
+  doc.setFontSize(15);
+  doc.setTextColor(...emerald);
   doc.text("ChemClash — Organic Chemistry Concepts", 12, 13);
 
-  // ── Subtitle / date ────────────────────────────────────────────
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.setTextColor(100, 116, 139);       // slate-500
-  doc.text(`Generated ${now}  ·  JEE / NEET Exam Reference  ·  chemclash.app`, 12, 19);
+  doc.setTextColor(...mutedText);
+  doc.text(
+    `Generated ${now}  ·  JEE / NEET Exam Reference  ·  chemclash.app`,
+    12,
+    19
+  );
 
-  // ── Table ─────────────────────────────────────────────────────
+  // ── Table ──────────────────────────────────────────────────────
   autoTable(doc, {
     startY: 26,
     head: [["Concept", "Core Rule", "Common Exception", "Keywords"]],
     body: concepts.map((c) => [c.concept, c.coreRule, c.exception, c.keywords]),
 
-    // Column widths (landscape A4 = 297 mm, margins = ~12 mm each side)
     columnStyles: {
-      0: { cellWidth: 28,  fontStyle: "bold" },
-      1: { cellWidth: 84 },
-      2: { cellWidth: 84 },
-      3: { cellWidth: 73 },
+      0: { cellWidth: 28,  fontStyle: "bold", textColor: emerald },
+      1: { cellWidth: 84,  textColor: bodyText },
+      2: { cellWidth: 84,  textColor: bodyText },
+      3: { cellWidth: 73,  textColor: mutedText, fontStyle: "italic" },
     },
 
-    // Header style — dark row, green text
     headStyles: {
-      fillColor:  [17, 24, 32],          // #111820
-      textColor:  [0, 255, 136],         // #00ff88
+      fillColor: headerBg,
+      textColor: emerald,
       fontStyle:  "bold",
       fontSize:   8,
       halign:     "left",
+      lineColor:  borderColor,
+      lineWidth:  0.2,
     },
 
-    // Body style
     bodyStyles: {
-      fontSize:   7.2,
-      textColor:  [226, 232, 240],       // slate-200
-      lineColor:  [30, 45, 61],          // #1e2d3d
-      lineWidth:  0.2,
-      valign:     "top",
+      fontSize:    7.2,
+      textColor:   bodyText,
+      lineColor:   borderColor,
+      lineWidth:   0.2,
+      valign:      "top",
       cellPadding: { top: 3, right: 4, bottom: 3, left: 4 },
     },
 
-    // Zebra striping — dark cyberpunk palette
-    alternateRowStyles: {
-      fillColor: [14, 20, 28],           // slightly lighter than black
-    },
-    styles: {
-      fillColor: [8, 14, 22],
-      overflow:  "linebreak",
-    },
+    alternateRowStyles: { fillColor: altRow },
+    styles: { fillColor: [255, 255, 255], overflow: "linebreak" },
 
-    // Accent the "Concept" column cells
-    didParseCell(data) {
-      if (data.column.index === 0 && data.section === "body") {
-        data.cell.styles.textColor = [0, 200, 110];  // slightly darker green
-        data.cell.styles.fontStyle = "bold";
-      }
-    },
-
-    // Footer on every page
     didDrawPage(data) {
       const pageCount = doc.internal.pages.length - 1;
+
+      // Thin emerald accent on pages 2+
+      if (data.pageNumber > 1) {
+        doc.setDrawColor(...emerald);
+        doc.setLineWidth(0.6);
+        doc.line(0, 0, pageW, 0);
+      }
+
+      // Footer divider
+      doc.setDrawColor(...borderColor);
+      doc.setLineWidth(0.3);
+      doc.line(12, pageH - 8, pageW - 12, pageH - 8);
+
       doc.setFont("helvetica", "normal");
       doc.setFontSize(6.5);
-      doc.setTextColor(51, 65, 85);      // slate-700
+      doc.setTextColor(...mutedText);
       doc.text(
         `ChemClash · Page ${data.pageNumber} of ${pageCount}`,
         pageW / 2,
@@ -209,7 +223,7 @@ async function generatePDF(concepts: ChemConcept[]): Promise<void> {
       );
     },
 
-    margin: { top: 26, right: 12, bottom: 10, left: 12 },
+    margin: { top: 26, right: 12, bottom: 12, left: 12 },
     tableWidth: "auto",
     rowPageBreak: "auto",
     showHead: "everyPage",
@@ -225,13 +239,13 @@ async function generatePDF(concepts: ChemConcept[]): Promise<void> {
 interface DownloadCheatSheetProps {
   /** Override the default concept data (e.g. pass live API data). */
   concepts?: ChemConcept[];
-  /** Optional extra inline styles on the wrapper. */
-  style?: React.CSSProperties;
+  /** Optional Tailwind className on the wrapper div. */
+  className?: string;
 }
 
 export default function DownloadCheatSheet({
   concepts = CHEM_CONCEPTS,
-  style,
+  className = "",
 }: DownloadCheatSheetProps) {
   const [state, setState] = useState<"idle" | "loading" | "done">("idle");
 
@@ -248,100 +262,37 @@ export default function DownloadCheatSheet({
     }
   }, [concepts, state]);
 
-  // ── Label & icon by state ──────────────────────────────────────
-  const label =
-    state === "loading" ? "Generating…"
-    : state === "done"    ? "✓ Downloaded!"
-    : "⬇ Download PDF Guide";
-
-  // ── Green cyberpunk button (matches app theme, no Tailwind needed) ──
   const isLoading = state === "loading";
   const isDone    = state === "done";
 
+  const label =
+    isLoading ? "Generating…"
+    : isDone   ? "✓ Downloaded!"
+    : "⬇ Download PDF Guide";
+
   return (
-    <div style={style}>
+    <div className={className}>
       <button
         id="cheatsheet-download-btn"
+        type="button"
         onClick={handleClick}
         disabled={isLoading}
         aria-label="Download ChemClash Cheat Sheet PDF"
-        style={{
-          display:        "inline-flex",
-          alignItems:     "center",
-          gap:            8,
-          padding:        "10px 22px",
-          background:     isDone
-            ? "linear-gradient(135deg, #00cc6a 0%, #009950 100%)"
+        className={`inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-bold tracking-wide transition-all duration-200 ${
+          isDone
+            ? "border-emerald-300 bg-emerald-500 text-white shadow-sm"
             : isLoading
-            ? "linear-gradient(135deg, #1a4a30 0%, #122e1e 100%)"
-            : "linear-gradient(135deg, #003d20 0%, #00ff88 100%)",
-          color:          isDone ? "#fff" : isLoading ? "#4ade80" : "#080c10",
-          border:         `1px solid ${isDone ? "#00cc6a" : "#00ff88"}`,
-          borderRadius:   8,
-          fontFamily:     "Courier New, monospace",
-          fontWeight:     900,
-          fontSize:       "0.78rem",
-          letterSpacing:  "0.06em",
-          cursor:         isLoading ? "not-allowed" : "pointer",
-          transition:     "all 0.2s ease",
-          boxShadow:      isDone
-            ? "0 0 18px rgba(0,204,106,0.6)"
-            : isLoading
-            ? "none"
-            : "0 0 14px rgba(0,255,136,0.35), 0 0 28px rgba(0,255,136,0.15)",
-          whiteSpace:     "nowrap",
-          userSelect:     "none",
-          position:       "relative",
-          overflow:       "hidden",
-        }}
-        onMouseEnter={(e) => {
-          if (!isLoading && !isDone)
-            (e.currentTarget as HTMLButtonElement).style.boxShadow =
-              "0 0 22px rgba(0,255,136,0.7), 0 0 44px rgba(0,255,136,0.3)";
-        }}
-        onMouseLeave={(e) => {
-          if (!isLoading && !isDone)
-            (e.currentTarget as HTMLButtonElement).style.boxShadow =
-              "0 0 14px rgba(0,255,136,0.35), 0 0 28px rgba(0,255,136,0.15)";
-        }}
-        onMouseDown={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.96)";
-        }}
-        onMouseUp={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-        }}
+            ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+            : "border-emerald-300 bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+        }`}
       >
-        {/* Spinner overlay when loading */}
         {isLoading && (
-          <span
-            style={{
-              width:        14,
-              height:       14,
-              border:       "2px solid #4ade80",
-              borderTop:    "2px solid transparent",
-              borderRadius: "50%",
-              display:      "inline-block",
-              animation:    "spin 0.7s linear infinite",
-              flexShrink:   0,
-            }}
-          />
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent flex-shrink-0" />
         )}
         {label}
-
-        {/* Keyframe injection (tiny, runs once) */}
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </button>
 
-      {/* Micro-hint below the button */}
-      <p
-        style={{
-          marginTop:   6,
-          fontSize:    "0.62rem",
-          color:       "#334155",
-          fontFamily:  "Courier New, monospace",
-          letterSpacing: "0.08em",
-        }}
-      >
+      <p className="mt-1.5 text-xs text-slate-500 font-mono tracking-wide">
         {isDone
           ? "// PDF saved to your downloads folder"
           : isLoading

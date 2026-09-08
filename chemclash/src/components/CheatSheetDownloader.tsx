@@ -111,27 +111,40 @@ export async function generateCustomCheatSheetPDF(
     throw new Error("No categories selected for PDF export.");
   }
 
-  // Common styling tokens
-  const primaryColor: [number, number, number] = [0, 255, 136]; // ChemClash Neon Green
-  const headerBgColor: [number, number, number] = [17, 24, 32];
-  const darkBgColor: [number, number, number] = [8, 12, 16];
-  const textColor: [number, number, number] = [226, 232, 240];
-  const borderColor: [number, number, number] = [30, 45, 61];
+  // ── Light-theme colour tokens ─────────────────────────────────
+  // Page background is white (jsPDF default); all surfaces follow
+  // the same slate/emerald palette as the web UI.
+  const pageBodyText:  [number, number, number] = [15,  23,  42];  // slate-900
+  const mutedText:     [number, number, number] = [71,  85, 105];  // slate-600
+  const borderColor:   [number, number, number] = [226, 232, 240]; // slate-200
+  const altRowColor:   [number, number, number] = [248, 250, 252]; // slate-50
+  const headerBg:      [number, number, number] = [241, 245, 249]; // slate-100
+  // Per-section accent colours (accessible on white)
+  const emerald:  [number, number, number] = [5,   150, 105];  // emerald-600
+  const blue:     [number, number, number] = [37,   99, 235];  // blue-600
+  const amber:    [number, number, number] = [180, 120,   0];  // amber-700 (darkened for print)
+  const violet:   [number, number, number] = [109,  40, 217];  // violet-700
 
-  let currentY = 24;
+  let currentY = 26;
 
   // ── First Page Header Banner ───────────────────────────────────
-  doc.setFillColor(...darkBgColor);
+  // Light slate-100 banner strip with emerald title
+  doc.setFillColor(...headerBg);
   doc.rect(0, 0, pageW, 20, "F");
 
+  // Thin emerald top accent line
+  doc.setDrawColor(...emerald);
+  doc.setLineWidth(1.2);
+  doc.line(0, 0, pageW, 0);
+
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(...primaryColor);
+  doc.setFontSize(13);
+  doc.setTextColor(...emerald);
   doc.text(customTitle, 12, 12);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
-  doc.setTextColor(148, 163, 184);
+  doc.setTextColor(...mutedText);
   doc.text(
     `Exported: ${dateStr} · Categories: ${activeKeys.length} · ChemClash Platform`,
     pageW - 12,
@@ -154,7 +167,7 @@ export async function generateCustomCheatSheetPDF(
     // Section sub-heading
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.setTextColor(...primaryColor);
+    doc.setTextColor(...emerald);
     doc.text(`1. Reagents & Catalysts (${data.reagents.length} items)`, 12, currentY);
     currentY += 4;
 
@@ -163,26 +176,28 @@ export async function generateCustomCheatSheetPDF(
       head: [["Reagent / Catalyst", "Chemical Function & Mechanism Role", "Typical Example Reaction"]],
       body: data.reagents.map((r) => [r.name, r.function, r.example]),
       columnStyles: {
-        0: { cellWidth: 55, fontStyle: "bold", textColor: [0, 220, 120] },
-        1: { cellWidth: 120 },
-        2: { cellWidth: 98, fontStyle: "italic", textColor: [203, 213, 225] },
+        0: { cellWidth: 55, fontStyle: "bold", textColor: emerald },
+        1: { cellWidth: 120, textColor: pageBodyText },
+        2: { cellWidth: 98,  fontStyle: "italic", textColor: mutedText },
       },
       headStyles: {
-        fillColor: headerBgColor,
-        textColor: primaryColor,
+        fillColor: headerBg,
+        textColor: emerald,
         fontStyle: "bold",
         fontSize: 8.5,
+        lineColor: borderColor,
+        lineWidth: 0.2,
       },
       bodyStyles: {
         fontSize: 7.5,
-        textColor: textColor,
+        textColor: pageBodyText,
         lineColor: borderColor,
         lineWidth: 0.15,
         valign: "top",
         cellPadding: 3,
       },
-      alternateRowStyles: { fillColor: [13, 19, 27] },
-      styles: { fillColor: [8, 14, 22], overflow: "linebreak" },
+      alternateRowStyles: { fillColor: altRowColor },
+      styles: { fillColor: [255, 255, 255], overflow: "linebreak" },
       margin: { left: 12, right: 12 },
       rowPageBreak: "auto",
       showHead: "everyPage",
@@ -197,7 +212,7 @@ export async function generateCustomCheatSheetPDF(
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.setTextColor(...primaryColor);
+    doc.setTextColor(...blue);
     doc.text(`2. Named Reactions & Transformations (${data.named_reactions.length} items)`, 12, currentY);
     currentY += 4;
 
@@ -206,26 +221,28 @@ export async function generateCustomCheatSheetPDF(
       head: [["Named Reaction", "Key Reactants & Conditions", "Typical Products & Regiochemistry"]],
       body: data.named_reactions.map((nr) => [nr.name, nr.reactants, nr.products]),
       columnStyles: {
-        0: { cellWidth: 55, fontStyle: "bold", textColor: [56, 189, 248] },
-        1: { cellWidth: 105 },
-        2: { cellWidth: 113 },
+        0: { cellWidth: 55, fontStyle: "bold", textColor: blue },
+        1: { cellWidth: 105, textColor: pageBodyText },
+        2: { cellWidth: 113, textColor: pageBodyText },
       },
       headStyles: {
-        fillColor: headerBgColor,
-        textColor: [56, 189, 248],
+        fillColor: headerBg,
+        textColor: blue,
         fontStyle: "bold",
         fontSize: 8.5,
+        lineColor: borderColor,
+        lineWidth: 0.2,
       },
       bodyStyles: {
         fontSize: 7.5,
-        textColor: textColor,
+        textColor: pageBodyText,
         lineColor: borderColor,
         lineWidth: 0.15,
         valign: "top",
         cellPadding: 3,
       },
-      alternateRowStyles: { fillColor: [13, 19, 27] },
-      styles: { fillColor: [8, 14, 22], overflow: "linebreak" },
+      alternateRowStyles: { fillColor: altRowColor },
+      styles: { fillColor: [255, 255, 255], overflow: "linebreak" },
       margin: { left: 12, right: 12 },
       rowPageBreak: "auto",
       showHead: "everyPage",
@@ -240,7 +257,7 @@ export async function generateCustomCheatSheetPDF(
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.setTextColor(...primaryColor);
+    doc.setTextColor(...amber);
     doc.text(`3. Fundamental Rules & Principles (${data.basic_rules.length} items)`, 12, currentY);
     currentY += 4;
 
@@ -249,25 +266,27 @@ export async function generateCustomCheatSheetPDF(
       head: [["Rule / Principle", "Definition & Application in Exam Problems"]],
       body: data.basic_rules.map((br) => [br.rule, br.definition]),
       columnStyles: {
-        0: { cellWidth: 65, fontStyle: "bold", textColor: [251, 191, 36] },
-        1: { cellWidth: 208 },
+        0: { cellWidth: 65, fontStyle: "bold", textColor: amber },
+        1: { cellWidth: 208, textColor: pageBodyText },
       },
       headStyles: {
-        fillColor: headerBgColor,
-        textColor: [251, 191, 36],
+        fillColor: headerBg,
+        textColor: amber,
         fontStyle: "bold",
         fontSize: 8.5,
+        lineColor: borderColor,
+        lineWidth: 0.2,
       },
       bodyStyles: {
         fontSize: 7.5,
-        textColor: textColor,
+        textColor: pageBodyText,
         lineColor: borderColor,
         lineWidth: 0.15,
         valign: "top",
         cellPadding: 3,
       },
-      alternateRowStyles: { fillColor: [13, 19, 27] },
-      styles: { fillColor: [8, 14, 22], overflow: "linebreak" },
+      alternateRowStyles: { fillColor: altRowColor },
+      styles: { fillColor: [255, 255, 255], overflow: "linebreak" },
       margin: { left: 12, right: 12 },
       rowPageBreak: "auto",
       showHead: "everyPage",
@@ -282,7 +301,7 @@ export async function generateCustomCheatSheetPDF(
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.setTextColor(...primaryColor);
+    doc.setTextColor(...violet);
     doc.text(`4. Core Concepts & Electronic Effects (${data.core_concepts.length} items)`, 12, currentY);
     currentY += 4;
 
@@ -294,25 +313,27 @@ export async function generateCustomCheatSheetPDF(
         cc.details || cc.core_rule || "",
       ]),
       columnStyles: {
-        0: { cellWidth: 70, fontStyle: "bold", textColor: [167, 139, 250] },
-        1: { cellWidth: 203 },
+        0: { cellWidth: 70, fontStyle: "bold", textColor: violet },
+        1: { cellWidth: 203, textColor: pageBodyText },
       },
       headStyles: {
-        fillColor: headerBgColor,
-        textColor: [167, 139, 250],
+        fillColor: headerBg,
+        textColor: violet,
         fontStyle: "bold",
         fontSize: 8.5,
+        lineColor: borderColor,
+        lineWidth: 0.2,
       },
       bodyStyles: {
         fontSize: 7.5,
-        textColor: textColor,
+        textColor: pageBodyText,
         lineColor: borderColor,
         lineWidth: 0.15,
         valign: "top",
         cellPadding: 3,
       },
-      alternateRowStyles: { fillColor: [13, 19, 27] },
-      styles: { fillColor: [8, 14, 22], overflow: "linebreak" },
+      alternateRowStyles: { fillColor: altRowColor },
+      styles: { fillColor: [255, 255, 255], overflow: "linebreak" },
       margin: { left: 12, right: 12 },
       rowPageBreak: "auto",
       showHead: "everyPage",
@@ -323,9 +344,22 @@ export async function generateCustomCheatSheetPDF(
   const totalPages = doc.internal.pages.length - 1;
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
+
+    // Thin top accent line on pages 2+
+    if (p > 1) {
+      doc.setDrawColor(...emerald);
+      doc.setLineWidth(0.6);
+      doc.line(0, 0, pageW, 0);
+    }
+
+    // Footer divider
+    doc.setDrawColor(...borderColor);
+    doc.setLineWidth(0.3);
+    doc.line(12, pageH - 8, pageW - 12, pageH - 8);
+
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
-    doc.setTextColor(100, 116, 139);
+    doc.setTextColor(...mutedText);
     doc.text(
       `ChemClash Study Guide · Page ${p} of ${totalPages}`,
       pageW / 2,
