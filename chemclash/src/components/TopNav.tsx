@@ -22,127 +22,44 @@ export default function TopNav({
   const storeStreak   = useChemStore((s) => s.dailyStreak);
   const storeUsername = useChemStore((s) => s.username);
 
-  const eloRating  = storeElo      ?? eloProp;
-  const dailyStreak = storeStreak  ?? streakProp;
-  const username   = storeUsername ?? usernameProp;
+  const eloRating   = storeElo      ?? eloProp;
+  const dailyStreak = storeStreak   ?? streakProp;
+  const username    = storeUsername ?? usernameProp;
 
   return (
-    <nav
-      style={{
-        background: "rgba(8,12,16,0.92)",
-        borderBottom: "1px solid #1e2d3d",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-      }}
-    >
+    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
       {/* Top accent line */}
-      <div style={{
-        height: 2,
-        background: "linear-gradient(90deg, transparent, #00ff88, #3b82f6, transparent)",
-        opacity: 0.6,
-      }} />
+      <div className="h-0.5 bg-gradient-to-r from-emerald-500 via-blue-500 to-violet-500 opacity-80" />
 
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "0 20px",
-          height: 58,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
-        }}
-      >
+      <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+
         {/* ── Logo ── */}
-        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: "rgba(0,255,136,0.1)",
-              border: "1px solid rgba(0,255,136,0.3)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1rem",
-            }}
-          >
+        <Link href="/" className="no-underline flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-base">
             ⚗
           </div>
-          <span
-            style={{
-              color: "#00ff88",
-              fontFamily: "Courier New, monospace",
-              fontWeight: 800,
-              fontSize: "1.1rem",
-              letterSpacing: "0.08em",
-            }}
-            className="glow"
-          >
-            CHEM<span style={{ color: "#e2e8f0" }}>CLASH</span>
+          <span className="text-emerald-600 font-black text-lg tracking-wide leading-none">
+            CHEM<span className="text-slate-800">CLASH</span>
           </span>
-          <span
-            style={{
-              fontSize: "0.6rem",
-              padding: "2px 7px",
-              borderRadius: 999,
-              background: "rgba(0,255,136,0.08)",
-              color: "#00ff88",
-              border: "1px solid rgba(0,255,136,0.2)",
-              letterSpacing: "0.1em",
-              fontFamily: "Courier New, monospace",
-            }}
-          >
+          <span className="text-[0.6rem] font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono">
             v0.1
           </span>
         </Link>
 
         {/* ── Center nav links ── */}
-        <div
-          style={{
-            display: "flex",
-            gap: 4,
-            alignItems: "center",
-          }}
-          className="hidden-mobile"
-        >
+        <div className="hidden md:flex gap-1 items-center">
           {[
-            { href: "/react-or-reject",  label: "React or Reject",   color: "#00ff88" },
-            { href: "/mechanism-builder",label: "Mechanism Builder",  color: "#3b82f6" },
-            { href: "/adaptive-pyq",     label: "Adaptive PYQ",      color: "#a78bfa" },
-            { href: "/curriculum",       label: "Curriculum",         color: "#3b82f6" },
-            { href: "/reagents",         label: "Reagents",           color: "#f59e0b" },
-            { href: "/leaderboard",      label: "Leaderboard",        color: "#f59e0b" },
+            { href: "/react-or-reject",   label: "React or Reject",  hoverCls: "hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200" },
+            { href: "/mechanism-builder", label: "Mechanism Builder", hoverCls: "hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200" },
+            { href: "/adaptive-pyq",      label: "Adaptive PYQ",     hoverCls: "hover:text-violet-600 hover:bg-violet-50 hover:border-violet-200" },
+            { href: "/curriculum",        label: "Curriculum",        hoverCls: "hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200" },
+            { href: "/reagents",          label: "Reagents",          hoverCls: "hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200" },
+            { href: "/leaderboard",       label: "Leaderboard",       hoverCls: "hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200" },
           ].map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              style={{
-                color: "#64748b",
-                textDecoration: "none",
-                fontSize: "0.72rem",
-                letterSpacing: "0.06em",
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "1px solid transparent",
-                transition: "all 0.15s",
-                fontFamily: "Courier New, monospace",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = link.color;
-                (e.currentTarget as HTMLAnchorElement).style.background = `${link.color}10`;
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = `${link.color}30`;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = "#64748b";
-                (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = "transparent";
-              }}
+              className={`text-slate-500 text-sm font-medium px-3 py-1.5 rounded-lg border border-transparent transition-all duration-150 no-underline ${link.hoverCls}`}
             >
               {link.label}
             </Link>
@@ -150,144 +67,67 @@ export default function TopNav({
         </div>
 
         {/* ── Right stats + user ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="flex items-center gap-2">
 
-          {/* Streak */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              background: "rgba(245,158,11,0.07)",
-              border: "1px solid rgba(245,158,11,0.2)",
-              borderRadius: 8,
-              padding: "5px 12px",
-            }}
-          >
-            <span style={{ fontSize: "0.9rem" }}>🔥</span>
-            <div style={{ fontFamily: "Courier New, monospace", lineHeight: 1 }}>
-              <div style={{ color: "#64748b", fontSize: "0.55rem", letterSpacing: "0.12em", marginBottom: 1 }}>STREAK</div>
-              <div style={{ color: "#f59e0b", fontSize: "0.85rem", fontWeight: 800 }}>{dailyStreak}d</div>
+          {/* Streak pill */}
+          <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
+            <span className="text-base leading-none">🔥</span>
+            <div className="leading-none">
+              <div className="text-[0.55rem] font-semibold tracking-widest text-amber-500 uppercase mb-0.5">Streak</div>
+              <div className="text-amber-600 text-sm font-black">{dailyStreak}d</div>
             </div>
           </div>
 
-          {/* ELO */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              background: "rgba(0,255,136,0.07)",
-              border: "1px solid rgba(0,255,136,0.2)",
-              borderRadius: 8,
-              padding: "5px 12px",
-            }}
-          >
-            <span style={{ fontSize: "0.9rem" }}>⚡</span>
-            <div style={{ fontFamily: "Courier New, monospace", lineHeight: 1 }}>
-              <div style={{ color: "#64748b", fontSize: "0.55rem", letterSpacing: "0.12em", marginBottom: 1 }}>ELO</div>
-              <div className="glow" style={{ color: "#00ff88", fontSize: "0.85rem", fontWeight: 800 }}>{eloRating}</div>
+          {/* ELO pill */}
+          <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5">
+            <span className="text-base leading-none">⚡</span>
+            <div className="leading-none">
+              <div className="text-[0.55rem] font-semibold tracking-widest text-emerald-500 uppercase mb-0.5">ELO</div>
+              <div className="text-emerald-700 text-sm font-black">{eloRating}</div>
             </div>
           </div>
 
-          {/* User avatar */}
-          <div style={{ position: "relative" }}>
+          {/* User avatar + dropdown */}
+          <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                background: "rgba(0,255,136,0.05)",
-                border: "1px solid rgba(0,255,136,0.2)",
-                borderRadius: 8,
-                padding: "5px 12px 5px 6px",
-                cursor: "pointer",
-                transition: "all 0.15s",
-                fontFamily: "Courier New, monospace",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,255,136,0.1)";
-                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,255,136,0.4)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,255,136,0.05)";
-                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,255,136,0.2)";
-              }}
+              className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 cursor-pointer transition-all duration-150 hover:bg-slate-100 hover:border-slate-300"
             >
-              <div
-                style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 6,
-                  background: "linear-gradient(135deg, #00ff88, #00cc6a)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "0.7rem",
-                  fontWeight: 900,
-                  color: "#080c10",
-                }}
-              >
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-xs font-black text-white">
                 {username[0]}
               </div>
-              <span style={{ color: "#e2e8f0", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em" }}>
+              <span className="text-slate-700 text-sm font-semibold tracking-wide">
                 {username}
               </span>
-              <span style={{ color: "#64748b", fontSize: "0.7rem", marginLeft: 2, transform: menuOpen ? "rotate(180deg)" : "none", display: "inline-block", transition: "transform 0.2s" }}>▾</span>
+              <span
+                className="text-slate-400 text-xs ml-0.5 inline-block transition-transform duration-200"
+                style={{ transform: menuOpen ? "rotate(180deg)" : "none" }}
+              >
+                ▾
+              </span>
             </button>
 
             {/* Dropdown */}
             {menuOpen && (
               <div
-                className="animate-slide-down"
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  top: "calc(100% + 8px)",
-                  background: "#111820",
-                  border: "1px solid #1e2d3d",
-                  borderRadius: 10,
-                  minWidth: 180,
-                  overflow: "hidden",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                  zIndex: 200,
-                }}
+                className="animate-slide-down absolute right-0 top-[calc(100%+8px)] bg-white border border-slate-200 rounded-xl min-w-[180px] overflow-hidden shadow-lg z-50"
               >
                 {[
-                  { label: "Profile",      icon: "👤",  href: undefined      },
-                  { label: "Leaderboard",  icon: "🏆",  href: "/leaderboard" },
-                  { label: "Settings",     icon: "⚙️",  href: undefined      },
-                  { label: "Sign Out",     icon: "→",   href: undefined, danger: true },
+                  { label: "Profile",     icon: "👤", href: undefined },
+                  { label: "Leaderboard", icon: "🏆", href: "/leaderboard" },
+                  { label: "Settings",    icon: "⚙️", href: undefined },
+                  { label: "Sign Out",    icon: "→",  href: undefined, danger: true },
                 ].map((item) => (
                   <button
                     key={item.label}
                     onClick={() => { setMenuOpen(false); if (item.href) window.location.href = item.href; }}
-                    style={{
-                      width: "100%",
-                      background: "transparent",
-                      border: "none",
-                      padding: "10px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      cursor: "pointer",
-                      color: item.danger ? "#f87171" : "#64748b",
-                      fontSize: "0.75rem",
-                      fontFamily: "Courier New, monospace",
-                      letterSpacing: "0.05em",
-                      transition: "all 0.12s",
-                      textAlign: "left",
-                      borderTop: item.label === "Sign Out" ? "1px solid #1e2d3d" : "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background = "#161e28";
-                      (e.currentTarget as HTMLButtonElement).style.color = item.danger ? "#fca5a5" : "#e2e8f0";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                      (e.currentTarget as HTMLButtonElement).style.color = item.danger ? "#f87171" : "#64748b";
-                    }}
+                    className={[
+                      "w-full bg-transparent border-none px-4 py-2.5 flex items-center gap-2.5 cursor-pointer text-sm font-medium tracking-wide transition-all duration-100 text-left",
+                      item.danger
+                        ? "text-red-500 hover:bg-red-50 hover:text-red-600"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-800",
+                      item.label === "Sign Out" ? "border-t border-slate-100" : "",
+                    ].join(" ")}
                   >
                     <span>{item.icon}</span>
                     {item.label}

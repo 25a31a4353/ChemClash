@@ -10,6 +10,7 @@ export interface GameMode {
   description: string;
   icon: string;
   href: string;
+  /** Semantic colour name: "emerald" | "blue" | "violet" | "amber" */
   accentColor: string;
   badge?: string;
   locked?: boolean;
@@ -22,99 +23,102 @@ interface GameModeCardProps {
   index?: number;
 }
 
+// Maps semantic accent name → Tailwind utility groups
+const ACCENT_MAP: Record<
+  string,
+  {
+    text: string;
+    bg: string;
+    border: string;
+    hoverBorder: string;
+    iconBg: string;
+    levelPill: string;
+    badgeBg: string;
+    progressBar: string;
+    bar: string; // left accent bar bg
+  }
+> = {
+  emerald: {
+    text:        "text-emerald-600",
+    bg:          "bg-emerald-50",
+    border:      "border-emerald-200",
+    hoverBorder: "group-hover:border-emerald-400",
+    iconBg:      "bg-emerald-50 border-emerald-200",
+    levelPill:   "text-emerald-700 bg-emerald-50 border-emerald-200",
+    badgeBg:     "text-emerald-700 bg-emerald-50 border-emerald-200",
+    progressBar: "from-emerald-400 to-emerald-600",
+    bar:         "from-emerald-500 to-transparent",
+  },
+  blue: {
+    text:        "text-blue-600",
+    bg:          "bg-blue-50",
+    border:      "border-blue-200",
+    hoverBorder: "group-hover:border-blue-400",
+    iconBg:      "bg-blue-50 border-blue-200",
+    levelPill:   "text-blue-700 bg-blue-50 border-blue-200",
+    badgeBg:     "text-blue-700 bg-blue-50 border-blue-200",
+    progressBar: "from-blue-400 to-blue-600",
+    bar:         "from-blue-500 to-transparent",
+  },
+  violet: {
+    text:        "text-violet-600",
+    bg:          "bg-violet-50",
+    border:      "border-violet-200",
+    hoverBorder: "group-hover:border-violet-400",
+    iconBg:      "bg-violet-50 border-violet-200",
+    levelPill:   "text-violet-700 bg-violet-50 border-violet-200",
+    badgeBg:     "text-violet-700 bg-violet-50 border-violet-200",
+    progressBar: "from-violet-400 to-violet-600",
+    bar:         "from-violet-500 to-transparent",
+  },
+  amber: {
+    text:        "text-amber-600",
+    bg:          "bg-amber-50",
+    border:      "border-amber-200",
+    hoverBorder: "group-hover:border-amber-400",
+    iconBg:      "bg-amber-50 border-amber-200",
+    levelPill:   "text-amber-700 bg-amber-50 border-amber-200",
+    badgeBg:     "text-amber-700 bg-amber-50 border-amber-200",
+    progressBar: "from-amber-400 to-amber-600",
+    bar:         "from-amber-500 to-transparent",
+  },
+};
+
 export default function GameModeCard({ mode, index = 0 }: GameModeCardProps) {
   const [hovered, setHovered] = useState(false);
+
+  const accent = ACCENT_MAP[mode.accentColor] ?? ACCENT_MAP.blue;
 
   const cardContent = (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered
-          ? `linear-gradient(135deg, #161e28, #1c2535)`
-          : "#111820",
-        border: `1px solid ${hovered ? mode.accentColor + "60" : "#1e2d3d"}`,
-        borderRadius: 14,
-        padding: "26px 22px",
-        cursor: mode.locked ? "not-allowed" : "pointer",
-        transition: "all 0.22s cubic-bezier(0.4, 0, 0.2, 1)",
-        boxShadow: hovered
-          ? `0 0 32px ${mode.accentColor}22, 0 8px 32px rgba(0,0,0,0.4)`
-          : "0 2px 8px rgba(0,0,0,0.2)",
-        transform: hovered && !mode.locked ? "translateY(-5px)" : "translateY(0)",
-        position: "relative",
-        overflow: "hidden",
-        fontFamily: "Courier New, monospace",
-        minHeight: 230,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        opacity: mode.locked ? 0.6 : 1,
-        animationDelay: `${index * 0.08}s`,
-      }}
-      className="animate-slide-up"
+      className={[
+        "group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-white",
+        "p-6 min-h-[230px] transition-all duration-200 animate-slide-up",
+        hovered && !mode.locked
+          ? `border-slate-300 shadow-md -translate-y-1`
+          : "border-slate-200 shadow-sm translate-y-0",
+        mode.locked ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
+      ].join(" ")}
+      style={{ animationDelay: `${index * 0.08}s` }}
     >
-      {/* Background radial glow */}
-      <div
-        style={{
-          position: "absolute",
-          top: -60,
-          right: -60,
-          width: 180,
-          height: 180,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${mode.accentColor}18 0%, transparent 65%)`,
-          pointerEvents: "none",
-          transition: "opacity 0.3s",
-          opacity: hovered ? 1 : 0.5,
-        }}
-      />
-
       {/* Left accent bar */}
       <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 3,
-          background: `linear-gradient(180deg, ${mode.accentColor}, ${mode.accentColor}00)`,
-          borderRadius: "14px 0 0 14px",
-          opacity: hovered ? 1 : 0.4,
-          transition: "opacity 0.2s",
-        }}
+        className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${accent.bar} rounded-l-2xl transition-opacity duration-200`}
+        style={{ opacity: hovered ? 1 : 0.35 }}
       />
 
       {/* Badge */}
       {mode.badge && (
         <span
-          style={{
-            position: "absolute",
-            top: 14,
-            right: 14,
-            fontSize: "0.58rem",
-            padding: "3px 9px",
-            borderRadius: 999,
-            background: mode.locked
-              ? "rgba(100,116,139,0.15)"
+          className={`absolute top-4 right-4 text-[0.65rem] font-bold tracking-wide px-2.5 py-0.5 rounded-full border ${
+            mode.locked
+              ? "text-slate-400 bg-slate-100 border-slate-200"
               : mode.badge === "COMING SOON"
-              ? "rgba(245,158,11,0.12)"
-              : `${mode.accentColor}15`,
-            color: mode.locked
-              ? "#64748b"
-              : mode.badge === "COMING SOON"
-              ? "#f59e0b"
-              : mode.accentColor,
-            border: `1px solid ${
-              mode.locked
-                ? "rgba(100,116,139,0.3)"
-                : mode.badge === "COMING SOON"
-                ? "rgba(245,158,11,0.3)"
-                : `${mode.accentColor}40`
-            }`,
-            letterSpacing: "0.1em",
-            fontWeight: 700,
-          }}
+              ? "text-amber-600 bg-amber-50 border-amber-200"
+              : accent.badgeBg
+          }`}
         >
           {mode.badge}
         </span>
@@ -122,119 +126,64 @@ export default function GameModeCard({ mode, index = 0 }: GameModeCardProps) {
 
       <div>
         {/* Icon + Level pill */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <div className="flex items-center gap-3 mb-4">
           <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              background: `${mode.accentColor}12`,
-              border: `1px solid ${mode.accentColor}30`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1.4rem",
-              transition: "all 0.2s",
-              transform: hovered ? "scale(1.08)" : "scale(1)",
-            }}
+            className={`w-11 h-11 rounded-xl border flex items-center justify-center text-2xl transition-transform duration-200 ${accent.iconBg} ${hovered ? "scale-110" : "scale-100"}`}
           >
             {mode.icon}
           </div>
-          <span
-            style={{
-              fontSize: "0.62rem",
-              color: mode.accentColor,
-              border: `1px solid ${mode.accentColor}50`,
-              background: `${mode.accentColor}0c`,
-              padding: "3px 9px",
-              borderRadius: 4,
-              letterSpacing: "0.12em",
-              fontWeight: 700,
-            }}
-          >
+          <span className={`text-[0.68rem] font-bold tracking-wider px-2.5 py-1 rounded border font-mono ${accent.levelPill}`}>
             {mode.level}
           </span>
         </div>
 
         {/* Title */}
         <h2
-          style={{
-            color: hovered ? "#ffffff" : "#e2e8f0",
-            fontSize: "1.05rem",
-            fontWeight: 800,
-            margin: "0 0 8px 0",
-            letterSpacing: "0.04em",
-            transition: "color 0.15s",
-          }}
+          className={`text-lg font-extrabold tracking-tight mb-2 transition-colors duration-150 ${
+            hovered ? "text-slate-900" : "text-slate-800"
+          }`}
         >
           {mode.title}
         </h2>
 
         {/* Description */}
-        <p
-          style={{
-            color: "#64748b",
-            fontSize: "0.78rem",
-            margin: 0,
-            lineHeight: 1.65,
-          }}
-        >
+        <p className="text-sm text-slate-600 leading-relaxed">
           {mode.description}
         </p>
       </div>
 
       {/* Bottom row */}
-      <div style={{ marginTop: 20 }}>
-        {/* Progress bar (if applicable) */}
+      <div className="mt-5">
+        {/* Progress bar */}
         {mode.progress !== undefined && (
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ color: "#334155", fontSize: "0.6rem", letterSpacing: "0.1em" }}>PROGRESS</span>
-              <span style={{ color: mode.accentColor, fontSize: "0.6rem", fontWeight: 700 }}>{mode.progress}%</span>
+          <div className="mb-3">
+            <div className="flex justify-between mb-1.5">
+              <span className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase">
+                Progress
+              </span>
+              <span className={`text-[0.65rem] font-bold ${accent.text}`}>
+                {mode.progress}%
+              </span>
             </div>
-            <div style={{ height: 3, background: "#1e2d3d", borderRadius: 2, overflow: "hidden" }}>
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
-                style={{
-                  height: "100%",
-                  width: `${mode.progress}%`,
-                  background: `linear-gradient(90deg, ${mode.accentColor}80, ${mode.accentColor})`,
-                  borderRadius: 2,
-                  transition: "width 0.8s ease",
-                }}
+                className={`h-full bg-gradient-to-r ${accent.progressBar} rounded-full transition-all duration-700`}
+                style={{ width: `${mode.progress}%` }}
               />
             </div>
           </div>
         )}
 
         {/* CTA row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
+        <div className="flex items-center justify-between">
           <span
-            style={{
-              color: mode.accentColor,
-              fontSize: "0.75rem",
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              opacity: hovered ? 1 : 0.55,
-              transition: "opacity 0.2s",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
+            className={`text-sm font-bold tracking-wide flex items-center gap-1.5 transition-opacity duration-200 ${accent.text} ${hovered ? "opacity-100" : "opacity-50"}`}
           >
             {mode.locked ? "LOCKED" : "ENTER"}
             {!mode.locked && (
               <span
-                style={{
-                  display: "inline-block",
-                  transition: "transform 0.2s",
-                  transform: hovered ? "translateX(4px)" : "translateX(0)",
-                }}
+                className="inline-block transition-transform duration-200"
+                style={{ transform: hovered ? "translateX(4px)" : "translateX(0)" }}
               >
                 →
               </span>
@@ -242,7 +191,7 @@ export default function GameModeCard({ mode, index = 0 }: GameModeCardProps) {
           </span>
 
           {mode.plays !== undefined && (
-            <span style={{ color: "#334155", fontSize: "0.62rem", letterSpacing: "0.06em" }}>
+            <span className="text-xs text-slate-400 font-medium">
               {mode.plays.toLocaleString()} plays
             </span>
           )}
@@ -254,7 +203,7 @@ export default function GameModeCard({ mode, index = 0 }: GameModeCardProps) {
   if (mode.locked) return cardContent;
 
   return (
-    <Link href={mode.href} style={{ textDecoration: "none" }}>
+    <Link href={mode.href} className="no-underline">
       {cardContent}
     </Link>
   );

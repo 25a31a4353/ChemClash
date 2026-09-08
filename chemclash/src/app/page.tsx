@@ -14,7 +14,7 @@ const GAME_MODES: GameMode[] = [
       "Swipe right if the nucleophile and electrophile will react, swipe left if they won't. Train your chemical intuition under time pressure.",
     icon: "⚗️",
     href: "/react-or-reject",
-    accentColor: "#00ff88",
+    accentColor: "emerald",
     badge: "BEGINNER",
     progress: 68,
     plays: 1240,
@@ -27,7 +27,7 @@ const GAME_MODES: GameMode[] = [
       "Draw curved electron arrows on an interactive canvas to construct reaction mechanisms step by step. Precision earns bonus ELO.",
     icon: "🧬",
     href: "/mechanism-builder",
-    accentColor: "#3b82f6",
+    accentColor: "blue",
     progress: 34,
     plays: 580,
   },
@@ -39,7 +39,7 @@ const GAME_MODES: GameMode[] = [
       "AI matchmaker serves you the most relevant JEE Previous Year Questions based on your exact weakness profile. No hallucinations — verified questions only.",
     icon: "🎯",
     href: "/adaptive-pyq",
-    accentColor: "#a78bfa",
+    accentColor: "violet",
     badge: "NEW",
     plays: 420,
   },
@@ -51,7 +51,7 @@ const GAME_MODES: GameMode[] = [
       "Challenge another chemist to a live duel. Answer mechanism questions faster and more accurately to climb the leaderboard.",
     icon: "⚔️",
     href: "/duel",
-    accentColor: "#f59e0b",
+    accentColor: "amber",
     badge: "COMING SOON",
     locked: true,
   },
@@ -63,7 +63,7 @@ const GAME_MODES: GameMode[] = [
       "Browse every JEE-relevant reagent — formula, reaction conditions, substrates, products, and Socratic notes. Searchable and filterable by category.",
     icon: "🧪",
     href: "/reagents",
-    accentColor: "#f59e0b",
+    accentColor: "amber",
     badge: "JEE READY",
     plays: 3100,
   },
@@ -75,7 +75,7 @@ const GAME_MODES: GameMode[] = [
       "Work through concept modules in order. Each slide teaches a core idea and tests your understanding with a quick question. +5 ELO per correct answer.",
     icon: "📚",
     href: "/curriculum",
-    accentColor: "#3b82f6",
+    accentColor: "blue",
     badge: "START HERE",
     plays: 560,
   },
@@ -87,100 +87,64 @@ const GAME_MODES: GameMode[] = [
       "See where you stand globally. Track your ELO progress, weekly gains, and compare accuracy + streak with top players.",
     icon: "🏆",
     href: "/leaderboard",
-    accentColor: "#f59e0b",
+    accentColor: "amber",
     badge: "LIVE",
     plays: 890,
   },
 ];
 
 const STATS = [
-  { label: "REACTIONS ATTEMPTED", value: "248", color: "#00ff88", icon: "⚗" },
-  { label: "ACCURACY RATE",        value: "73%", color: "#3b82f6", icon: "🎯" },
-  { label: "BEST STREAK",          value: "12d",  color: "#f59e0b", icon: "🔥" },
-  { label: "GLOBAL RANK",          value: "#84",  color: "#a78bfa", icon: "🏆" },
+  { label: "REACTIONS ATTEMPTED", value: "248",  colorClass: "text-emerald-600", borderClass: "hover:border-emerald-300", icon: "⚗" },
+  { label: "ACCURACY RATE",       value: "73%",  colorClass: "text-blue-600",    borderClass: "hover:border-blue-300",    icon: "🎯" },
+  { label: "BEST STREAK",         value: "12d",  colorClass: "text-amber-600",   borderClass: "hover:border-amber-300",   icon: "🔥" },
+  { label: "GLOBAL RANK",         value: "#84",  colorClass: "text-violet-600",  borderClass: "hover:border-violet-300",  icon: "🏆" },
 ];
 
+const ACTIVITY = [40, 70, 55, 90, 65, 80, 100];
+const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
+
 export default function Dashboard() {
-  const eloRating  = useChemStore((s) => s.eloRating);
+  const eloRating   = useChemStore((s) => s.eloRating);
   const dailyStreak = useChemStore((s) => s.dailyStreak);
-  const username   = useChemStore((s) => s.username);
+  const username    = useChemStore((s) => s.username);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#080c10", fontFamily: "Courier New, monospace" }}>
+    <div className="min-h-screen bg-slate-50">
       <TopNav eloRating={eloRating} dailyStreak={dailyStreak} username={username} />
 
-      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 80px" }}>
+      <main className="max-w-6xl mx-auto px-6 py-12 pb-20">
 
         {/* ── Hero section ── */}
-        <div style={{ marginBottom: 52 }} className="animate-fade-in">
+        <div className="mb-12 animate-fade-in">
 
           {/* Eyebrow */}
-          <p style={{ color: "#00ff88", fontSize: "0.7rem", letterSpacing: "0.3em", margin: "0 0 12px 0", opacity: 0.7 }}>
-            // SELECT GAME MODE
+          <p className="text-xs font-semibold tracking-widest text-emerald-600 mb-3 uppercase">
+            Select Game Mode
           </p>
 
           {/* Headline */}
-          <h1
-            style={{
-              color: "#ffffff",
-              fontSize: "clamp(1.6rem, 3vw, 2.4rem)",
-              fontWeight: 900,
-              margin: "0 0 10px 0",
-              letterSpacing: "0.02em",
-              lineHeight: 1.2,
-            }}
-          >
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-2">
             Welcome back,{" "}
-            <span className="glow" style={{ color: "#00ff88" }}>
-              {username}
-            </span>
+            <span className="text-emerald-600">{username}</span>
           </h1>
 
-          <p style={{ color: "#64748b", fontSize: "0.88rem", margin: "0 0 36px 0", lineHeight: 1.6 }}>
+          <p className="text-base text-slate-600 leading-relaxed mb-8">
             Your ELO is{" "}
-            <span style={{ color: "#00ff88", fontWeight: 700 }}>{eloRating}</span> · Top{" "}
-            <span style={{ color: "#f59e0b", fontWeight: 700 }}>12%</span> globally · Keep reacting.
+            <span className="text-emerald-600 font-bold">{eloRating}</span> · Top{" "}
+            <span className="text-amber-600 font-bold">12%</span> globally · Keep reacting.
           </p>
 
           {/* Stats bar */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-              gap: 12,
-            }}
-          >
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {STATS.map((stat, i) => (
               <div
                 key={stat.label}
-                className={`animate-slide-up delay-${(i + 1) * 100}`}
-                style={{
-                  background: "#111820",
-                  border: "1px solid #1e2d3d",
-                  borderRadius: 10,
-                  padding: "14px 18px",
-                  position: "relative",
-                  overflow: "hidden",
-                  transition: "border-color 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = stat.color + "50";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = "#1e2d3d";
-                }}
+                className={`animate-slide-up delay-${(i + 1) * 100} bg-white border border-slate-200 ${stat.borderClass} rounded-xl p-4 relative overflow-hidden transition-all duration-200 hover:shadow-sm`}
               >
-                {/* Background glow blob */}
-                <div style={{
-                  position: "absolute", top: -20, right: -20, width: 70, height: 70,
-                  borderRadius: "50%",
-                  background: `radial-gradient(circle, ${stat.color}18 0%, transparent 70%)`,
-                  pointerEvents: "none",
-                }} />
-                <div style={{ fontSize: "0.58rem", color: "#334155", letterSpacing: "0.14em", marginBottom: 6 }}>
+                <div className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase mb-2">
                   {stat.label}
                 </div>
-                <div style={{ fontSize: "1.5rem", fontWeight: 900, color: stat.color, lineHeight: 1 }}>
+                <div className={`text-2xl font-black ${stat.colorClass} leading-none`}>
                   {stat.value}
                 </div>
               </div>
@@ -189,84 +153,62 @@ export default function Dashboard() {
         </div>
 
         {/* ── Section divider ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
-          <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.2em", whiteSpace: "nowrap" }}>
-            // GAME MODES
+        <div className="flex items-center gap-3 mb-7">
+          <span className="text-xs font-semibold tracking-widest text-slate-400 uppercase whitespace-nowrap">
+            Game Modes
           </span>
-          <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, #1e2d3d, transparent)" }} />
+          <div className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent" />
         </div>
 
         {/* ── Game mode grid ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 18,
-          }}
-        >
+        <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))" }}>
           {GAME_MODES.map((mode, i) => (
             <GameModeCard key={mode.id} mode={mode} index={i} />
           ))}
         </div>
 
         {/* ── Activity strip ── */}
-        <div
-          style={{
-            marginTop: 52,
-            background: "#111820",
-            border: "1px solid #1e2d3d",
-            borderRadius: 12,
-            padding: "20px 24px",
-          }}
-          className="animate-fade-in"
-        >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
-            <span style={{ color: "#334155", fontSize: "0.65rem", letterSpacing: "0.18em" }}>// WEEKLY ACTIVITY</span>
-            <span style={{ color: "#64748b", fontSize: "0.65rem" }}>last 7 days</span>
+        <div className="mt-12 bg-white border border-slate-200 rounded-xl p-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+            <span className="text-xs font-semibold tracking-widest text-slate-400 uppercase">Weekly Activity</span>
+            <span className="text-xs text-slate-400 font-medium">last 7 days</span>
           </div>
-          <div style={{ display: "flex", gap: 6, alignItems: "flex-end", height: 48 }}>
-            {[40, 70, 55, 90, 65, 80, 100].map((h, i) => (
-              <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
+          <div className="flex gap-1.5 items-end h-12">
+            {ACTIVITY.map((h, i) => (
+              <div key={i} className="flex-1 flex flex-col gap-1 items-center">
                 <div
+                  className="w-full rounded-t-sm transition-all duration-500"
                   style={{
-                    width: "100%",
                     height: `${h}%`,
-                    background: h === 100
-                      ? "linear-gradient(180deg, #00ff88, #00cc6a)"
-                      : `rgba(0,255,136,${0.15 + h / 300})`,
-                    borderRadius: "3px 3px 0 0",
-                    transition: "height 0.6s ease",
                     minHeight: 4,
-                    border: h === 100 ? "none" : "1px solid rgba(0,255,136,0.15)",
+                    background:
+                      h === 100
+                        ? "linear-gradient(180deg, #059669, #047857)"
+                        : `rgba(5,150,105,${0.2 + h / 250})`,
+                    border: h === 100 ? "none" : "1px solid rgba(5,150,105,0.2)",
                   }}
                 />
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-            {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-              <span key={i} style={{ color: "#334155", fontSize: "0.58rem", flex: 1, textAlign: "center" }}>{d}</span>
+          <div className="flex justify-between mt-2">
+            {DAYS.map((d, i) => (
+              <span key={i} className="flex-1 text-center text-[0.65rem] font-medium text-slate-400">
+                {d}
+              </span>
             ))}
           </div>
         </div>
 
         {/* ── Custom Cheat Sheet Downloader ── */}
-        <div style={{ marginTop: 40 }} className="animate-fade-in">
+        <div className="mt-10 animate-fade-in">
           <CheatSheetDownloader />
         </div>
 
         {/* ── Footer ── */}
-        <p
-          style={{
-            marginTop: 52,
-            color: "#1e2d3d",
-            fontSize: "0.68rem",
-            textAlign: "center",
-            letterSpacing: "0.14em",
-          }}
-        >
-          CHEMCLASH v0.1.0 · ORGANIC CHEMISTRY ARENA ·{" "}
-          <span style={{ color: "#263245" }}>ALL REACTIONS WILL BE JUDGED</span>
+        <p className="mt-12 text-xs text-center tracking-widest text-slate-300 font-medium uppercase">
+          ChemClash v0.1.0 · Organic Chemistry Arena ·{" "}
+          <span className="text-slate-400">All reactions will be judged</span>
         </p>
       </main>
     </div>
