@@ -105,18 +105,6 @@ const GAME_MODES: GameMode[] = [
     plays: 580,
   },
   {
-    id: "pathway-lab",
-    title: "Reaction Pathway Lab",
-    level: "LEVEL 2.5",
-    description:
-      "Build a reaction pathway step-by-step: identify the nucleophile, choose the mechanism, confirm the product. Instant feedback on every step.",
-    icon: "🔬",
-    href: "/mechanism-builder",
-    accentColor: "blue",
-    badge: "NEW",
-    plays: 0,
-  },
-  {
     id: "adaptive-pyq",
     title: "Adaptive PYQ",
     level: "SMART",
@@ -125,8 +113,8 @@ const GAME_MODES: GameMode[] = [
     icon: "🎯",
     href: "/adaptive-pyq",
     accentColor: "violet",
-    badge: "COMING SOON",
-    locked: true,
+    badge: "AI-POWERED",
+    plays: 0,
   },
   {
     id: "1v1-duel",
@@ -200,13 +188,18 @@ const GAME_MODES: GameMode[] = [
     badge: "LIVE",
     plays: 890,
   },
-];
-
-const STATS = [
-  { label: "REACTIONS ATTEMPTED", value: "248",  colorClass: "text-emerald-600", borderClass: "hover:border-emerald-300", icon: "⚗" },
-  { label: "ACCURACY RATE",       value: "73%",  colorClass: "text-blue-600",    borderClass: "hover:border-blue-300",    icon: "🎯" },
-  { label: "BEST STREAK",         value: "12d",  colorClass: "text-amber-600",   borderClass: "hover:border-amber-300",   icon: "🔥" },
-  { label: "GLOBAL RANK",         value: "#84",  colorClass: "text-violet-600",  borderClass: "hover:border-violet-300",  icon: "🏆" },
+  {
+    id: "resources",
+    title: "Resource Library",
+    level: "REFERENCE",
+    description:
+      "Personalised Organic Chemistry book and resource recommendations matched to your exact weakness profile — textbooks, notes, revision sheets, and practice packs.",
+    icon: "📖",
+    href: "/resources",
+    accentColor: "emerald",
+    badge: "PERSONALISED",
+    plays: 0,
+  },
 ];
 
 const ACTIVITY = [40, 70, 55, 90, 65, 80, 100];
@@ -386,13 +379,16 @@ export default function Dashboard() {
   const claimDailyChallengeReward = useChemStore((s) => s.claimDailyChallengeReward);
   const profile                = useChemStore((s) => s.profile);
   const refreshProfile         = useChemStore((s) => s.refreshProfile);
+  const loadPlayerProfile      = useChemStore((s) => s.loadPlayerProfile);
 
-  // Hydrate coins + attempt auto-claim login reward on mount (client-only)
-  // Also hydrate weakness profile for recommendations.
+  // Hydrate coins + attempt auto-claim login reward on mount (client-only).
+  // loadPlayerProfile hydrates ELO, streak, and username from /user/{id}.
+  // refreshProfile hydrates weakness profile for recommendations + stat tiles.
   useEffect(() => {
     claimLoginReward();
+    loadPlayerProfile();
     refreshProfile();
-  }, [claimLoginReward, refreshProfile]);
+  }, [claimLoginReward, loadPlayerProfile, refreshProfile]);
 
   const rec = getRecommendation(profile?.top_weaknesses ?? []);
 
@@ -424,20 +420,43 @@ export default function Dashboard() {
 
           {/* Stats bar — 5 cols on sm+, 2 on mobile */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {STATS.map((stat, i) => (
-              <div
-                key={stat.label}
-                className={`animate-slide-up delay-${(i + 1) * 100} bg-white border border-slate-200 ${stat.borderClass} rounded-xl p-4 relative overflow-hidden transition-all duration-200 hover:shadow-sm`}
-              >
-                <div className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase mb-2">
-                  {stat.label}
-                </div>
-                <div className={`text-2xl font-black ${stat.colorClass} leading-none`}>
-                  {stat.value}
-                </div>
+            {/* Reactions Attempted — live from weakness profile */}
+            <div className="animate-slide-up delay-100 bg-white border border-slate-200 hover:border-emerald-300 rounded-xl p-4 relative overflow-hidden transition-all duration-200 hover:shadow-sm">
+              <div className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase mb-2">
+                Reactions Attempted
               </div>
-            ))}
-            {/* ChemCoins tile */}
+              <div className="text-2xl font-black text-emerald-600 leading-none">
+                {profile?.total_answered ?? "—"}
+              </div>
+            </div>
+            {/* Accuracy Rate — live from weakness profile */}
+            <div className="animate-slide-up delay-200 bg-white border border-slate-200 hover:border-blue-300 rounded-xl p-4 relative overflow-hidden transition-all duration-200 hover:shadow-sm">
+              <div className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase mb-2">
+                Accuracy Rate
+              </div>
+              <div className="text-2xl font-black text-blue-600 leading-none">
+                {profile != null ? `${Math.round(profile.accuracy * 100)}%` : "—"}
+              </div>
+            </div>
+            {/* Best Streak — live from store (hydrated by loadPlayerProfile) */}
+            <div className="animate-slide-up delay-300 bg-white border border-slate-200 hover:border-amber-300 rounded-xl p-4 relative overflow-hidden transition-all duration-200 hover:shadow-sm">
+              <div className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase mb-2">
+                Daily Streak
+              </div>
+              <div className="text-2xl font-black text-amber-600 leading-none">
+                {dailyStreak > 0 ? `${dailyStreak}d` : "—"}
+              </div>
+            </div>
+            {/* ELO Rating — live from store */}
+            <div className="animate-slide-up delay-400 bg-white border border-slate-200 hover:border-violet-300 rounded-xl p-4 relative overflow-hidden transition-all duration-200 hover:shadow-sm">
+              <div className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase mb-2">
+                ELO Rating
+              </div>
+              <div className="text-2xl font-black text-violet-600 leading-none">
+                {eloRating}
+              </div>
+            </div>
+            {/* ChemCoins tile — live from store */}
             <div className="animate-slide-up delay-500 bg-white border border-amber-200 hover:border-amber-300 rounded-xl p-4 relative overflow-hidden transition-all duration-200 hover:shadow-sm">
               <div className="text-[0.65rem] font-semibold tracking-widest text-slate-400 uppercase mb-2">
                 ChemCoins

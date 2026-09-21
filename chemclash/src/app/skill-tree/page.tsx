@@ -64,6 +64,24 @@ const TIER_COLOR: Record<number, { badge: string; dot: string; connector: string
 
 export const LS_MODULE_KEY = (id: string) => `chemclash_completed_${id}`;
 
+/**
+ * Explicit mapping: Skill Tree node.id → Curriculum module_id (from concept_tree.json).
+ * The backend module_ids for the 17 primary nodes are identical to the node ids used
+ * here (bas_01…bas_05, med_01…med_06, adv_01…adv_06), so no translation is needed.
+ * The concept_* modules in concept_tree.json (concept_sn2, concept_sn1, etc.) have no
+ * corresponding Skill Tree node and are intentionally ignored by this map.
+ *
+ * When the Curriculum page writes:
+ *   localStorage.setItem(`chemclash_completed_${module_id}`, "1")
+ * and module_id is e.g. "med_03", this Skill Tree reads:
+ *   localStorage.getItem(`chemclash_completed_med_03`) === "1"  → marks node mastered ✓
+ */
+const NODE_MODULE_IDS: Record<string, string> = {
+  bas_01: "bas_01", bas_02: "bas_02", bas_03: "bas_03", bas_04: "bas_04", bas_05: "bas_05",
+  med_01: "med_01", med_02: "med_02", med_03: "med_03", med_04: "med_04", med_05: "med_05", med_06: "med_06",
+  adv_01: "adv_01", adv_02: "adv_02", adv_03: "adv_03", adv_04: "adv_04", adv_05: "adv_05", adv_06: "adv_06",
+};
+
 // ── Status derivation ─────────────────────────────────────────────────────
 
 type NodeStatus = "mastered" | "available" | "locked";
@@ -172,15 +190,25 @@ export default function SkillTreePage() {
   const eloRating = useChemStore((s) => s.eloRating);
   const [masteredIds, setMasteredIds] = useState<Set<string>>(new Set());
 
-  // Read completions from localStorage on mount (client-only)
+  // Read completions from localStorage on mount and whenever localStorage changes
+  // (e.g. the user completes a Curriculum module in the same or another tab).
   useEffect(() => {
-    const ids = new Set<string>();
-    for (const node of TREE_NODES) {
-      if (localStorage.getItem(LS_MODULE_KEY(node.id)) === "1") {
-        ids.add(node.id);
+    function readMastered() {
+      const ids = new Set<string>();
+      for (const node of TREE_NODES) {
+        const moduleId = NODE_MODULE_IDS[node.id] ?? node.id;
+        if (localStorage.getItem(LS_MODULE_KEY(moduleId)) === "1") {
+          ids.add(node.id);
+        }
       }
+      setMasteredIds(ids);
     }
-    setMasteredIds(ids);
+
+    readMastered();
+
+    // Keep in sync if Curriculum writes to localStorage after this page mounts
+    window.addEventListener("storage", readMastered);
+    return () => window.removeEventListener("storage", readMastered);
   }, []);
 
   const statuses = deriveStatuses(masteredIds);

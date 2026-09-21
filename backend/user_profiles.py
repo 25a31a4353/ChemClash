@@ -1,39 +1,91 @@
 """
-ChemClash — User Profile & Weakness Tracker
+ChemClash — User Profile & Weakness Tracker  (canonical weakness source)
 
-In-memory store for a prototype. Swap `_PROFILES` for a Redis hash or
-PostgreSQL JSONB column when moving to production.
+Persists to backend/data/user_profiles.json using atomic temp-file + os.replace
+writes. Loaded once at import time; survives server restarts.
 
-Schema per user
----------------
+All scoring logic is unchanged:
+  wrong answer  → weakness_scores[tag] += 2,  strength_scores[tag] = max(0, s-1)
+  correct answer → weakness_scores[tag] = max(0, w-1), strength_scores[tag] += 1
+
+Schema per user (stored in JSON)
+---------------------------------
 {
   "user_id": "u_123",
   "total_answered": 42,
   "total_correct": 31,
-  "weakness_scores": {
-    "SN2": 3,
-    "steric_hindrance": 5,
-    ...
-  },
-  "strength_scores": {
-    "EAS": 4,
-    ...
-  },
-  "history": [
-    { "pyq_id": "PYQ-001", "correct": False, "ts": 1720000000.0 }
-  ]
+  "weakness_scores":  { "SN2": 3, "steric_hindrance": 5 },
+  "strength_scores":  { "EAS": 4 },
+  "history": [{ "pyq_id": "PYQ-001", "correct": false, "ts": 1720000000.0 }]
 }
 """
 
 from __future__ import annotations
 
+import json
+import os
+import tempfile
 import time
 from collections import defaultdict
-from typing import TypedDict
+from pathlib import Path
 
 
-# ── In-memory store  ──────────────────────────────────────────────────────────
-_PROFILES: dict[str, dict] = {}
+# ── Persistence path ──────────────────────────────────────────────────────────
+
+_DATA_DIR  = Path(__file__).parent / "data"
+_SAVE_PATH = _DATA_DIR / "user_profiles.json"
+
+
+def _load_from_disk() -> dict[str, dict]:
+    """
+    Load all profiles from the JSON file on startup.
+    Returns an empty dict if the file does not yet exist or is corrupt.
+    weakness_scores and strength_scores are re-wrapped as defaultdict(int)
+    so existing in-memory code continues to work without modification.
+    """
+    if not _SAVE_PATH.exists():
+        return {}
+    try:
+        raw: dict[str, dict] = json.loads(_SAVE_PATH.read_text(encoding="utf-8"))
+        for uid, p in raw.items():
+            p["weakness_scores"] = defaultdict(int, p.get("weakness_scores", {}))
+            p["strength_scores"] = defaultdict(int, p.get("strength_scores", {}))
+        return raw
+    except Exception:
+        # Corrupt file — start fresh rather than crash
+        return {}
+
+
+def _persist() -> None:
+    """
+    Atomically write all profiles to disk (temp file + os.replace).
+    Serialises defaultdicts to plain dicts for JSON compatibility.
+    Single-process safe; not designed for multi-worker deployments.
+    """
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    serialisable = {
+        uid: {
+            **p,
+            "weakness_scores": dict(p["weakness_scores"]),
+            "strength_scores": dict(p["strength_scores"]),
+        }
+        for uid, p in _PROFILES.items()
+    }
+    fd, tmp_path = tempfile.mkstemp(dir=_DATA_DIR, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(serialisable, f, indent=2, default=str)
+        os.replace(tmp_path, _SAVE_PATH)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+# ── In-memory store (loaded from disk at import time) ────────────────────────
+_PROFILES: dict[str, dict] = _load_from_disk()
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -60,18 +112,11 @@ def update_user_profile(
     concept_tags: list[str],
 ) -> dict:
     """
-    Record the result of one answered PYQ.
+    Record the result of one answered PYQ and persist to disk.
 
-    Parameters
-    ----------
-    user_id      : Unique player identifier.
-    pyq_id       : The PYQ that was answered (e.g. "PYQ-001").
-    was_correct  : True if the player chose the right answer.
-    concept_tags : Tags from the PYQ (e.g. ["SN2", "steric_hindrance"]).
-
-    Returns
-    -------
-    The updated profile dict (weakness_scores as plain dict for serialisation).
+    Scoring (unchanged):
+      wrong  → weakness_scores[tag] += 2,  strength_scores[tag] = max(0, s-1)
+      correct → weakness_scores[tag] = max(0, w-1), strength_scores[tag] += 1
     """
     profile = _get_or_create(user_id)
 
@@ -99,6 +144,7 @@ def update_user_profile(
         "ts": time.time(),
     })
 
+    _persist()   # atomic write — survives server restarts
     return get_profile(user_id)
 
 

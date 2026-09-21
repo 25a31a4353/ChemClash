@@ -13,34 +13,23 @@ at main.py with zero extra imports.
 from __future__ import annotations
 
 # ── Standard library ──────────────────────────────────────────────────────────
-import datetime
 import logging
-from typing import Dict, Optional
 
 # ── Third-party ───────────────────────────────────────────────────────────────
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 
 # ── Dedicated modules (single source of truth) ────────────────────────────────
 from challenge_bank import CHALLENGES
-from config import MONGO_URI, OPENAI_API_KEY, _NO_KEY
+from config import OPENAI_API_KEY, _NO_KEY
 from routers.adaptive import _PYQ_DB       # loaded once in adaptive router
 from routers.curriculum import _MODULES    # loaded once in curriculum router
 
 # config.py calls load_dotenv() at import time — no second call needed here.
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("chemclash")
-
-# ═════════════════════════════════════════════════════════════════════════════
-# SECTION 1 — CONFIGURATION
-# ═════════════════════════════════════════════════════════════════════════════
-
-_mongo_client = AsyncIOMotorClient(MONGO_URI)
-_db = _mongo_client.chemclash
-users_collection = _db.users
 
 
 def _llm_available() -> bool:
@@ -106,54 +95,11 @@ app.include_router(_adaptive_router, prefix="/api/adaptive", tags=["Adaptive PYQ
 from routers.curriculum import router as _curriculum_router  # noqa: E402
 app.include_router(_curriculum_router, prefix="/api/curriculum", tags=["Curriculum"])
 
-
 # ═════════════════════════════════════════════════════════════════════════════
-# SECTION 14 — USER PROFILES (MongoDB)
+# SECTION 14 — USER PROFILES  (delegated to routers/user.py)
 # ═════════════════════════════════════════════════════════════════════════════
-
-class UserProfile(BaseModel):
-    user_id: str
-    elo_rating: int = 1200
-    streak_days: int = 0
-    last_played: Optional[datetime.datetime] = None
-    concept_weaknesses: Dict[str, float] = Field(default_factory=dict)
-
-class MatchUpdate(BaseModel):
-    elo_change: int
-    weakness_updates: Dict[str, float] = Field(default_factory=dict)
-
-@app.get("/user/{user_id}", response_model=UserProfile, tags=["User"])
-async def get_user(user_id: str):
-    """Fetch a user profile from MongoDB, or create one if it doesn't exist."""
-    user = await users_collection.find_one({"user_id": user_id})
-    if not user:
-        new_profile = UserProfile(user_id=user_id)
-        await users_collection.insert_one(new_profile.model_dump())
-        return new_profile
-    return UserProfile(**user)
-
-@app.post("/user/{user_id}/update-match", response_model=UserProfile, tags=["User"])
-async def update_match(user_id: str, update: MatchUpdate):
-    """Update a user's ELO and weaknesses after a match."""
-    user = await users_collection.find_one({"user_id": user_id})
-    if not user:
-        profile = UserProfile(user_id=user_id)
-    else:
-        profile = UserProfile(**user)
-
-    profile.elo_rating += update.elo_change
-    profile.last_played = datetime.datetime.now(datetime.timezone.utc)
-    
-    # Simple logic to merge weaknesses
-    for concept, value in update.weakness_updates.items():
-        profile.concept_weaknesses[concept] = profile.concept_weaknesses.get(concept, 0.0) + value
-
-    await users_collection.update_one(
-        {"user_id": user_id},
-        {"$set": profile.model_dump()},
-        upsert=True
-    )
-    return profile
+from routers.user import user_router as _user_router  # noqa: E402
+app.include_router(_user_router)   # prefix="/user" is declared inside user_router
 
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 15 — SNAP-TO-SOLVE  (image-based Socratic doubt resolution)
@@ -202,8 +148,8 @@ _PERSONA_INSTRUCTIONS: dict[str, str] = {
         "- Identify the concept being tested and name the common exam trap.\n"
         "- In 'first_issue', highlight the step where most students lose marks.\n"
         "- In 'principle', name the rule or shortcut that applies in an exam context.\n"
-        "- In 'socratic_question', ask a concise strategy question ("Which rule eliminates "
-        "  wrong options here?").\n"
+        "- In 'socratic_question', ask a concise strategy question (\"Which rule eliminates "
+        "  wrong options here?\").\n"
         "- Do NOT give the final answer."
     ),
     "quick_revision": (

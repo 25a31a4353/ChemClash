@@ -1,0 +1,305 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ChemClash — Phase 2 Integration Audit</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; background: #ffffff; color: #1f2328; }
+  .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
+  h1 { font-size: 22px; font-weight: 800; color: #1f2328; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #57606a; margin-bottom: 32px; }
+  h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #57606a; margin: 32px 0 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+  .finding { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+  .finding-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .red    { background: #fef2f2; border-color: #fca5a5; }
+  .red    .badge { background: #fee2e2; color: #b91c1c; }
+  .orange { background: #fff7ed; border-color: #fdba74; }
+  .orange .badge { background: #ffedd5; color: #c2410c; }
+  .yellow { background: #fefce8; border-color: #fde68a; }
+  .yellow .badge { background: #fef9c3; color: #a16207; }
+  .green  { background: #f0fdf4; border-color: #86efac; }
+  .green  .badge { background: #dcfce7; color: #15803d; }
+  .finding-title { font-size: 13px; font-weight: 700; color: #1f2328; }
+  .finding-body  { font-size: 12.5px; color: #57606a; line-height: 1.65; padding-left: 30px; }
+  .finding-body code { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 5px; font-size: 11px; font-family: ui-monospace, monospace; color: #334155; }
+  .priority-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .priority-table th { background: #f7f8fa; text-align: left; padding: 8px 12px; border: 1px solid #e5e7eb; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #57606a; }
+  .priority-table td { padding: 9px 12px; border: 1px solid #e5e7eb; vertical-align: top; }
+  .priority-table tr:nth-child(even) td { background: #fafafa; }
+  .rank { font-weight: 800; color: #3b82d4; }
+  .impact { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; white-space: nowrap; }
+  .impact-high   { background: #fee2e2; color: #b91c1c; }
+  .impact-medium { background: #ffedd5; color: #c2410c; }
+  .impact-low    { background: #fef9c3; color: #a16207; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px; }
+  .stat-box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 12px; text-align: center; background: #f7f8fa; }
+  .stat-num { font-size: 26px; font-weight: 900; display: block; }
+  .stat-label { font-size: 11px; color: #57606a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .red-num    { color: #dc2626; }
+  .orange-num { color: #ea580c; }
+  .yellow-num { color: #d97706; }
+  .green-num  { color: #16a34a; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #57606a; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>ChemClash — Phase 2 Integration Audit</h1>
+  <p class="subtitle">Read-only audit · Backend GAPs 1–6 assumed fixed · All page files inspected directly · No changes made</p>
+
+  
+  <div class="summary-grid">
+    <div class="stat-box"><span class="stat-num red-num">3</span><span class="stat-label">🔴 Critical</span></div>
+    <div class="stat-box"><span class="stat-num orange-num">4</span><span class="stat-label">🟠 Important</span></div>
+    <div class="stat-box"><span class="stat-num yellow-num">5</span><span class="stat-label">🟡 Minor</span></div>
+    <div class="stat-box"><span class="stat-num green-num">14</span><span class="stat-label">✅ Working</span></div>
+  </div>
+
+  
+  <h2>🔴 Critical Issues</h2>
+
+  <div class="finding red">
+    <div class="finding-header">
+      <span class="badge">CRITICAL 1</span>
+      <span class="finding-title">Dashboard stats bar is entirely hardcoded — never reflects real data</span>
+    </div>
+    <div class="finding-body">
+      The four stat tiles (<code>REACTIONS ATTEMPTED: 248</code>, <code>ACCURACY RATE: 73%</code>, <code>BEST STREAK: 12d</code>, <code>GLOBAL RANK: #84</code>) and the hero subtitle (<em>"Top 12% globally"</em>) are all static constants in <code>page.tsx</code> lines 205–210. The store does hydrate real <code>eloRating</code> and <code>dailyStreak</code> from the backend but those values are never used in the STATS array. A demo evaluator will see values that never change, breaking the illusion that the app is data-driven. The <code>eloRating</code> from Zustand <strong>is</strong> shown in the TopNav and hero text — but the stat cards below it always show "248 / 73% / 12d / #84" regardless of what the backend says.
+    </div>
+  </div>
+
+  <div class="finding red">
+    <div class="finding-header">
+      <span class="badge">CRITICAL 2</span>
+      <span class="finding-title">Adaptive PYQ is marked <code>locked: true</code> on the Dashboard card but is the primary recommendation target everywhere else</span>
+    </div>
+    <div class="finding-body">
+      In <code>page.tsx</code> line 129, <code>adaptive-pyq</code> game-mode card has <code>locked: true</code> and <code>badge: "COMING SOON"</code>. However, the "Recommended for You" panel, the Duel result screen's "Review Videos" CTA, every Tutor Shorts card's practice button, Video Recommendations' footer link, the Skill Tree nodes <code>med_02 / med_03 / med_04 / adv_01 / adv_03</code>, and the Rewards Shop all link to <code>/adaptive-pyq</code>. The page itself works correctly — the inconsistency is that the Dashboard card says "COMING SOON / LOCKED" while nine other places invite the user to click it. During a live demo this will confuse evaluators immediately.
+    </div>
+  </div>
+
+  <div class="finding red">
+    <div class="finding-header">
+      <span class="badge">CRITICAL 3</span>
+      <span class="finding-title"><code>/resources</code> page exists as a route but is completely missing from the Dashboard game-mode grid</span>
+    </div>
+    <div class="finding-body">
+      <code>chemclash/src/app/resources/page.tsx</code> exists and is personalised (reads <code>top_weaknesses</code> from the store). It is not listed in the <code>GAME_MODES</code> array at all, so there is no card, no link, and no way to reach it from the Dashboard via normal navigation. A user or evaluator has no discoverability path to it unless they type the URL manually.
+    </div>
+  </div>
+
+  
+  <h2>🟠 Important Issues</h2>
+
+  <div class="finding orange">
+    <div class="finding-header">
+      <span class="badge">IMPORTANT 1</span>
+      <span class="finding-title">Dashboard's <code>loadPlayerProfile</code> is never called — streak and username stay at defaults on page load</span>
+    </div>
+    <div class="finding-body">
+      The Dashboard <code>useEffect</code> (line 392–395) calls <code>claimLoginReward()</code> and <code>refreshProfile()</code> but <strong>not</strong> <code>loadPlayerProfile()</code>. <code>refreshProfile</code> fetches the <em>adaptive weakness profile</em> (<code>/api/adaptive/profile/{id}</code>) to populate <code>profile.top_weaknesses</code>. <code>loadPlayerProfile</code> fetches the <em>game profile</em> (<code>/user/{id}</code>) to hydrate <code>eloRating</code> and <code>dailyStreak</code> into the store. So on the Dashboard, <code>streak_days</code> remains 0 and <code>username</code> shows the raw UUID (the anonymous ID) rather than any server-side label. The TopNav and hero will display the UUID as the welcome message until the user navigates to Adaptive PYQ (which calls <code>startSession</code>, which calls <code>loadPlayerProfile</code>).
+    </div>
+  </div>
+
+  <div class="finding orange">
+    <div class="finding-header">
+      <span class="badge">IMPORTANT 2</span>
+      <span class="finding-title">Duel (Practice Arena) result screen shows missed concepts but the "Review Videos" CTA does NOT pre-filter the video page</span>
+    </div>
+    <div class="finding-body">
+      After a Duel match, <code>ArenaResult</code> (line 559–566) shows a "Review Videos for Missed Concepts" link that navigates to <code>/video-recommendations</code>. That page reads <code>profile.top_weaknesses</code> from the Zustand store — but the Duel's <code>processAnswer</code> calls <code>syncMatchResult</code> (fire-and-forget to <code>/user/{id}/update-match</code>) which intentionally does <em>not</em> update <code>concept_weaknesses</code> in the canonical <code>user_profiles.py</code> store (by design, line 182–183 of <code>user.py</code>). Only <code>POST /api/adaptive/answer</code> updates weakness scores. So the video recommendations shown after a Duel reflect old weakness data, not the concepts just missed in that match, breaking the stated "personalised" promise at a critical demo moment.
+    </div>
+  </div>
+
+  <div class="finding orange">
+    <div class="finding-header">
+      <span class="badge">IMPORTANT 3</span>
+      <span class="finding-title">Skill Tree mastery key mismatch — Curriculum writes <code>bas_01…</code> IDs, but Skill Tree nodes don't map to actual Curriculum <code>module_id</code>s</span>
+    </div>
+    <div class="finding-body">
+      <code>curriculum/page.tsx</code> writes <code>localStorage.setItem(LS_MODULE_KEY(selectedModule.module_id), "1")</code> using the backend's <code>module_id</code> values (e.g. <code>"basics_sn1"</code>, <code>"advanced_eas"</code> from <code>concept_tree.json</code>). The Skill Tree reads <code>LS_MODULE_KEY(node.id)</code> for its own static node IDs (<code>"bas_01"</code>, <code>"med_03"</code>, etc.). These IDs will never match unless the backend's <code>module_id</code>s happen to equal the Skill Tree node IDs — which they don't. Result: completing a Curriculum module <strong>never</strong> marks the corresponding Skill Tree node as Mastered. The Mastery flow is broken at the last step.
+    </div>
+  </div>
+
+  <div class="finding orange">
+    <div class="finding-header">
+      <span class="badge">IMPORTANT 4</span>
+      <span class="finding-title">Leaderboard is entirely static mock data — ELO shown in "My Position" is live but the board itself is fabricated</span>
+    </div>
+    <div class="finding-body">
+      <code>leaderboard/page.tsx</code> lines 13–37 define hardcoded arrays <code>GLOBAL_BOARD</code> and <code>WEEKLY_BOARD</code> with fictional usernames. The "My Position" row reads from the Zustand store (<code>eloRating</code>, <code>username</code>) so it is live, but it is injected at a hardcoded rank (84 global, 5 weekly). There is no API call to <code>/user/…</code> or any endpoint. For a demo this is fine as a placeholder, but the "LIVE" badge on the dashboard card is misleading — a quick evaluator may ask the backend for leaderboard data and find no such endpoint exists.
+    </div>
+  </div>
+
+  
+  <h2>🟡 Minor Issues</h2>
+
+  <div class="finding yellow">
+    <div class="finding-header">
+      <span class="badge">MINOR 1</span>
+      <span class="finding-title">"Reaction Pathway Lab" dashboard card (id <code>pathway-lab</code>) points to <code>/mechanism-builder</code></span>
+    </div>
+    <div class="finding-body">
+      The card at line 108 has a distinct identity ("LEVEL 2.5", "NEW" badge) but routes to the same <code>/mechanism-builder</code> page as the "Mechanism Builder" card above it. There is no dedicated <code>/reaction-pathway-lab</code> route. Evaluators may click it expecting a different experience and get the same canvas. Either merge the cards or create a distinct route.
+    </div>
+  </div>
+
+  <div class="finding yellow">
+    <div class="finding-header">
+      <span class="badge">MINOR 2</span>
+      <span class="finding-title">Rewards Shop purchases have no actual effect — "unlock" is cosmetic only</span>
+    </div>
+    <div class="finding-body">
+      Purchasing a reward in <code>rewards/page.tsx</code> deducts ChemCoins and stores the reward ID in localStorage, then shows a "✅ Open [page] →" link. However the linked pages (Adaptive PYQ, Tutor Shorts, etc.) have no awareness of which rewards were purchased. There is no "SN2 filter active" state passed to those pages. The reward descriptions promise "unlocks a focused run of SN2 questions" or "activates a bonus Tutor Shorts session filtered to EAS" but the destination pages always start in their default state. This is a demo gap but not a crash.
+    </div>
+  </div>
+
+  <div class="finding yellow">
+    <div class="finding-header">
+      <span class="badge">MINOR 3</span>
+      <span class="finding-title">Weekly Activity chart is hardcoded static data</span>
+    </div>
+    <div class="finding-body">
+      <code>ACTIVITY = [40, 70, 55, 90, 65, 80, 100]</code> at line 212 is never populated from the backend. The chart always shows the same 7-bar pattern regardless of whether the user has ever played.
+    </div>
+  </div>
+
+  <div class="finding yellow">
+    <div class="finding-header">
+      <span class="badge">MINOR 4</span>
+      <span class="finding-title"><code>Snap-to-Solve</code> gracefully degrades to <code>supported: false</code> when vision not configured, but the UI state for that case was not verified to be polished</span>
+    </div>
+    <div class="finding-body">
+      The backend correctly returns <code>{"supported": false, "reason": "…"}</code> when <code>OPENAI_API_KEY</code> is absent or the model is not vision-capable. The frontend (line 17–21 of the API client) types <code>SnapResponse = SnapResult | SnapUnsupported</code>. As long as <code>snap-to-solve/page.tsx</code> renders the <code>reason</code> text clearly, this is fine — but it means the feature shows as partially broken in any demo environment without a valid GPT-4o key.
+    </div>
+  </div>
+
+  <div class="finding yellow">
+    <div class="finding-header">
+      <span class="badge">MINOR 5</span>
+      <span class="finding-title">Tutor Shorts concept filter does not include <code>markovnikov</code> / <code>leaving_group</code> / <code>carbonyl</code> / <code>aromaticity</code> tags in the weakness-priority sort</span>
+    </div>
+    <div class="finding-body">
+      The weakness sort in <code>tutor-shorts/page.tsx</code> (line 356–361) matches <code>short.conceptTag</code> against <code>topWeaknesses</code> from the backend. The backend's <code>get_top_weaknesses</code> returns raw concept tags from <code>pyq_db.json</code> (e.g. <code>"steric_hindrance"</code>, <code>"leaving_group"</code>). Several Tutor Shorts use tags like <code>"markovnikov"</code>, <code>"leaving_group"</code>, and <code>"carbonyl"</code> which exist in both datasets — these will surface correctly. However the VIDEO_MAP in <code>video-recommendations/page.tsx</code> normalises tags with <code>replace(/[^a-z0-9_]/g, "_")</code>, potentially mangling tags with spaces (e.g. <code>"carbocation shifts"</code> becomes <code>"carbocation_shifts"</code>) while the CONCEPT_ROUTE_MAP on the dashboard uses the raw string with a space. Low-probability but produces a missed weakness match.
+    </div>
+  </div>
+
+  
+  <h2>✅ Working Integrations</h2>
+
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Adaptive PYQ end-to-end flow — fetch → answer → weakness update → next question</span></div>
+    <div class="finding-body">Store <code>startSession</code> → <code>fetchAdaptivePYQ</code> → <code>chooseAnswer</code> → <code>submitAnswer</code> → <code>syncMatchResult</code> → <code>nextQuestion</code> with prefetch queue all wire correctly. Error states, loading states, and optimistic phase transitions are all handled.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Weakness data drives Dashboard recommendation</span></div>
+    <div class="finding-body"><code>refreshProfile()</code> is called on Dashboard mount; <code>profile.top_weaknesses</code> feeds <code>getRecommendation()</code> which maps concept tags to the correct destination route with a styled CTA. CONCEPT_ROUTE_MAP covers all major tags.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Weakness data drives Tutor Shorts card ordering</span></div>
+    <div class="finding-body">Weakness-matching shorts surface first; weakness filter buttons are highlighted in red; each card's "Practice CTA" links to Adaptive PYQ — Learn → Practice loop is closed.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Weakness data drives Video Recommendations</span></div>
+    <div class="finding-body"><code>refreshProfile()</code> called on mount; weakness tags map to curated YouTube search URLs with partial-match fallback; foundational cards fill gaps; footer links to Adaptive PYQ. Full Learn → Watch → Practice loop present.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Curriculum → ELO award → localStorage completion write</span></div>
+    <div class="finding-body">Correct answers award +5 ELO; module completion awards +20 ELO; <code>LS_MODULE_KEY(module_id)</code> is written to localStorage. The Skill Tree reads the same key pattern — the only bug is the ID mismatch (Critical 3 above).</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Practice Arena (Duel) — full 5-question match loop with ELO, timer, reveal, result screen</span></div>
+    <div class="finding-body">Lobby → match → result flow works; countdown timer auto-expires with wrong answer; per-question ELO tracked; syncMatchResult fire-and-forget; global Zustand ELO updated on match complete.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">React-or-Reject — backend challenge bank integration</span></div>
+    <div class="finding-body">Fetches challenges from <code>/api/challenges</code>; graceful fallback if backend unreachable (uses static seed). Swipe mechanic, feedback overlay, and ELO award all functional.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Mechanism Builder — canvas arrow drawing + backend evaluation</span></div>
+    <div class="finding-body">SVG drag-to-draw arrows, <code>evaluateMechanism</code> call to <code>/api/evaluate-mechanism</code>, Socratic hint stream via SSE from <code>/api/hint/stream</code> all wired correctly. Falls back gracefully if LLM unavailable.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Daily Missions — ChemCoins earn, persist, and display consistently</span></div>
+    <div class="finding-body">Login reward auto-claimed on Dashboard mount; Daily Challenge claimable once per day; coin balance persisted in localStorage; Rewards Shop reads same key; deduct-on-purchase logic guards against overspending.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">ELO propagates across all game modes into the Zustand store</span></div>
+    <div class="finding-body">Adaptive PYQ (+10/-5), Curriculum (+5/+20), Duel (+12/-6), all update <code>useChemStore.eloRating</code> correctly and show live in every page's top bar.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Skill Tree — lock/unlock logic correct; available/mastered rendering works</span></div>
+    <div class="finding-body">Tier-unlock rules (any Tier N-1 mastered → Tier N available) are implemented correctly; click-through CTAs to correct destinations per node type. Only broken by the ID mismatch with Curriculum (Critical 3).</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Backend adaptive algorithm correctly uses weakness profile</span></div>
+    <div class="finding-body"><code>get_top_weaknesses</code> feeds <code>_filter_by_tags</code> which scores questions by tag overlap; difficulty calibration by accuracy; LLM pick with rule-based fallback; hallucination-proof ID validation. Accuracy-based difficulty ordering (easy for &lt;40%, hard for &gt;70%) implemented.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">All 14 feature pages have a ← Dashboard breadcrumb link</span></div>
+    <div class="finding-body">Every feature page has a sticky top nav with a working <code>Link href="/"</code>. No page is a dead end.</div>
+  </div>
+  <div class="finding green">
+    <div class="finding-header"><span class="badge">✅</span><span class="finding-title">Anonymous persistent user ID across sessions</span></div>
+    <div class="finding-body"><code>getAnonId()</code> generates a UUID once and persists it in localStorage. All API calls use this stable ID so weakness profiles, ELO, and streaks accumulate correctly across browser sessions without login.</div>
+  </div>
+
+  
+  <h2>Recommended Next Fixes — Ranked by Demo Impact</h2>
+  <table class="priority-table">
+    <thead>
+      <tr><th>#</th><th>Fix</th><th>Files</th><th>Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="rank">1</td>
+        <td><strong>Remove <code>locked: true</code> from the Adaptive PYQ dashboard card</strong> — change badge from "COMING SOON" to "SMART" and remove the locked flag. The page already works.</td>
+        <td><code>app/page.tsx</code> line 128–129</td>
+        <td><span class="impact impact-high">CRITICAL</span></td>
+      </tr>
+      <tr>
+        <td class="rank">2</td>
+        <td><strong>Replace hardcoded STATS with live Zustand values</strong> — wire <code>dailyStreak</code> to BEST STREAK, <code>profile.total_answered</code> to REACTIONS ATTEMPTED, <code>profile.accuracy</code> to ACCURACY RATE. Call <code>loadPlayerProfile()</code> in the Dashboard <code>useEffect</code>.</td>
+        <td><code>app/page.tsx</code> lines 205–210, 392–395</td>
+        <td><span class="impact impact-high">CRITICAL</span></td>
+      </tr>
+      <tr>
+        <td class="rank">3</td>
+        <td><strong>Fix Skill Tree mastery ID mismatch</strong> — add an ID mapping table in <code>skill-tree/page.tsx</code> (or in the Curriculum page) that translates backend <code>module_id</code>s to Skill Tree node IDs, or rename the TREE_NODES to match actual backend module IDs.</td>
+        <td><code>app/skill-tree/page.tsx</code>, <code>app/curriculum/page.tsx</code></td>
+        <td><span class="impact impact-high">CRITICAL</span></td>
+      </tr>
+      <tr>
+        <td class="rank">4</td>
+        <td><strong>Add <code>/resources</code> to the Dashboard game-mode grid</strong> — it is a fully built personalised page that is simply unreachable.</td>
+        <td><code>app/page.tsx</code> GAME_MODES array</td>
+        <td><span class="impact impact-medium">IMPORTANT</span></td>
+      </tr>
+      <tr>
+        <td class="rank">5</td>
+        <td><strong>Call <code>loadPlayerProfile()</code> on Dashboard mount</strong> — so username and streak are hydrated immediately without waiting for a PYQ session to start.</td>
+        <td><code>app/page.tsx</code> useEffect line 392</td>
+        <td><span class="impact impact-medium">IMPORTANT</span></td>
+      </tr>
+      <tr>
+        <td class="rank">6</td>
+        <td><strong>After a Duel match, call <code>refreshProfile() before routing to Video Recommendations so the weakness data is fresh from the backend (Duel already calls <code>submitAnswer</code> which updates weakness scores).</code></strong></td>
+        <td><code>app/duel/page.tsx</code> <code>handleMatchComplete</code></td>
+        <td><span class="impact impact-medium">IMPORTANT</span></td>
+      </tr>
+      <tr>
+        <td class="rank">7</td>
+        <td><strong>Remove the duplicate "Reaction Pathway Lab" card or give it a distinct route</strong> — two cards pointing to the same page with different names is confusing.</td>
+        <td><code>app/page.tsx</code> GAME_MODES array</td>
+        <td><span class="impact impact-low">MINOR</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

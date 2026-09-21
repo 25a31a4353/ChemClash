@@ -161,9 +161,9 @@ export default function AdaptivePYQPage() {
   // We use a local ref pattern via useState; reset on each new question.
   const [chosenAnswer, setChosenAnswer] = useState<string | null>(null);
 
-  // Start an adaptive session for the guest user on mount
+  // Start an adaptive session on mount — uses the persistent anon ID from the store
   useEffect(() => {
-    startSession("guest");
+    startSession();
   }, [startSession]);
 
   // Reset local chosen state when a new question arrives
@@ -220,7 +220,7 @@ export default function AdaptivePYQPage() {
             <p className="text-sm font-semibold text-red-600 mb-3">Could not load question</p>
             <p className="text-xs text-slate-500 mb-4">{error}</p>
             <button
-              onClick={() => startSession("guest")}
+              onClick={() => startSession()}
               className="bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold px-5 py-2 rounded-lg transition-colors"
             >
               Retry

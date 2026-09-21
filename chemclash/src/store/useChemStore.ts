@@ -47,6 +47,25 @@ interface PlayerState {
   profile: WeaknessProfile | null;
 }
 
+// ── Anonymous persistent user ID ─────────────────────────────────────────
+// Generated once per browser, stored in localStorage, reused on every reload.
+// Gives every visitor their own profile without requiring authentication.
+
+const LS_KEY_USER_ID = "chemclash_user_id";
+
+function getAnonId(): string {
+  if (typeof window === "undefined") return "ssr-placeholder";
+  let id = localStorage.getItem(LS_KEY_USER_ID);
+  if (!id) {
+    // crypto.randomUUID is available in all modern browsers and Node 16+
+    id = typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `anon-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(LS_KEY_USER_ID, id);
+  }
+  return id;
+}
+
 // ── ChemCoins / Daily Missions ────────────────────────────────────────────
 
 /** Keys stored in localStorage to track which daily rewards have been claimed. */
@@ -78,7 +97,7 @@ interface ChemStore extends AdaptiveSession, PlayerState {
   dailyMissions: DailyMissions;
 
   // Actions
-  startSession: (userId: string, demo?: boolean) => Promise<void>;
+  startSession: (userId?: string, demo?: boolean) => Promise<void>;
   chooseAnswer: (answer: string) => Promise<void>;
   nextQuestion: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -92,7 +111,9 @@ interface ChemStore extends AdaptiveSession, PlayerState {
 
 export const useChemStore = create<ChemStore>((set, get) => ({
   // ── Initial state ──────────────────────────────────────────────────────
-  userId: "guest",
+  // getAnonId() is SSR-safe: returns "ssr-placeholder" on the server,
+  // then is immediately overwritten on the client in startSession/loadPlayerProfile.
+  userId: getAnonId(),
   phase: "loading",
   current: null,
   prefetchQueue: [],
@@ -102,7 +123,7 @@ export const useChemStore = create<ChemStore>((set, get) => ({
 
   // Player profile: defaults are placeholders; loadPlayerProfile() hydrates
   // these from the backend as soon as a userId is known.
-  username: "guest",
+  username: "player",
   eloRating: 1200,
   dailyStreak: 0,
   profile: null,
@@ -150,8 +171,7 @@ export const useChemStore = create<ChemStore>((set, get) => ({
       set({
         eloRating: p.elo_rating,
         dailyStreak: p.streak_days,
-        // Derive display name: use userId unless it's the generic "guest"
-        username: userId !== "guest" ? userId : "guest",
+        username: userId,
       });
     } catch {
       // Non-fatal: keep existing defaults if backend is unreachable
@@ -159,7 +179,7 @@ export const useChemStore = create<ChemStore>((set, get) => ({
   },
 
   // ── startSession ───────────────────────────────────────────────────────
-  startSession: async (userId, demo = false) => {
+  startSession: async (userId = getAnonId(), demo = false) => {
     // Hydrate ChemCoins + mission state from localStorage on session start
     if (typeof window !== "undefined") {
       const today = todayStr();
