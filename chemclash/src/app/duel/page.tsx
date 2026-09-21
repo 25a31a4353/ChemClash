@@ -576,8 +576,9 @@ function ArenaResult({
 type PagePhase = "lobby" | "match" | "result";
 
 export default function DuelPage() {
-  const eloRating  = useChemStore((s) => s.eloRating);
-  const userId     = useChemStore((s) => s.userId);
+  const eloRating      = useChemStore((s) => s.eloRating);
+  const userId         = useChemStore((s) => s.userId);
+  const refreshProfile = useChemStore((s) => s.refreshProfile);
 
   const [pagePhase, setPagePhase]   = useState<PagePhase>("lobby");
   const [records, setRecords]       = useState<RoundRecord[]>([]);
@@ -601,6 +602,9 @@ export default function DuelPage() {
     setFinalElo(finalE);
     // Update global ELO in store
     useChemStore.setState({ eloRating: finalE });
+    // Refresh adaptive weakness profile so downstream recommendations
+    // (Video Recommendations, Dashboard) reflect this match's wrong answers.
+    refreshProfile();
     setPagePhase("result");
   }
 
