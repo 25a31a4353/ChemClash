@@ -392,12 +392,10 @@ export default function Dashboard() {
   }, [router]);
 
   // Hydrate coins + attempt auto-claim login reward on mount (client-only).
-  // loadPlayerProfile hydrates ELO, streak, and username from /user/{id}.
-  // refreshProfile hydrates weakness profile for recommendations + stat tiles.
+  // loadPlayerProfile + refreshProfile run in parallel — saves one round-trip.
   useEffect(() => {
     claimLoginReward();
-    loadPlayerProfile();
-    refreshProfile();
+    Promise.all([loadPlayerProfile(), refreshProfile()]).catch(() => {});
   }, [claimLoginReward, loadPlayerProfile, refreshProfile]);
 
   const rec = getRecommendation(profile?.top_weaknesses ?? []);

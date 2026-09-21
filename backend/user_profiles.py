@@ -56,12 +56,18 @@ def _load_from_disk() -> dict[str, dict]:
         return {}
 
 
-def _persist() -> None:
-    """
-    Atomically write all profiles to disk (temp file + os.replace).
-    Serialises defaultdicts to plain dicts for JSON compatibility.
-    Single-process safe; not designed for multi-worker deployments.
-    """
+# ── Debounced persist ─────────────────────────────────────────────────────────
+# Rapid answering (e.g. Duel 5-question runs) previously triggered a full
+# JSON rewrite on every answer. The debounce coalesces writes into one disk
+# operation per 2-second window, eliminating the I/O bottleneck under load.
+
+import threading as _threading
+_persist_timer: "_threading.Timer | None" = None
+_persist_lock  = _threading.Lock()
+
+
+def _do_persist() -> None:
+    """Actual atomic write — called by the debounce timer."""
     _DATA_DIR.mkdir(parents=True, exist_ok=True)
     serialisable = {
         uid: {
@@ -82,6 +88,21 @@ def _persist() -> None:
         except OSError:
             pass
         raise
+
+
+def _persist() -> None:
+    """
+    Schedule a debounced write.  Any call within 2 s of the previous one
+    resets the timer — only the final call in a burst hits the disk.
+    Single-process safe; not designed for multi-worker deployments.
+    """
+    global _persist_timer
+    with _persist_lock:
+        if _persist_timer is not None:
+            _persist_timer.cancel()
+        _persist_timer = _threading.Timer(2.0, _do_persist)
+        _persist_timer.daemon = True
+        _persist_timer.start()
 
 
 # ── In-memory store (loaded from disk at import time) ────────────────────────

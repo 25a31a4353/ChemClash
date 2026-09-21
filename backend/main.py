@@ -77,6 +77,17 @@ async def root():
     }
 
 
+@app.get("/api/ping", tags=["Health"])
+async def ping():
+    """
+    Ultra-lightweight keep-alive endpoint.
+    The frontend fires this on every page load so the Render free-tier
+    server is already warm by the time the first real API call is made.
+    Returns in <1 ms — no DB, no disk, no computation.
+    """
+    return {"ok": True}
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 11 — MECHANISM ROUTES  (delegated to routers/mechanism.py)
 # ═════════════════════════════════════════════════════════════════════════════

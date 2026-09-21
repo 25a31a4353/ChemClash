@@ -299,3 +299,14 @@ export async function fetchCurriculumModule(
 ): Promise<CurriculumModule> {
   return apiFetch<CurriculumModule>(`/api/curriculum/modules/${encodeURIComponent(moduleId)}`);
 }
+
+// ── Keep-alive ping ────────────────────────────────────────────────────────
+
+/**
+ * Fire-and-forget ping to /api/ping.
+ * Wakes the Render free-tier server before the first real API call is needed.
+ * Called once on app mount from layout.tsx; never blocks the UI.
+ */
+export function pingBackend(): void {
+  fetch(`${BASE}/api/ping`).catch(() => {/* silent — non-critical */});
+}

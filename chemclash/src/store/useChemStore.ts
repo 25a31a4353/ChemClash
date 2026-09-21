@@ -192,12 +192,13 @@ export const useChemStore = create<ChemStore>((set, get) => ({
       });
     }
     set({ userId, phase: "loading", seenIds: [], prefetchQueue: [], error: null });
-    // Hydrate ELO/streak from backend immediately when a session starts
-    try { await get().loadPlayerProfile(); } catch { /* non-fatal */ }
+    // Fire loadPlayerProfile AND the first PYQ fetch in parallel — saves one full
+    // round-trip compared to the previous sequential await.
     try {
-      const q = demo
-        ? await fetchDemoPYQ()
-        : await fetchAdaptivePYQ(userId);
+      const [q] = await Promise.all([
+        demo ? fetchDemoPYQ() : fetchAdaptivePYQ(userId),
+        get().loadPlayerProfile().catch(() => {}),
+      ]);
       set({ current: q, phase: "answering", seenIds: [q.question.id] });
       // Kick off background prefetch immediately
       get()._prefetchNext();
