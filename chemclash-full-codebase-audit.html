@@ -1,0 +1,765 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ChemClash — Full Codebase Audit</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    background: #ffffff;
+    color: #1f2328;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+  h1 { font-size: 1.45rem; font-weight: 700; margin-bottom: 4px; }
+  h2 { font-size: 1.05rem; font-weight: 700; margin: 32px 0 10px; color: #1f2328; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+  h3 { font-size: 0.88rem; font-weight: 700; margin: 18px 0 4px; color: #1f2328; }
+  p  { margin-bottom: 8px; color: #1f2328; }
+  .meta { font-size: 0.78rem; color: #57606a; margin-bottom: 28px; }
+  .meta span { margin-right: 18px; }
+  .tag {
+    display: inline-block;
+    font-size: 0.67rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+    vertical-align: middle;
+  }
+  .tag-py   { background: #dbeafe; color: #1d4ed8; }
+  .tag-ts   { background: #e0e7ff; color: #4338ca; }
+  .tag-js   { background: #fef9c3; color: #92400e; }
+  .tag-json { background: #f0fdf4; color: #166534; }
+  .tag-yaml { background: #fdf4ff; color: #7e22ce; }
+  .tag-txt  { background: #f7f8fa; color: #57606a; }
+  .tag-md   { background: #fff7ed; color: #9a3412; }
+  .tag-cfg  { background: #f7f8fa; color: #57606a; }
+  .tag-issue { background: #fff1f2; color: #9f1239; }
+  .tag-ok   { background: #f0fdf4; color: #166534; }
+  .tag-warn { background: #fffbeb; color: #92400e; }
+
+  .file-block {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .file-block .filename {
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    color: #3b82d4;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .file-block .size {
+    font-size: 0.68rem;
+    color: #57606a;
+    font-family: monospace;
+    font-weight: 400;
+  }
+  .file-block .desc { font-size: 0.82rem; color: #1f2328; margin-bottom: 6px; }
+  .file-block ul { margin: 4px 0 0 16px; }
+  .file-block li { font-size: 0.8rem; color: #57606a; margin-bottom: 2px; }
+  .file-block li strong { color: #1f2328; }
+
+  .section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #57606a;
+    margin: 28px 0 10px;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width: 540px) { .grid2 { grid-template-columns: 1fr; } }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin: 10px 0 18px; }
+  th { background: #f7f8fa; text-align: left; padding: 7px 10px; font-weight: 600; border-bottom: 2px solid #e5e7eb; color: #1f2328; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: monospace; font-size: 0.75rem; color: #3b82d4; white-space: nowrap; }
+
+  .findings-block { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; }
+  .findings-block.warn { background: #fffbeb; border-color: #fde68a; }
+  .findings-block.ok   { background: #f0fdf4; border-color: #bbf7d0; }
+  .findings-block .ftitle { font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #9f1239; }
+  .findings-block.warn .ftitle { color: #92400e; }
+  .findings-block.ok .ftitle { color: #166534; }
+  .findings-block p { font-size: 0.78rem; margin: 0; color: #1f2328; }
+
+  .summary-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+  .stat-box {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .stat-box .num { font-size: 1.4rem; font-weight: 800; color: #1f2328; }
+  .stat-box .lbl { font-size: 0.62rem; color: #57606a; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  footer {
+    margin-top: 52px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 12px;
+    color: #57606a;
+  }
+</style>
+</head>
+<body>
+
+<h1>ChemClash — Full Codebase Audit</h1>
+<div class="meta">
+  <span>📅 Audit Date: 30 Aug 2026</span>
+  <span>🌿 Branch: <strong>main</strong></span>
+  <span>🔖 HEAD: <strong>a9f8dec</strong></span>
+  <span>⚡ Sync: <strong>origin/main (0 diff)</strong></span>
+</div>
+
+
+<div class="summary-row">
+  <div class="stat-box"><div class="num">57</div><div class="lbl">Source Files</div></div>
+  <div class="stat-box"><div class="num">2</div><div class="lbl">Layers (FE + BE)</div></div>
+  <div class="stat-box"><div class="num">15</div><div class="lbl">API Endpoints</div></div>
+  <div class="stat-box"><div class="num">7</div><div class="lbl">Game Modes</div></div>
+  <div class="stat-box"><div class="num">10</div><div class="lbl">Git Commits</div></div>
+</div>
+
+
+<h2>1 — Project Architecture</h2>
+<p>ChemClash is a full-stack, AI-powered organic chemistry platform split into two independently deployable layers:</p>
+<ul style="margin-left:18px;margin-bottom:10px">
+  <li style="margin-bottom:4px"><strong>Backend</strong> — Python FastAPI + uvicorn served from <code>backend/</code>, deployable to Render.</li>
+  <li style="margin-bottom:4px"><strong>Frontend</strong> — Next.js 16 / React 19 app in <code>chemclash/</code>, deployable to Vercel.</li>
+  <li style="margin-bottom:4px"><strong>Root utilities</strong> — <code>main.py</code> (unified launcher), <code>generate_db.py</code> (data generator), <code>sync_concepts.py</code> (data sync), shared JSON data files.</li>
+</ul>
+
+
+<h2>2 — Root-Level Files</h2>
+
+<div class="file-block">
+  <div class="filename">main.py <span class="tag tag-py">Python</span> <span class="size">21 KB · 548 lines</span></div>
+  <div class="desc"><strong>Unified dev launcher.</strong> Single-command entry point to start backend (uvicorn) and/or frontend (npm run dev) as subprocesses.</div>
+  <ul>
+    <li><strong>Modes:</strong> <code>--backend</code>, <code>--frontend</code>, <code>--check</code>, default = both</li>
+    <li><strong>Pre-flight checks:</strong> Python version ≥3.9, pip packages, Node/npm presence, node_modules, .env file presence &amp; placeholder key warning</li>
+    <li><strong>Health monitor:</strong> Background thread polls <code>/docs</code> every 10 s, warns after 3 consecutive failures</li>
+    <li><strong>Port config:</strong> <code>BACKEND_PORT</code> (default 8000), <code>FRONTEND_PORT</code> (default 3000) — overrideable via env vars or CLI flags</li>
+    <li><strong>Windows UTF-8 fix:</strong> Forces stdout/stderr to UTF-8 on Windows to handle emoji correctly</li>
+    <li><strong>Coloured output:</strong> VT-escape colour codes with graceful fallback on non-TTY terminals</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">generate_db.py <span class="tag tag-py">Python</span> <span class="size">39 KB · 545 lines</span></div>
+  <div class="desc"><strong>One-shot database generator.</strong> Contains the entire organic chemistry master dataset inline and writes it to JSON.</div>
+  <ul>
+    <li><strong>Outputs:</strong> <code>organic_db.json</code> (root) AND <code>chemclash/src/data/organic_db.json</code> (frontend copy)</li>
+    <li><strong>Dataset:</strong> 40 reagents, 30 named reactions, 15 basic rules, 15 core concepts = 100 total items</li>
+    <li><strong>Schema:</strong> Exactly matches the JSON shape expected by the React frontend's <code>CheatSheetDownloader</code></li>
+    <li><strong>Run manually</strong> whenever the chemistry data needs to be regenerated</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">sync_concepts.py <span class="tag tag-py">Python</span> <span class="size">3.7 KB · 106 lines</span></div>
+  <div class="desc"><strong>Cross-layer concept synchroniser.</strong> Reads <code>chem_master_data.json</code> and pushes the 10 high-yield concepts into both the backend concept tree and the frontend organic DB.</div>
+  <ul>
+    <li><strong>Target 1:</strong> <code>backend/concept_tree.json</code> — converts concept objects into full module entries with 3-slide tutorial sequences</li>
+    <li><strong>Target 2:</strong> <code>organic_db.json</code> (root + <code>chemclash/src/data/</code>) — appends concepts to <code>core_concepts[]</code> if not already present</li>
+    <li><strong>Idempotent:</strong> Skips concepts already present (deduplication by id/title)</li>
+    <li><strong>Auto-tagging:</strong> Assigns <code>basics/medium/advanced</code> difficulty based on concept_id keywords</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chem_master_data.json <span class="tag tag-json">JSON</span> <span class="size">23 KB</span></div>
+  <div class="desc"><strong>Master chemistry data source.</strong> Contains 10 high-yield concepts (SN2, SN1, EAS, Aldol, Markovnikov, etc.) and 15 PYQ questions with Socratic hints.</div>
+  <ul>
+    <li><strong>Schema per concept:</strong> <code>concept_id</code>, <code>title</code>, <code>core_rule</code>, <code>common_exception</code>, <code>tags[]</code></li>
+    <li><strong>Schema per PYQ:</strong> <code>id</code>, <code>exam</code>, <code>exam_year</code>, <code>question_text</code>, <code>options{A–D}</code>, <code>correct_answer</code>, <code>difficulty_level</code>, <code>concept_tags[]</code>, <code>socratic_hint</code></li>
+    <li><strong>Consumed by:</strong> <code>sync_concepts.py</code>, frontend's <code>adaptive-pyq/page.tsx</code></li>
+    <li><strong>⚠ Duplicated</strong> at <code>chemclash/src/data/chem_master_data.json</code> — two identical copies in the repo</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">organic_db.json <span class="tag tag-json">JSON</span> <span class="size">43 KB</span></div>
+  <div class="desc"><strong>Root-level copy of the organic chemistry database.</strong> Generated by <code>generate_db.py</code> and updated by <code>sync_concepts.py</code>. Primarily used for reference and kept in sync with the frontend copy.</div>
+  <ul>
+    <li><strong>⚠ Duplicated</strong> at <code>chemclash/src/data/organic_db.json</code> — the frontend reads its own copy</li>
+  </ul>
+</div>
+
+<div class="grid2">
+  <div class="file-block">
+    <div class="filename">requirements.txt <span class="tag tag-txt">TXT</span></div>
+    <div class="desc"><strong>Root-level Python deps.</strong> Used by Streamlit Cloud (legacy entry point). Includes FastAPI, uvicorn, pydantic, motor, pymongo, openai, pytest. Contains <code>streamlit&gt;=1.35.0</code> — a leftover from a removed Streamlit frontend.</div>
+    <ul><li><span class="tag tag-warn">warn</span> <strong>streamlit</strong> listed here is unused (Streamlit artefacts were removed in commit 384e2b7) but still pulls in as a dependency</li></ul>
+  </div>
+  <div class="file-block">
+    <div class="filename">render.yaml <span class="tag tag-yaml">YAML</span></div>
+    <div class="desc"><strong>Render deployment blueprint.</strong> Configures the FastAPI backend as a web service on Render.com — build command, start command, health check path, and env var stubs.</div>
+    <ul><li>Start cmd: <code>uvicorn backend.main:app --host 0.0.0.0 --port $PORT</code></li>
+    <li>Health check: <code>GET /</code></li></ul>
+  </div>
+</div>
+
+<div class="file-block">
+  <div class="filename">README.md <span class="tag tag-md">Markdown</span> <span class="size">842 B</span></div>
+  <div class="desc">Project overview and 4-step quick start guide. References <code>python start.py</code> but the actual launcher is <code>python main.py</code> — a minor doc discrepancy.</div>
+  <ul><li><span class="tag tag-warn">warn</span> Quick start says <code>python start.py</code>, actual launcher file is <code>main.py</code></li></ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">.gitignore <span class="tag tag-cfg">Config</span></div>
+  <div class="desc">Root gitignore covering <code>__pycache__</code>, <code>.env</code>, <code>*.pyc</code>. Note: <code>backend/.env</code> is committed to the repo (it is an exact copy of <code>.env.example</code> with placeholder keys — not a real secret leak but should be excluded).</div>
+  <ul><li><span class="tag tag-warn">warn</span> <code>backend/.env</code> (placeholder keys only) is tracked in git</li></ul>
+</div>
+
+
+<h2>3 — Backend (<code>backend/</code>)</h2>
+
+<div class="file-block">
+  <div class="filename">backend/main.py <span class="tag tag-py">Python</span> <span class="size">37 KB · 797 lines</span></div>
+  <div class="desc"><strong>FastAPI application — single-file entry point.</strong> This is the primary backend file. All logic is intentionally colocated here so any hosting service can point at a single file.</div>
+  <ul>
+    <li><strong>CORS:</strong> <code>allow_origins=["*"]</code> — intentionally open for dev; comment in code notes to tighten for production</li>
+    <li><strong>LLM config:</strong> Supports OpenAI and IBM watsonx.ai; gracefully degrades to rule-based if no API key is set</li>
+    <li><strong>Rule-based validator (Section 2):</strong> Five rules covering non-nucleophiles, tertiary/secondary/primary targets, aromatic targets — returns verdict in &lt;1ms</li>
+    <li><strong>Challenge bank (Section 3):</strong> 8 hard-coded puzzles embedded inline (duplicates <code>challenge_bank.py</code>)</li>
+    <li><strong>User profiles (Section 4):</strong> In-memory <code>_PROFILES</code> dict (duplicates <code>user_profiles.py</code>)</li>
+    <li><strong>PYQ database (Section 5):</strong> Loaded from <code>pyq_db.json</code> at startup</li>
+    <li><strong>Curriculum tree (Section 6):</strong> Loaded from <code>concept_tree.json</code> at startup</li>
+    <li><strong>LLM helpers (Section 7):</strong> OpenAI + watsonx inline wrappers (duplicates <code>llm_client.py</code>)</li>
+    <li><strong>MongoDB (Section 14):</strong> <code>motor</code> async client for persistent user profiles + ELO; connects to <code>MONGO_URI</code> env var</li>
+    <li><strong>All 15 API endpoints defined here</strong> — also partially duplicated in <code>routers/</code></li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/config.py <span class="tag tag-py">Python</span> <span class="size">1.8 KB · 34 lines</span></div>
+  <div class="desc"><strong>Centralised configuration module.</strong> Reads all env vars (LLM provider, API keys, model names, generation params) using <code>python-dotenv</code>.</div>
+  <ul>
+    <li><strong>Variables:</strong> <code>LLM_PROVIDER</code>, <code>OPENAI_API_KEY</code>, <code>OPENAI_BASE_URL</code>, <code>OPENAI_MODEL</code>, <code>WATSONX_*</code>, <code>LLM_MAX_TOKENS</code>, <code>LLM_TEMPERATURE</code></li>
+    <li><strong>⚠ Imported by routers</strong> but the same vars are also re-read inline in <code>backend/main.py</code> — two sources of truth for config</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/llm_client.py <span class="tag tag-py">Python</span> <span class="size">5.7 KB · 160 lines</span></div>
+  <div class="desc"><strong>LLM abstraction layer.</strong> Provides a unified <code>evaluate_move(source, target)</code> function that dispatches to either OpenAI or watsonx.ai based on <code>LLM_PROVIDER</code>.</div>
+  <ul>
+    <li><strong>Socratic system prompt:</strong> Strict JSON-only response format enforced via prompt; covers 7 rules for the tutor's behaviour</li>
+    <li><strong>OpenAI path:</strong> Uses <code>response_format={"type": "json_object"}</code> for reliable JSON output</li>
+    <li><strong>watsonx path:</strong> Uses <code>ModelInference.chat()</code> which mirrors OpenAI messages API</li>
+    <li><strong>Used by:</strong> <code>routers/mechanism.py</code> via lazy import</li>
+    <li><strong>⚠ Duplicated logic:</strong> <code>backend/main.py</code> contains its own inline <code>_chat_openai</code>/<code>_chat_watsonx</code> copies</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/fast_validator.py <span class="tag tag-py">Python</span> <span class="size">5.1 KB · 133 lines</span></div>
+  <div class="desc"><strong>Rule-based fast-path validator.</strong> Evaluates nucleophile→target pairs in &lt;1ms with no LLM call. Returns a <code>Verdict</code> dataclass or <code>None</code> (LLM fallback).</div>
+  <ul>
+    <li><strong>Rule 1:</strong> Non-nucleophile source → instant fail</li>
+    <li><strong>Rule 2:</strong> Strong nucleophile + tertiary carbon → SN2 steric fail</li>
+    <li><strong>Rule 3:</strong> Strong nucleophile + primary/leaving group → SN2 pass</li>
+    <li><strong>Rule 4:</strong> Any nucleophile + secondary carbon → pass with E2 warning</li>
+    <li><strong>Rule 5:</strong> Any nucleophile + aromatic target → fail (EAS required)</li>
+    <li><strong>Used by:</strong> <code>routers/mechanism.py</code>; <strong>⚠ duplicated inline</strong> in <code>backend/main.py</code></li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/challenge_bank.py <span class="tag tag-py">Python</span> <span class="size">4.5 KB · 113 lines</span></div>
+  <div class="desc"><strong>Pre-built challenge puzzle store.</strong> Defines 8 nucleophile/electrophile pair puzzles as a typed <code>TypedDict</code> list with hints, mechanism labels, and difficulty ratings.</div>
+  <ul>
+    <li><strong>Helpers:</strong> <code>get_challenge(id)</code>, <code>get_batch(start_id, count)</code></li>
+    <li><strong>Used by:</strong> <code>routers/mechanism.py</code></li>
+    <li><strong>⚠ Duplicate:</strong> Identical 8 puzzles are also hard-coded in <code>backend/main.py</code> <code>CHALLENGES</code> list</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/user_profiles.py <span class="tag tag-py">Python</span> <span class="size">4.0 KB · 129 lines</span></div>
+  <div class="desc"><strong>In-memory user profile and weakness tracker.</strong> Manages per-user PYQ answer history, weakness scores (penalise 2pts on wrong, reward 1pt on correct), and overall accuracy.</div>
+  <ul>
+    <li><strong>Public API:</strong> <code>update_user_profile()</code>, <code>get_profile()</code>, <code>get_top_weaknesses()</code>, <code>get_accuracy()</code></li>
+    <li><strong>Storage:</strong> In-memory dict <code>_PROFILES</code> — <strong>reset on every server restart</strong></li>
+    <li><strong>Used by:</strong> <code>routers/adaptive.py</code></li>
+    <li><strong>⚠ Duplicate:</strong> The same in-memory logic is re-implemented inline in <code>backend/main.py</code> Sections 4</li>
+  </ul>
+</div>
+
+<div class="section-label">Routers</div>
+
+<div class="file-block">
+  <div class="filename">backend/routers/mechanism.py <span class="tag tag-py">Python</span> <span class="size">7.3 KB · 190 lines</span></div>
+  <div class="desc"><strong>Mechanism evaluation router.</strong> Mounts at <code>/api</code> via <code>app.include_router()</code>.</div>
+  <ul>
+    <li><strong>POST /api/evaluate-mechanism</strong> — fast validator → LLM fallback → safe default</li>
+    <li><strong>GET  /api/hint/stream</strong> — SSE word-by-word Socratic hint stream</li>
+    <li><strong>GET  /api/challenges/prefetch</strong> — batch challenge pre-fetch (zero LLM)</li>
+    <li><strong>GET  /api/challenges/{id}</strong> — single challenge by id</li>
+    <li><strong>GET  /api/challenges</strong> — list all (id + difficulty + mechanism)</li>
+    <li><strong>⚠ Note:</strong> These same routes are also defined directly in <code>backend/main.py</code> — dual registration risk if both are mounted</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/routers/adaptive.py <span class="tag tag-py">Python</span> <span class="size">11.8 KB · 316 lines</span></div>
+  <div class="desc"><strong>Adaptive PYQ router.</strong> Hallucination-proof question matchmaker — LLM can only return IDs from the pre-filtered candidate list.</div>
+  <ul>
+    <li><strong>POST /api/adaptive/answer</strong> — record answer, update weakness scores</li>
+    <li><strong>GET  /api/adaptive/pyq/{user_id}</strong> — adaptive question selection (LLM or rule-based)</li>
+    <li><strong>GET  /api/adaptive/pyq/demo</strong> — demo endpoint, no user_id needed</li>
+    <li><strong>GET  /api/adaptive/profile/{user_id}</strong> — full student weakness profile</li>
+    <li><strong>Loads:</strong> <code>pyq_db.json</code> at startup (2nd copy — also loaded in main.py)</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/routers/curriculum.py <span class="tag tag-py">Python</span> <span class="size">4.1 KB · 113 lines</span></div>
+  <div class="desc"><strong>Curriculum tree router.</strong> Serves the module/tutorial content from <code>concept_tree.json</code>.</div>
+  <ul>
+    <li><strong>GET /api/curriculum/modules</strong> — list all modules (filterable by difficulty)</li>
+    <li><strong>GET /api/curriculum/modules/by-tag</strong> — find modules by game tags</li>
+    <li><strong>GET /api/curriculum/modules/{module_id}</strong> — full module + 3-slide tutorial</li>
+    <li><strong>GET /api/curriculum/summary</strong> — stats (module count, slide count, tag index)</li>
+    <li><strong>Loads:</strong> <code>concept_tree.json</code> at startup (2nd copy — also loaded in main.py)</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/routers/user.py <span class="tag tag-py">Python</span> <span class="size">9.2 KB · 226 lines</span></div>
+  <div class="desc"><strong>MongoDB-backed user profile router.</strong> Most recently added router (HEAD commit a9f8dec). Handles ELO, daily streaks, and concept weakness tracking with MongoDB as primary store and in-memory dict as fallback.</div>
+  <ul>
+    <li><strong>GET  /user/{user_id}</strong> — fetch or auto-create profile</li>
+    <li><strong>POST /user/{user_id}/update-match</strong> — update ELO, streak, failed concepts after a match</li>
+    <li><strong>Streak logic:</strong> Computes day diff against <code>last_played</code> UTC timestamp; resets if gap &gt; 1 day</li>
+    <li><strong>MongoDB ops:</strong> <code>find_one_and_update</code> with <code>$inc</code> for atomic weakness increments</li>
+    <li><strong>⚠ Not mounted:</strong> The router defines <code>user_router = APIRouter(prefix="/user")</code> but there is no <code>app.include_router(user_router)</code> in <code>backend/main.py</code> — these endpoints are likely unreachable</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/routers/__init__.py <span class="tag tag-py">Python</span> <span class="size">0 B</span></div>
+  <div class="desc">Empty package marker. No exports.</div>
+</div>
+
+<div class="section-label">Backend Data Files</div>
+
+<div class="grid2">
+  <div class="file-block">
+    <div class="filename">backend/pyq_db.json <span class="tag tag-json">JSON</span> <span class="size">24 KB</span></div>
+    <div class="desc">15 PYQ question records loaded at startup by <code>adaptive.py</code> and <code>main.py</code>. Schema: <code>id</code> (PYQ-001…), <code>exam</code>, <code>exam_year</code>, <code>question_text</code>, <code>options</code>, <code>correct_answer</code>, <code>difficulty_level</code>, <code>concept_tags[]</code>, <code>socratic_hint</code>.</div>
+  </div>
+  <div class="file-block">
+    <div class="filename">backend/concept_tree.json <span class="tag tag-json">JSON</span> <span class="size">45 KB</span></div>
+    <div class="desc">Curriculum module tree loaded at startup by <code>curriculum.py</code> and <code>main.py</code>. Each module has <code>module_id</code>, <code>title</code>, <code>difficulty</code>, <code>difficulty_tier</code>, <code>game_tags[]</code>, and a 3-slide <code>tutorial_sequence[]</code>. Written/extended by <code>sync_concepts.py</code>.</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="file-block">
+    <div class="filename">backend/config.py <span class="tag tag-py">Python</span></div>
+    <div class="desc">Already covered above (centralised env-var config).</div>
+  </div>
+  <div class="file-block">
+    <div class="filename">backend/.env.example <span class="tag tag-cfg">Config</span></div>
+    <div class="desc">Template env file. Documents all required vars with inline comments. Copy to <code>.env</code> and set <code>OPENAI_API_KEY</code>. <strong>Note: .env itself is tracked in git (placeholder keys only).</strong></div>
+  </div>
+</div>
+
+<div class="section-label">Tests</div>
+
+<div class="file-block">
+  <div class="filename">backend/tests/test_mechanism.py <span class="tag tag-py">Python</span> <span class="size">5.2 KB · 146 lines</span></div>
+  <div class="desc"><strong>FastAPI TestClient integration tests</strong> for the <code>/api/evaluate-mechanism</code> endpoint. Uses <code>unittest.mock.patch</code> to monkey-patch <code>llm_client.evaluate_move</code>.</div>
+  <ul>
+    <li><strong>7 test cases:</strong> tertiary→fail, primary→pass, secondary→pass, input normalisation, missing field 422, empty source 422, LLM parse error 502, LLM service error 503, health check 200</li>
+    <li><strong>⚠ Tests expect 502/503 errors</strong> but the current <code>routers/mechanism.py</code> catches all exceptions and returns a safe default 200 — tests for 502/503 will fail against the real implementation</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">backend/requirements.txt <span class="tag tag-txt">TXT</span> <span class="size">409 B</span></div>
+  <div class="desc">Backend-specific Python dependencies. Correctly scoped — <strong>does not</strong> include streamlit. Includes <code>httpx</code> required by FastAPI TestClient.</div>
+</div>
+
+
+<h2>4 — Frontend (<code>chemclash/</code>)</h2>
+
+<div class="section-label">App Infrastructure</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/layout.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">704 B · 24 lines</span></div>
+  <div class="desc"><strong>Next.js root layout.</strong> Sets page metadata ("ChemClash — Gamified Organic Chemistry"), wraps every page in <code>&lt;html&gt;&lt;body&gt;</code>, and renders a fixed bottom-right footer with developer credits.</div>
+  <ul><li><strong>Credits footer:</strong> "Developed by M.Shanmukheswara, N.Varshith, S.V.S.Mohith"</li></ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/globals.css <span class="tag tag-cfg">CSS</span> <span class="size">8.5 KB</span></div>
+  <div class="desc"><strong>Global stylesheet.</strong> Tailwind base + custom cyberpunk animations (<code>animate-fade-in</code>, <code>animate-slide-up</code>, <code>animate-slide-down</code>, <code>.glow</code> text-shadow, <code>.hidden-mobile</code> responsive hide). Dark theme variables.</div>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/lib/api.ts <span class="tag tag-ts">TypeScript</span> <span class="size">5.0 KB · 167 lines</span></div>
+  <div class="desc"><strong>Typed API client layer.</strong> All backend fetch calls go through this module. Uses <code>NEXT_PUBLIC_BACKEND_URL</code> env var (falls back to <code>http://localhost:8000</code>).</div>
+  <ul>
+    <li><strong>Types exported:</strong> <code>PYQQuestion</code>, <code>AdaptivePYQResponse</code>, <code>AnswerResult</code>, <code>WeaknessProfile</code>, <code>MechanismVerdict</code></li>
+    <li><strong>Functions:</strong> <code>fetchAdaptivePYQ()</code>, <code>fetchDemoPYQ()</code>, <code>submitAnswer()</code>, <code>fetchProfile()</code>, <code>evaluateMechanism()</code>, <code>streamHint()</code> (SSE), <code>prefetchChallenges()</code></li>
+    <li><strong>Error handling:</strong> Throws on non-OK responses with status + body text</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/store/useChemStore.ts <span class="tag tag-ts">TypeScript</span> <span class="size">6.1 KB · 180 lines</span></div>
+  <div class="desc"><strong>Zustand global state store.</strong> Single store for the entire app — player profile and adaptive PYQ session state.</div>
+  <ul>
+    <li><strong>Player state:</strong> <code>username</code> ("CH3M_L0RD"), <code>eloRating</code> (1337), <code>dailyStreak</code> (7), <code>profile</code></li>
+    <li><strong>Session state:</strong> <code>phase</code> (loading/answering/revealing/next), <code>current</code>, <code>prefetchQueue</code>, <code>seenIds</code>, <code>lastResult</code></li>
+    <li><strong>Prefetch strategy:</strong> Maintains a 2-item queue filled in background after each answer for instant round transitions</li>
+    <li><strong>ELO mutation:</strong> +10 on correct, -5 on incorrect — client-side only (not persisted to backend)</li>
+    <li><strong>⚠ All initial values are hardcoded mock data</strong> — no auth integration yet; username/ELO/streak are static defaults</li>
+  </ul>
+</div>
+
+<div class="section-label">Pages</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/page.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">9.8 KB · 275 lines</span></div>
+  <div class="desc"><strong>Dashboard / home page.</strong> Renders the game mode selection grid, player stats bar, weekly activity chart, and cheat sheet downloader.</div>
+  <ul>
+    <li><strong>7 game modes defined:</strong> React or Reject, Mechanism Builder, Adaptive PYQ, 1v1 Duel (locked), Reagents Explorer, Curriculum, Leaderboard</li>
+    <li><strong>Stats bar:</strong> 4 hardcoded mock stats (reactions attempted, accuracy rate, streak, rank)</li>
+    <li><strong>Activity chart:</strong> 7-bar weekly chart with hardcoded values <code>[40,70,55,90,65,80,100]</code></li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/mechanism-builder/page.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">21.9 KB</span></div>
+  <div class="desc"><strong>Interactive SVG mechanism builder.</strong> Drag-and-drop curved electron arrow canvas built with raw SVG (no Konva dependency despite konva being in package.json).</div>
+  <ul>
+    <li><strong>Atoms:</strong> 7 pre-placed atoms (C, OH⁻, H, Br, N, O, C(CH₃)₃) at fixed coordinates</li>
+    <li><strong>Arrows:</strong> Curved arrows with cubic bezier control points and SVG arrowheads; drag from atom to atom</li>
+    <li><strong>Tutorial steps:</strong> 3-step guided walkthrough (SN2 → Grignard → Carbonyl) with next/reset flow</li>
+    <li><strong>Backend integration:</strong> Calls <code>POST /api/evaluate-mechanism</code> on each arrow drop; shows verdict (pass/fail), hint, explanation, latency</li>
+    <li><strong>SSE streaming:</strong> Uses <code>streamHint()</code> from <code>api.ts</code> for progressive hint display</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/adaptive-pyq/page.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">24.7 KB</span></div>
+  <div class="desc"><strong>Adaptive PYQ game page.</strong> Full question UI with weakness sidebar, result overlay, and prefetch queue consumption.</div>
+  <ul>
+    <li><strong>Components:</strong> <code>OptionButton</code> (memo), <code>QuestionCard</code> (memo), <code>ResultOverlay</code>, <code>WeaknessSidebar</code></li>
+    <li><strong>Session flow:</strong> startSession → answering → revealing (optimistic) → nextQuestion (instant from queue)</li>
+    <li><strong>Data source:</strong> Uses <code>useChemStore</code> actions; falls back to demo PYQ if no userId</li>
+    <li><strong>Difficulty badges:</strong> Colour-coded (easy=green, medium=yellow, hard=red)</li>
+    <li><strong>Socratic hint display:</strong> Shows <code>socratic_hint</code> from PYQ data on answer reveal</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/curriculum/page.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">31.6 KB</span></div>
+  <div class="desc"><strong>Curriculum module browser.</strong> The largest frontend page. Contains embedded module data (30+ modules hardcoded inline) plus a slide quiz component.</div>
+  <ul>
+    <li><strong>Data:</strong> Hardcoded <code>MODULES[]</code> array and <code>ANSWERS{}</code> map inline in the page — <strong>does not fetch from the curriculum API</strong></li>
+    <li><strong>SlideQuiz:</strong> Renders 3-slide tutorial sequences; tracks score per module; +5 ELO reward on correct</li>
+    <li><strong>Filters:</strong> Difficulty (basics/medium/advanced) and free text search</li>
+    <li><strong>⚠ Disconnected from backend:</strong> Module data is duplicated here instead of fetching <code>/api/curriculum/modules</code></li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/reagents/page.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">16.7 KB · 431 lines</span></div>
+  <div class="desc"><strong>Reagents Explorer page.</strong> Accordion-style browse interface with search and category filter.</div>
+  <ul>
+    <li><strong>Data source:</strong> Imports <code>REAGENTS</code> and <code>REAGENT_CATEGORIES</code> from <code>chemclash/src/data/reagents.js</code></li>
+    <li><strong>Search:</strong> Deep search across name, formula, description, and all reaction fields (substrate, product, type, notes)</li>
+    <li><strong>Components:</strong> <code>ReactionRow</code>, <code>ReagentCard</code> (accordion), colour-coded type badges, reaction legend</li>
+    <li><strong>Performance:</strong> Uses <code>useMemo</code> for filtered list</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/react-or-reject/page.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">22.2 KB</span></div>
+  <div class="desc"><strong>React-or-Reject swipe game.</strong> Tinder-style card swipe mechanic for nucleophile/electrophile pairs.</div>
+  <ul>
+    <li><strong>Dataset:</strong> 15 hardcoded <code>CARDS[]</code> inline; no backend call</li>
+    <li><strong>Interaction:</strong> Keyboard (←/→), button click, or pointer drag with gesture threshold</li>
+    <li><strong>Scoring:</strong> Correct/total tally; hint shown after each swipe; final score screen with replay button</li>
+    <li><strong>⚠ Not connected to backend:</strong> Uses hardcoded cards, no <code>challenge_bank</code> API call</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/app/leaderboard/page.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">13.7 KB · 299 lines</span></div>
+  <div class="desc"><strong>Leaderboard page.</strong> Displays global and weekly rankings with podium, full table, and "your rank" footer.</div>
+  <ul>
+    <li><strong>Data:</strong> 10-entry mock <code>GLOBAL_BOARD</code> and <code>WEEKLY_BOARD</code> arrays — <strong>no live backend data</strong></li>
+    <li><strong>Live values:</strong> Injects current user's ELO from <code>useChemStore</code> into the rank row</li>
+    <li><strong>Animation:</strong> Uses <code>framer-motion</code> for podium and row entrance animations</li>
+    <li><strong>⚠ All rankings are static mock data</strong> — not persisted or fetched from MongoDB</li>
+  </ul>
+</div>
+
+<div class="section-label">Components</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/components/TopNav.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">11.3 KB · 304 lines</span></div>
+  <div class="desc"><strong>Global navigation bar.</strong> Sticky top nav with logo, 6 nav links, streak badge, ELO badge, and user avatar dropdown.</div>
+  <ul>
+    <li><strong>Live data:</strong> Reads ELO, streak, username from <code>useChemStore</code> (props are fallback defaults)</li>
+    <li><strong>Dropdown:</strong> Profile, Leaderboard, Settings, Sign Out — Profile/Settings/Sign Out are visual only (no handlers)</li>
+    <li><strong>Mobile:</strong> Center nav links hidden via <code>.hidden-mobile</code> CSS class</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/components/GameModeCard.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">7.6 KB · 262 lines</span></div>
+  <div class="desc"><strong>Game mode selection card.</strong> Used in the dashboard grid for each of the 7 game modes. Handles hover state, locked state, progress bar, badge, and CTA arrow.</div>
+  <ul>
+    <li><strong>Props:</strong> <code>GameMode</code> (id, title, level, description, icon, href, accentColor, badge?, locked?, progress?, plays?)</li>
+    <li>Wraps in <code>&lt;Link&gt;</code> unless <code>locked=true</code>, in which case click is disabled</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/components/CheatSheetDownloader.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">20.5 KB</span></div>
+  <div class="desc"><strong>Advanced multi-category cheat sheet PDF generator.</strong> Generates a customisable PDF from <code>organic_db.json</code> with category selection (reagents, named reactions, basic rules, core concepts).</div>
+  <ul>
+    <li><strong>Data source:</strong> Dynamically imports <code>chemclash/src/data/organic_db.json</code> at runtime</li>
+    <li><strong>Category config:</strong> 4 selectable categories with icons and descriptions</li>
+    <li><strong>PDF output:</strong> Uses <code>jspdf</code> + <code>jspdf-autotable</code> with dark cyberpunk table styling</li>
+    <li><strong>Used on:</strong> Dashboard (<code>page.tsx</code>)</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/components/DownloadCheatSheet.tsx <span class="tag tag-ts">TypeScript</span> <span class="size">14.8 KB · 354 lines</span></div>
+  <div class="desc"><strong>Simple single-table cheat sheet PDF button.</strong> Older/simpler PDF generator with 10 hardcoded concept rows (SN2, SN1, E2, Markovnikov, etc.).</div>
+  <ul>
+    <li><strong>⚠ Superseded by <code>CheatSheetDownloader.tsx</code></strong> — this component is no longer referenced anywhere in the app but is still present in the codebase</li>
+    <li>Exports: <code>CHEM_CONCEPTS[]</code> (10 items), <code>DownloadCheatSheet</code> component</li>
+  </ul>
+</div>
+
+<div class="section-label">Data &amp; Utils</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/data/reagents.js <span class="tag tag-js">JavaScript</span> <span class="size">46.8 KB</span></div>
+  <div class="desc"><strong>Frontend reagents master database.</strong> Exports <code>REAGENTS[]</code> and <code>REAGENT_CATEGORIES[]</code>. Each reagent has id, name, formula, category, description, and a <code>reactions[]</code> array with substrate/product/conditions/type/notes per reaction.</div>
+  <ul>
+    <li><strong>Categories include:</strong> Acids, Bases, Halogenating Agents, Oxidising Agents, Reducing Agents, Organometallic, Diagnostic Reagents, and more</li>
+    <li><strong>Scope:</strong> JEE Mains &amp; Advanced relevant reagents</li>
+    <li><strong>⚠ Plain .js (not .ts)</strong> — no type safety; types are defined at the point of use in <code>reagents/page.tsx</code></li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/data/organic_db.json <span class="tag tag-json">JSON</span> <span class="size">43.9 KB</span></div>
+  <div class="desc">Frontend copy of the organic chemistry database. Consumed by <code>CheatSheetDownloader.tsx</code>. Kept in sync via <code>generate_db.py</code> and <code>sync_concepts.py</code>.</div>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/data/chem_master_data.json <span class="tag tag-json">JSON</span> <span class="size">23.6 KB</span></div>
+  <div class="desc">Frontend copy of the master data (concepts + PYQs). Consumed directly by <code>adaptive-pyq/page.tsx</code> for the Socratic hints display.</div>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/utils/gamification.js <span class="tag tag-js">JavaScript</span> <span class="size">8.3 KB · 183 lines</span></div>
+  <div class="desc"><strong>Pure gamification engine.</strong> Two exported functions with no side effects.</div>
+  <ul>
+    <li><strong>calculateELO(playerRating, opponentRating, didWin, kOverride):</strong> Standard chess ELO with tiered K-factor (40/20/10 for provisional/standard/elite). Returns <code>{newRating, delta, expectedScore}</code></li>
+    <li><strong>updateStreak(lastLoginDate, currentLoginDate, currentStreak):</strong> 48-hour window streak logic with UTC calendar-day boundary check. Returns <code>{streak, status, gapMs}</code></li>
+    <li><strong>⚠ Not wired up to the UI</strong> — <code>useChemStore</code> uses a simple ±10/±5 ELO mutation instead of this function</li>
+  </ul>
+</div>
+
+<div class="file-block">
+  <div class="filename">chemclash/src/utils/gamification.test.js <span class="tag tag-js">JavaScript</span> <span class="size">11.6 KB</span></div>
+  <div class="desc"><strong>Jest unit tests for the gamification engine.</strong> Comprehensive coverage of ELO and streak edge cases.</div>
+  <ul>
+    <li><strong>ELO tests:</strong> win/loss, extreme rating gaps, K-factor tiers, floor at 0, kOverride, type errors</li>
+    <li><strong>Streak tests:</strong> consecutive day, same day, missed days, reset, sub-second gap, timezone boundary, invalid inputs</li>
+  </ul>
+</div>
+
+<div class="section-label">Config Files</div>
+<div class="grid2">
+  <div class="file-block">
+    <div class="filename">chemclash/package.json <span class="tag tag-json">JSON</span></div>
+    <div class="desc">Next.js 16.3.3 · React 19.2.8. Key deps: <code>zustand@5</code>, <code>framer-motion@13</code>, <code>jspdf@4</code>, <code>konva@10</code>, <code>react-konva@19</code>, <code>jspdf-autotable@5</code>. Dev: TypeScript, ESLint, Tailwind 4, Jest 30.</div>
+  </div>
+  <div class="file-block">
+    <div class="filename">chemclash/next.config.ts <span class="tag tag-ts">TypeScript</span></div>
+    <div class="desc">Minimal Next.js config. No special rewrites or output modes — standard dev/build setup.</div>
+  </div>
+</div>
+<div class="grid2">
+  <div class="file-block">
+    <div class="filename">chemclash/tsconfig.json <span class="tag tag-cfg">Config</span></div>
+    <div class="desc">Standard Next.js TypeScript config with path alias <code>@/*</code> → <code>./src/*</code>.</div>
+  </div>
+  <div class="file-block">
+    <div class="filename">chemclash/.env.local.example <span class="tag tag-cfg">Config</span></div>
+    <div class="desc">Frontend env template. Documents <code>NEXT_PUBLIC_BACKEND_URL</code> — the only required frontend env var.</div>
+  </div>
+</div>
+<div class="grid2">
+  <div class="file-block">
+    <div class="filename">chemclash/AGENTS.md / CLAUDE.md <span class="tag tag-md">Markdown</span></div>
+    <div class="desc">AI agent instruction files (added in commit 8c15bdb). <code>AGENTS.md</code> has project context for Codex/GPT agents; <code>CLAUDE.md</code> is minimal (11 bytes).</div>
+  </div>
+  <div class="file-block">
+    <div class="filename">.devcontainer/devcontainer.json <span class="tag tag-json">JSON</span></div>
+    <div class="desc">GitHub Codespaces dev container config. Specifies Node + Python environment for cloud development.</div>
+  </div>
+</div>
+
+
+<h2>5 — API Endpoint Map</h2>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Purpose</th><th>Auth</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td>/</td><td>Health check — returns service status, LLM enabled flag, counts</td><td>None</td></tr>
+    <tr><td>POST</td><td>/api/evaluate-mechanism</td><td>Evaluate nucleophile→target arrow move (rule-based + LLM fallback)</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/hint/stream</td><td>SSE stream of Socratic hint tokens word-by-word</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/challenges</td><td>List all 8 challenges (id + difficulty + mechanism only)</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/challenges/prefetch</td><td>Batch pre-fetch N challenges starting at start_id</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/challenges/{id}</td><td>Single challenge by integer id</td><td>None</td></tr>
+    <tr><td>POST</td><td>/api/adaptive/answer</td><td>Record answer; update weakness scores</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/adaptive/pyq/{user_id}</td><td>Adaptive question matchmaker (LLM / rule-based)</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/adaptive/pyq/demo</td><td>Demo adaptive question (no user_id required)</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/adaptive/profile/{user_id}</td><td>Full student weakness profile</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/curriculum/modules</td><td>List all curriculum modules (filterable by difficulty)</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/curriculum/modules/by-tag</td><td>Find modules by comma-separated game tags</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/curriculum/modules/{id}</td><td>Single module with full 3-slide tutorial sequence</td><td>None</td></tr>
+    <tr><td>GET</td><td>/api/curriculum/summary</td><td>Curriculum stats (counts, tag index)</td><td>None</td></tr>
+    <tr><td>GET</td><td>/user/{user_id}</td><td>Get or create MongoDB user profile (ELO, streak)</td><td>None⚠</td></tr>
+    <tr><td>POST</td><td>/user/{user_id}/update-match</td><td>Update ELO, streak, failed concepts after match</td><td>None⚠</td></tr>
+  </tbody>
+</table>
+<p style="font-size:0.75rem;color:#57606a">⚠ <code>/user/*</code> endpoints are defined in <code>routers/user.py</code> but the router is not mounted in <code>main.py</code> — these paths may be unreachable at runtime.</p>
+
+
+<h2>6 — Key Findings &amp; Issues</h2>
+
+<div class="findings-block">
+  <div class="ftitle">🔴 CRITICAL — user_router not mounted</div>
+  <p><code>routers/user.py</code> defines <code>user_router</code> (the MongoDB ELO/streak endpoints) but <code>backend/main.py</code> has no <code>app.include_router(user_router)</code> call. The <code>/user/{user_id}</code> and <code>/user/{user_id}/update-match</code> endpoints are unreachable. The HEAD commit (a9f8dec "hookup MongoDB for UserProfiles") added the router file but did not complete the wiring.</p>
+</div>
+
+<div class="findings-block">
+  <div class="ftitle">🔴 CRITICAL — Logic duplicated across main.py and routers/</div>
+  <p><code>backend/main.py</code> contains inline copies of: the fast validator (Sections 2), challenge bank (Section 3), user profiles (Section 4), LLM chat helpers (Section 7), and all route handlers (Sections 11–13). The <code>routers/</code> directory holds the same logic in separated, well-structured modules. The two are not properly integrated — it is unclear which set of routes is actually active, creating maintenance risk and potential duplicate registrations.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — Tests expect 502/503 but implementation returns 200</div>
+  <p><code>test_mechanism.py</code> has tests asserting HTTP 502 (LLM parse error) and 503 (service error) status codes. The current <code>routers/mechanism.py</code> catches all exceptions and returns a safe-default <code>200 pass</code> response, so these tests will fail. The test expectations no longer match the implementation's error-handling strategy.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — gamification.js not wired into the UI</div>
+  <p>The well-written, well-tested <code>calculateELO()</code> function in <code>gamification.js</code> is not used anywhere in the app. <code>useChemStore.ts</code> uses a hardcoded ±10/±5 delta instead. The gamification engine is effectively dead code despite having unit tests.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — Curriculum page disconnected from backend API</div>
+  <p><code>curriculum/page.tsx</code> has 30+ modules hardcoded inline as a <code>MODULES[]</code> constant. The backend has a full curriculum API at <code>/api/curriculum/modules</code> serving from <code>concept_tree.json</code>. The frontend never fetches from it, meaning curriculum content is duplicated and changes in the backend data won't reflect in the UI.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — React-or-Reject not connected to challenge_bank API</div>
+  <p><code>react-or-reject/page.tsx</code> uses 15 hardcoded <code>CARDS[]</code> inline and never calls <code>/api/challenges</code>. The backend's challenge bank (8 puzzles) is only used by the Mechanism Builder. The two datasets are different and maintained separately.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — DownloadCheatSheet.tsx is dead code</div>
+  <p><code>chemclash/src/components/DownloadCheatSheet.tsx</code> is not imported or used anywhere in the current codebase. It was superseded by the more complete <code>CheatSheetDownloader.tsx</code>. Should be removed to reduce maintenance surface.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — Leaderboard uses only mock data</div>
+  <p><code>leaderboard/page.tsx</code> displays two hardcoded arrays of 10 players each. No backend endpoint or MongoDB query feeds real data. The current user's ELO is injected from the Zustand store (itself a hardcoded default), so the "LIVE" badge on the dashboard card is misleading.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — root requirements.txt includes unused streamlit</div>
+  <p>The root-level <code>requirements.txt</code> lists <code>streamlit&gt;=1.35.0</code> — a leftover from the Streamlit frontend that was removed in commit 384e2b7. The backend's own <code>backend/requirements.txt</code> correctly omits it. This may cause unnecessary large installs on Streamlit Cloud or CI environments that use the root file.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — README references wrong launcher file</div>
+  <p>The quick-start guide says <code>python start.py</code> but the actual launcher is <code>python main.py</code>. <code>start.py</code> does not exist.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — backend/.env tracked in git</div>
+  <p><code>backend/.env</code> is committed to the repository. Although it contains only placeholder values (same content as <code>.env.example</code>), the root <code>.gitignore</code> only excludes <code>.env</code> at root level, not <code>backend/.env</code>. This pattern risks a future real key being committed if a developer edits the file in-place.</p>
+</div>
+
+<div class="findings-block warn">
+  <div class="ftitle">🟡 WARN — Data files duplicated across root and frontend</div>
+  <p><code>chem_master_data.json</code> and <code>organic_db.json</code> each exist in two places: the repo root AND <code>chemclash/src/data/</code>. They are kept in sync by scripts but divergence is possible if one copy is edited manually. The root copies serve no runtime purpose (neither the FastAPI backend nor the Next.js frontend reads from root).</p>
+</div>
+
+<div class="findings-block ok">
+  <div class="ftitle">🟢 GOOD — Hallucination-proof adaptive PYQ</div>
+  <p>The LLM matchmaker in <code>routers/adaptive.py</code> is well-designed: it only passes a pre-filtered subset of real question IDs to the LLM, validates the returned ID against the candidate set, and falls back to a deterministic rule-based picker if the LLM returns anything invalid. No hallucinated questions can reach the user.</p>
+</div>
+
+<div class="findings-block ok">
+  <div class="ftitle">🟢 GOOD — Rule-based fast-path validator</div>
+  <p><code>fast_validator.py</code> covers the most common undergraduate mechanism scenarios in &lt;1ms with no API key required. The LLM is only called when no rule fires, making the mechanism evaluator fully usable offline and cost-free for most interactions.</p>
+</div>
+
+<div class="findings-block ok">
+  <div class="ftitle">🟢 GOOD — Prefetch queue for instant round transitions</div>
+  <p><code>useChemStore.ts</code> maintains a 2-item prefetch queue that is replenished in the background after each answer. Switching to the next question is instantaneous from the user's perspective — no spinner on round transitions.</p>
+</div>
+
+
+<h2>7 — Dependency Summary</h2>
+<table>
+  <thead><tr><th>Package</th><th>Version</th><th>Layer</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>next</td><td>16.3.3</td><td>Frontend</td><td>React framework, SSR/SSG, routing</td></tr>
+    <tr><td>react / react-dom</td><td>19.2.8</td><td>Frontend</td><td>UI rendering</td></tr>
+    <tr><td>zustand</td><td>^5.0.15</td><td>Frontend</td><td>Global state management</td></tr>
+    <tr><td>framer-motion</td><td>^13.1.1</td><td>Frontend</td><td>Leaderboard animations</td></tr>
+    <tr><td>jspdf + jspdf-autotable</td><td>^4 / ^5</td><td>Frontend</td><td>Client-side PDF cheat sheet generation</td></tr>
+    <tr><td>konva + react-konva</td><td>^10 / ^19</td><td>Frontend</td><td>Canvas graphics (installed but SVG used instead)</td></tr>
+    <tr><td>tailwindcss</td><td>^4</td><td>Frontend</td><td>Utility CSS (used minimally — mostly inline styles)</td></tr>
+    <tr><td>fastapi</td><td>&gt;=0.111.0</td><td>Backend</td><td>Web framework</td></tr>
+    <tr><td>uvicorn</td><td>&gt;=0.30.0</td><td>Backend</td><td>ASGI server</td></tr>
+    <tr><td>pydantic</td><td>&gt;=2.7.0</td><td>Backend</td><td>Request/response validation</td></tr>
+    <tr><td>motor + pymongo</td><td>&gt;=3.5 / &gt;=4.8</td><td>Backend</td><td>Async MongoDB driver for user profiles</td></tr>
+    <tr><td>openai</td><td>&gt;=1.30.0</td><td>Backend</td><td>LLM calls (optional)</td></tr>
+    <tr><td>python-dotenv</td><td>&gt;=1.0.0</td><td>Backend</td><td>Env var loading from .env file</td></tr>
+    <tr><td>httpx + pytest</td><td>&gt;=0.27 / &gt;=8.2</td><td>Backend</td><td>TestClient + test runner</td></tr>
+    <tr><td>streamlit</td><td>&gt;=1.35.0</td><td>Root only</td><td>Unused — legacy dep from removed frontend</td></tr>
+  </tbody>
+</table>
+
+<footer>Made with IBM Bob</footer>
+</body>
+</html>

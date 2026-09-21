@@ -117,6 +117,84 @@ export async function fetchProfile(userId: string): Promise<WeaknessProfile> {
   return apiFetch<WeaknessProfile>(`/api/adaptive/profile/${encodeURIComponent(userId)}`);
 }
 
+// ── User-profile endpoints ─────────────────────────────────────────────────
+
+/** Shape returned by GET /user/{user_id} (main.py Section 14). */
+export interface UserGameProfile {
+  user_id: string;
+  elo_rating: number;
+  streak_days: number;
+  last_played: string | null;
+  concept_weaknesses: Record<string, number>;
+}
+
+/** Fetch (or auto-create) the game profile for a user. */
+export async function fetchUserProfile(userId: string): Promise<UserGameProfile> {
+  return apiFetch<UserGameProfile>(`/user/${encodeURIComponent(userId)}`);
+}
+
+/**
+ * Fire-and-forget ELO sync to the backend.
+ * Uses POST /user/{user_id}/update-match (main.py Section 14).
+ * weakness_updates is optional; pass concept tags with weight 1 to record failures.
+ */
+export async function syncMatchResult(
+  userId: string,
+  eloDelta: number,
+  weaknessUpdates: Record<string, number> = {}
+): Promise<void> {
+  try {
+    await apiFetch(`/user/${encodeURIComponent(userId)}/update-match`, {
+      method: "POST",
+      body: JSON.stringify({ elo_change: eloDelta, weakness_updates: weaknessUpdates }),
+    });
+  } catch {
+    // Non-fatal: local Zustand state is the source of truth during gameplay.
+    // Backend sync failure should never interrupt the user experience.
+  }
+}
+
+// ── Snap-to-Solve endpoints ───────────────────────────────────────────────
+
+export type SnapPersona = "socratic" | "concept_coach" | "exam_coach" | "quick_revision";
+export type SnapLanguage = "english" | "telugu" | "hindi";
+
+export interface SnapResult {
+  supported: true;
+  identified: string;
+  first_issue: string;
+  principle: string;
+  socratic_question: string;
+}
+
+export interface SnapUnsupported {
+  supported: false;
+  reason: string;
+}
+
+export type SnapResponse = SnapResult | SnapUnsupported;
+
+/**
+ * Send a base-64 encoded chemistry image to the backend for Socratic analysis.
+ * The backend returns { supported: false } when vision is not configured.
+ */
+export async function snapAnalyze(
+  imageB64: string,
+  mediaType: string = "image/jpeg",
+  persona: SnapPersona = "socratic",
+  language: SnapLanguage = "english"
+): Promise<SnapResponse> {
+  return apiFetch<SnapResponse>("/api/snap-analyze", {
+    method: "POST",
+    body: JSON.stringify({
+      image_b64: imageB64,
+      media_type: mediaType,
+      persona,
+      language,
+    }),
+  });
+}
+
 // ── Mechanism endpoints ────────────────────────────────────────────────────
 
 export async function evaluateMechanism(
@@ -157,10 +235,67 @@ export function streamHint(
   return () => es.close();
 }
 
-/** Pre-fetch the next batch of challenges (fire-and-forget). */
+// ── Challenge bank endpoints ───────────────────────────────────────────────
+
+export interface Challenge {
+  id: number;
+  nucleophile: string;
+  electrophile: string;
+  shouldReact: boolean;
+  hint: string;
+  mechanism: string;
+  explanation: string;
+  difficulty: "easy" | "medium" | "hard";
+}
+
+/** Fetch all challenges from the backend challenge bank. */
+export async function fetchChallenges(): Promise<Challenge[]> {
+  return apiFetch<Challenge[]>("/api/challenges");
+}
+
+/** Pre-fetch a batch of challenges for client-side caching. */
 export async function prefetchChallenges(
   startId: number,
   count = 3
-): Promise<{ challenges: PYQQuestion[]; total: number }> {
+): Promise<{ challenges: Challenge[]; total: number }> {
   return apiFetch(`/api/challenges/prefetch?start_id=${startId}&count=${count}`);
+}
+
+// ── Curriculum endpoints ───────────────────────────────────────────────────
+
+/** Lightweight module summary returned by GET /api/curriculum/modules */
+export interface CurriculumModuleSummary {
+  module_id: string;
+  title: string;
+  difficulty: "basics" | "medium" | "advanced";
+  difficulty_tier: number;
+  game_tags: string[];
+  slide_count: number;
+}
+
+export interface CurriculumSlide {
+  slide: number;
+  concept_term: string;
+  short_definition: string;
+  action_prompt: string;
+}
+
+/** Full module with tutorial_sequence returned by GET /api/curriculum/modules/{id} */
+export interface CurriculumModule extends CurriculumModuleSummary {
+  tutorial_sequence: CurriculumSlide[];
+}
+
+/** Fetch the lightweight module listing (no tutorial slides). */
+export async function fetchCurriculumModules(
+  difficulty?: string
+): Promise<CurriculumModuleSummary[]> {
+  const qs = difficulty && difficulty !== "all" ? `?difficulty=${encodeURIComponent(difficulty)}` : "";
+  return apiFetch<CurriculumModuleSummary[]>(`/api/curriculum/modules${qs}`);
+}
+
+/** Fetch a single module with its full tutorial_sequence. */
+export async function fetchCurriculumModule(
+  moduleId: string
+): Promise<CurriculumModule> {
+  return apiFetch<CurriculumModule>(`/api/curriculum/modules/${encodeURIComponent(moduleId)}`);
 }

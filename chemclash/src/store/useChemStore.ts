@@ -5,6 +5,7 @@
  *   • Player profile (ELO, streak, accuracy)
  *   • Adaptive PYQ session (current question, seen ids, answer state)
  *   • Prefetch queue for instant round transitions
+ *   • ChemCoins + Daily Missions (localStorage-persisted)
  */
 
 import { create } from "zustand";
@@ -13,6 +14,8 @@ import {
   fetchDemoPYQ,
   submitAnswer,
   fetchProfile,
+  fetchUserProfile,
+  syncMatchResult,
   type PYQQuestion,
   type AdaptivePYQResponse,
   type AnswerResult,
@@ -44,13 +47,45 @@ interface PlayerState {
   profile: WeaknessProfile | null;
 }
 
+// ── ChemCoins / Daily Missions ────────────────────────────────────────────
+
+/** Keys stored in localStorage to track which daily rewards have been claimed. */
+const LS_KEY_LOGIN    = "chemclash_login_date";
+const LS_KEY_CHALLENGE = "chemclash_challenge_date";
+const LS_KEY_COINS    = "chemclash_coins";
+
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+}
+
+function readCoins(): number {
+  if (typeof window === "undefined") return 0;
+  return parseInt(localStorage.getItem(LS_KEY_COINS) ?? "0", 10);
+}
+
+function saveCoins(n: number): void {
+  if (typeof window !== "undefined") localStorage.setItem(LS_KEY_COINS, String(n));
+}
+
+interface DailyMissions {
+  loginClaimed: boolean;
+  challengeClaimed: boolean;
+}
+
 interface ChemStore extends AdaptiveSession, PlayerState {
+  // ChemCoins
+  chemCoins: number;
+  dailyMissions: DailyMissions;
+
   // Actions
   startSession: (userId: string, demo?: boolean) => Promise<void>;
   chooseAnswer: (answer: string) => Promise<void>;
   nextQuestion: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  loadPlayerProfile: () => Promise<void>;
   _prefetchNext: () => Promise<void>;
+  claimLoginReward: () => void;
+  claimDailyChallengeReward: () => void;
 }
 
 // ── Store ──────────────────────────────────────────────────────────────────
@@ -65,14 +100,80 @@ export const useChemStore = create<ChemStore>((set, get) => ({
   lastResult: null,
   error: null,
 
-  username: "CH3M_L0RD",
-  eloRating: 1337,
-  dailyStreak: 7,
+  // Player profile: defaults are placeholders; loadPlayerProfile() hydrates
+  // these from the backend as soon as a userId is known.
+  username: "guest",
+  eloRating: 1200,
+  dailyStreak: 0,
   profile: null,
+
+  // ChemCoins — read from localStorage on first render; 0 on SSR
+  chemCoins: 0,
+  dailyMissions: {
+    loginClaimed: false,
+    challengeClaimed: false,
+  },
+
+  // ── claimLoginReward ───────────────────────────────────────────────────
+  claimLoginReward: () => {
+    if (typeof window === "undefined") return;
+    const today = todayStr();
+    if (localStorage.getItem(LS_KEY_LOGIN) === today) return; // already claimed today
+    localStorage.setItem(LS_KEY_LOGIN, today);
+    const next = readCoins() + 1;
+    saveCoins(next);
+    set((s) => ({
+      chemCoins: next,
+      dailyMissions: { ...s.dailyMissions, loginClaimed: true },
+    }));
+  },
+
+  // ── claimDailyChallengeReward ──────────────────────────────────────────
+  claimDailyChallengeReward: () => {
+    if (typeof window === "undefined") return;
+    const today = todayStr();
+    if (localStorage.getItem(LS_KEY_CHALLENGE) === today) return; // already claimed today
+    localStorage.setItem(LS_KEY_CHALLENGE, today);
+    const next = readCoins() + 10;
+    saveCoins(next);
+    set((s) => ({
+      chemCoins: next,
+      dailyMissions: { ...s.dailyMissions, challengeClaimed: true },
+    }));
+  },
+
+  // ── loadPlayerProfile ──────────────────────────────────────────────────
+  loadPlayerProfile: async () => {
+    const { userId } = get();
+    try {
+      const p = await fetchUserProfile(userId);
+      set({
+        eloRating: p.elo_rating,
+        dailyStreak: p.streak_days,
+        // Derive display name: use userId unless it's the generic "guest"
+        username: userId !== "guest" ? userId : "guest",
+      });
+    } catch {
+      // Non-fatal: keep existing defaults if backend is unreachable
+    }
+  },
 
   // ── startSession ───────────────────────────────────────────────────────
   startSession: async (userId, demo = false) => {
+    // Hydrate ChemCoins + mission state from localStorage on session start
+    if (typeof window !== "undefined") {
+      const today = todayStr();
+      set({
+        chemCoins: readCoins(),
+        dailyMissions: {
+          loginClaimed: localStorage.getItem(LS_KEY_LOGIN) === today,
+          challengeClaimed: localStorage.getItem(LS_KEY_CHALLENGE) === today,
+        },
+      });
+    }
     set({ userId, phase: "loading", seenIds: [], prefetchQueue: [], error: null });
+    // Hydrate ELO/streak from backend immediately when a session starts
+    try { await get().loadPlayerProfile(); } catch { /* non-fatal */ }
     try {
       const q = demo
         ? await fetchDemoPYQ()
@@ -95,11 +196,17 @@ export const useChemStore = create<ChemStore>((set, get) => ({
 
     try {
       const result = await submitAnswer(userId, current.question.id, answer);
+      const eloDelta = result.was_correct ? 10 : -5;
       // ELO update: ±10 for correct/incorrect
       set((s) => ({
         lastResult: result,
-        eloRating: s.eloRating + (result.was_correct ? 10 : -5),
+        eloRating: s.eloRating + eloDelta,
       }));
+      // Persist to backend (fire-and-forget, non-blocking)
+      const failedConcepts = result.was_correct
+        ? {}
+        : Object.fromEntries(current.question.concept_tags.map((t) => [t, 1]));
+      syncMatchResult(userId, eloDelta, failedConcepts);
     } catch {
       // Even on network error, keep the reveal so UI never freezes
       set({

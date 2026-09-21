@@ -87,19 +87,21 @@ class TestEvaluateMechanism:
         assert data["status"] == "pass"
 
     def test_input_is_normalised(self):
-        """Whitespace and casing in the payload must be normalised before the LLM call."""
-        with patch(
-            "routers.mechanism.evaluate_move",
-            side_effect=_mock_llm("fail", "Watch out for steric hindrance!", "..."),
-        ) as mock_fn:
-            client.post(
-                "/api/evaluate-mechanism",
-                json={"source": "  Nucleophile  ", "target": "  TERTIARY_Carbon  "},
-            )
+        """Whitespace and casing in the payload must be normalised before evaluation.
 
-        mock_fn.assert_called_once_with(
-            source="nucleophile", target="tertiary_carbon"
+        The fast validator handles tertiary_carbon + nucleophile without an LLM call,
+        so we verify normalisation by checking the echoed source/target in the response
+        (both are returned lower-cased and stripped by the Pydantic validator).
+        """
+        resp = client.post(
+            "/api/evaluate-mechanism",
+            json={"source": "  Nucleophile  ", "target": "  TERTIARY_Carbon  "},
         )
+
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["source"] == "nucleophile"
+        assert body["target"] == "tertiary_carbon"
 
     def test_missing_field_returns_422(self):
         resp = client.post(
@@ -116,25 +118,27 @@ class TestEvaluateMechanism:
         assert resp.status_code == 422
 
     def test_llm_parse_error_returns_502(self):
+        # Use a target that no fast-validator rule handles so the LLM path is reached.
         with patch(
             "routers.mechanism.evaluate_move",
             side_effect=ValueError("LLM returned non-JSON output"),
-        ):
+        ), patch("routers.mechanism.OPENAI_API_KEY", "sk-real-key"):
             resp = client.post(
                 "/api/evaluate-mechanism",
-                json={"source": "nucleophile", "target": "tertiary_carbon"},
+                json={"source": "nucleophile", "target": "alkene"},
             )
 
         assert resp.status_code == 502
 
     def test_llm_service_error_returns_503(self):
+        # Use a target that no fast-validator rule handles so the LLM path is reached.
         with patch(
             "routers.mechanism.evaluate_move",
             side_effect=RuntimeError("Connection timeout"),
-        ):
+        ), patch("routers.mechanism.OPENAI_API_KEY", "sk-real-key"):
             resp = client.post(
                 "/api/evaluate-mechanism",
-                json={"source": "nucleophile", "target": "tertiary_carbon"},
+                json={"source": "nucleophile", "target": "alkene"},
             )
 
         assert resp.status_code == 503

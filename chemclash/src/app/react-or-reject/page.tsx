@@ -1,28 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, useMotionValue, useTransform, animate, PanInfo } from "framer-motion";
 import Link from "next/link";
 import { useChemStore } from "@/store/useChemStore";
+import { fetchChallenges, Challenge } from "@/lib/api";
 
-interface ChemCard {
-  id: number;
-  nucleophile: string;
-  electrophile: string;
-  shouldReact: boolean;
-  hint: string;
-  mechanism?: string;
-}
-
-type Verdict = "react" | "reject" | null;
-
-const CARDS: ChemCard[] = [
-  { id: 1, nucleophile: "OH⁻",       electrophile: "CH₃Br",       shouldReact: true,  hint: "Hydroxide attacks the carbon bearing the leaving group (SN2).", mechanism: "SN2" },
-  { id: 2, nucleophile: "H₂O",       electrophile: "CH₄",         shouldReact: false, hint: "Methane has no electrophilic carbon — no leaving group, no reaction." },
-  { id: 3, nucleophile: "NH₃",       electrophile: "CH₃Cl",       shouldReact: true,  hint: "Ammonia acts as a nucleophile toward the electrophilic carbon (SN2).", mechanism: "SN2" },
-  { id: 4, nucleophile: "Cl⁻",       electrophile: "Benzene",     shouldReact: false, hint: "Cl⁻ alone cannot react with benzene — a Lewis acid catalyst is required." },
-  { id: 5, nucleophile: "CN⁻",       electrophile: "(CH₃)₃C⁺",   shouldReact: true,  hint: "Cyanide attacks the carbocation readily (SN1 scenario).", mechanism: "SN1" },
-];
+type ChemCard = Challenge;
 
 function FeedbackOverlay({ verdict }: { verdict: Verdict }) {
   if (!verdict) return null;
@@ -137,8 +121,13 @@ function SwipeCard({ card, isTop, stackIndex, onSwipe }: SwipeCardProps) {
   );
 }
 
+type Verdict = "react" | "reject" | null;
+
 export default function ReactOrRejectPage() {
-  const [cards, setCards] = useState<ChemCard[]>(CARDS);
+  const [allCards, setAllCards] = useState<ChemCard[]>([]);
+  const [cards, setCards] = useState<ChemCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [verdict, setVerdict] = useState<Verdict>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [lastHint, setLastHint] = useState<string>("");
@@ -147,6 +136,22 @@ export default function ReactOrRejectPage() {
   const verdictTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const eloRating = useChemStore((s) => s.eloRating);
+
+  const loadCards = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const data = await fetchChallenges();
+      setAllCards(data);
+      setCards(data);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to load challenges");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadCards(); }, [loadCards]);
 
   const triggerVerdict = (direction: "left" | "right", card: ChemCard) => {
     const userSaysReact = direction === "right";
@@ -212,7 +217,7 @@ export default function ReactOrRejectPage() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => { setCards(CARDS); setScore({ correct: 0, total: 0 }); setFinished(false); setLastHint(""); setLastCorrect(null); }}
+                onClick={() => { setCards(allCards); setScore({ correct: 0, total: 0 }); setFinished(false); setLastHint(""); setLastCorrect(null); }}
               className={`flex-1 border ${borderCls} ${colorCls} bg-white hover:bg-slate-50 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-colors`}
             >
               Play Again
@@ -228,7 +233,31 @@ export default function ReactOrRejectPage() {
     );
   }
 
-  const progressPct = ((CARDS.length - cards.length) / CARDS.length) * 100;
+  // ── Loading state ──────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-400 text-sm animate-pulse">Loading challenges…</div>
+      </div>
+    );
+  }
+
+  // ── Error state ────────────────────────────────────────────────────────────
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+        <p className="text-sm text-red-600 font-semibold">Could not load challenges</p>
+        <p className="text-xs text-slate-400">{loadError}</p>
+        <button onClick={loadCards}
+          className="text-xs font-bold text-red-600 underline underline-offset-2 hover:text-red-800 bg-transparent border-none cursor-pointer">
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  const total = allCards.length;
+  const progressPct = total > 0 ? ((total - cards.length) / total) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center">

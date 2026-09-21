@@ -9,11 +9,12 @@ Purpose: Track player ELO, daily streaks, and topic weaknesses for AI matchmakin
 from __future__ import annotations
 
 import logging
-import os
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, HTTPException, status
+
+from config import MONGODB_URL, MONGODB_DB_NAME
 
 logger = logging.getLogger("chemclash.user")
 
@@ -21,8 +22,7 @@ logger = logging.getLogger("chemclash.user")
 # 1. DATABASE CONFIGURATION & ASYNC CLIENT
 # ─────────────────────────────────────────────────────────────────────────────
 
-MONGODB_URL = os.environ.get("MONGODB_URL", "")
-DB_NAME = os.environ.get("MONGODB_DB_NAME", "chemclash")
+DB_NAME = MONGODB_DB_NAME
 
 _mongo_available = False
 users_collection = None

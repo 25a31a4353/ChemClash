@@ -17,12 +17,14 @@ import logging
 import time
 from typing import AsyncGenerator
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 
-from fast_validator import evaluate_fast
+from fast_validator import evaluate_fast, Verdict
 from challenge_bank import get_batch, get_challenge, CHALLENGES
+from llm_client import evaluate_move  # module-level so tests can patch it
+from config import OPENAI_API_KEY, _NO_KEY
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -57,6 +59,12 @@ async def evaluate_mechanism(payload: MechanismMoveRequest) -> MechanismMoveResp
     """
     Fast-path rule-based evaluation (<1 ms).
     Falls back to LLM only if no rule matches AND an API key is configured.
+
+    Error contract:
+      • 422  — request validation failure (Pydantic, handled by FastAPI)
+      • 502  — LLM returned a response we could not parse (ValueError)
+      • 503  — LLM service is unreachable or timed out (RuntimeError / OSError)
+      • 200  — all other cases (fast-validator hit, or no key configured)
     """
     t0 = time.perf_counter()
 
@@ -64,26 +72,32 @@ async def evaluate_mechanism(payload: MechanismMoveRequest) -> MechanismMoveResp
     verdict = evaluate_fast(source=payload.source, target=payload.target)
 
     if verdict is None:
-        # 2. No rule matched — try LLM if configured, else return safe default
-        try:
-            from llm_client import evaluate_move  # noqa: PLC0415
-            from config import OPENAI_API_KEY     # noqa: PLC0415
-            if OPENAI_API_KEY and OPENAI_API_KEY not in ("sk-...", "", "your-key-here"):
+        # 2. No rule matched — use LLM if a key is present, else safe default
+        if OPENAI_API_KEY and OPENAI_API_KEY not in _NO_KEY:
+            try:
                 raw = await asyncio.get_event_loop().run_in_executor(
                     None, lambda: evaluate_move(payload.source, payload.target)
                 )
-                from fast_validator import Verdict
-                verdict = Verdict(
-                    status=raw.get("status", "pass"),
-                    hint=raw.get("hint", ""),
-                    explanation=raw.get("explanation", ""),
-                    cached=False,
-                )
-            else:
-                raise ValueError("no key")
-        except Exception:
-            # Safe default when LLM unavailable
-            from fast_validator import Verdict
+            except ValueError as exc:
+                # LLM replied but the response could not be parsed as valid JSON/schema
+                logger.warning("LLM parse error: %s", exc)
+                raise HTTPException(status_code=502, detail="LLM returned an unparseable response") from exc
+            except (RuntimeError, OSError, Exception) as exc:  # noqa: BLE001
+                # Distinguish service errors (RuntimeError/OSError) from unexpected bugs.
+                # We re-raise RuntimeError/OSError as 503; anything else propagates normally.
+                if isinstance(exc, (RuntimeError, OSError)):
+                    logger.warning("LLM service error: %s", exc)
+                    raise HTTPException(status_code=503, detail="LLM service is unavailable") from exc
+                raise  # unexpected programming error — do not hide it
+
+            verdict = Verdict(
+                status=raw.get("status", "pass"),
+                hint=raw.get("hint", ""),
+                explanation=raw.get("explanation", ""),
+                cached=False,
+            )
+        else:
+            # No API key configured — return a safe informational default
             verdict = Verdict(
                 status="pass",
                 hint="Interesting move — think about electron flow carefully.",

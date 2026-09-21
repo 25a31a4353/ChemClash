@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ── Placeholder-key sentinel (shared across modules) ─────────────────────────
+# Any key matching one of these values is treated as "not configured".
+_NO_KEY: frozenset[str] = frozenset({"sk-...", "", "your-key-here"})
+
 # ── LLM Provider ──────────────────────────────────────────────────────────────
 # Set LLM_PROVIDER=watsonx  to use IBM watsonx.ai
 # Set LLM_PROVIDER=openai   to use OpenAI / any OpenAI-compatible endpoint
@@ -31,3 +35,11 @@ WATSONX_MODEL: str = os.getenv("WATSONX_MODEL", "ibm/granite-13b-chat-v2")
 # ── LLM generation parameters ────────────────────────────────────────────────
 LLM_MAX_TOKENS: int = int(os.getenv("LLM_MAX_TOKENS", "512"))
 LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.2"))
+
+# ── MongoDB ───────────────────────────────────────────────────────────────────
+# MONGO_URI  — used by main.py's Motor client (always-on connection)
+# MONGODB_URL / MONGODB_DB_NAME — used by routers/user.py (optional, with
+#   in-memory fallback when the var is absent)
+MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGODB_URL: str = os.getenv("MONGODB_URL", "")
+MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "chemclash")

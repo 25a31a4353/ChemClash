@@ -21,14 +21,13 @@ from __future__ import annotations
 
 import json
 import logging
-import os
-import re
 from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from config import OPENAI_API_KEY, LLM_PROVIDER, _NO_KEY
 from user_profiles import (
     update_user_profile,
     get_profile,
@@ -135,10 +134,8 @@ def _llm_pick(
     Ask the LLM to select the best PYQ id from the candidate list.
     Returns the selected id string, or None if unavailable / invalid.
     """
-    from config import OPENAI_API_KEY, LLM_PROVIDER  # noqa: PLC0415
-
     # Skip LLM if no valid key is configured
-    if not OPENAI_API_KEY or OPENAI_API_KEY in ("sk-...", "", "your-key-here"):
+    if not OPENAI_API_KEY or OPENAI_API_KEY in _NO_KEY:
         return None
 
     # Build a minimal candidate summary to stay within token budget
