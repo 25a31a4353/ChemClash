@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import GameModeCard, { GameMode } from "@/components/GameModeCard";
 import CheatSheetDownloader from "@/components/CheatSheetDownloader";
 import { useChemStore } from "@/store/useChemStore";
+import { LS_ONBOARDING_DONE } from "@/app/onboarding/page";
 
 const GAME_MODES: GameMode[] = [
   {
@@ -370,6 +372,7 @@ function getRecommendation(topWeaknesses: string[]): Recommendation {
 // ── Dashboard ──────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
+  const router                 = useRouter();
   const eloRating              = useChemStore((s) => s.eloRating);
   const dailyStreak            = useChemStore((s) => s.dailyStreak);
   const username               = useChemStore((s) => s.username);
@@ -380,6 +383,13 @@ export default function Dashboard() {
   const profile                = useChemStore((s) => s.profile);
   const refreshProfile         = useChemStore((s) => s.refreshProfile);
   const loadPlayerProfile      = useChemStore((s) => s.loadPlayerProfile);
+
+  // Redirect first-time visitors to onboarding (client-only, no SSR flash).
+  useEffect(() => {
+    if (localStorage.getItem(LS_ONBOARDING_DONE) !== "1") {
+      router.replace("/onboarding");
+    }
+  }, [router]);
 
   // Hydrate coins + attempt auto-claim login reward on mount (client-only).
   // loadPlayerProfile hydrates ELO, streak, and username from /user/{id}.
