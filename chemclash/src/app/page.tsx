@@ -204,8 +204,61 @@ const GAME_MODES: GameMode[] = [
   },
 ];
 
-const ACTIVITY = [40, 70, 55, 90, 65, 80, 100];
-const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
+// ── Yearly activity heatmap ────────────────────────────────────────────────
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/**
+ * Build a 52-week × 7-day grid of simulated activity values (0–4).
+ * 0 = no activity, 4 = peak activity.
+ * Seeded deterministically so it looks realistic and renders the same on
+ * every load (replaced with real backend data when available).
+ */
+function buildYearGrid(): number[][] {
+  const weeks: number[][] = [];
+  // Simple deterministic pseudo-random seeded by position
+  const val = (w: number, d: number): number => {
+    const n = Math.sin(w * 7 + d * 13 + 42) * 43758.5453;
+    const r = n - Math.floor(n);
+    // Bias toward 0 (empty) — ~55% empty, rest spread across 1–4
+    if (r < 0.55) return 0;
+    if (r < 0.72) return 1;
+    if (r < 0.85) return 2;
+    if (r < 0.94) return 3;
+    return 4;
+  };
+  for (let w = 0; w < 53; w++) {
+    const week: number[] = [];
+    for (let d = 0; d < 7; d++) {
+      week.push(val(w, d));
+    }
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+const YEAR_GRID = buildYearGrid();
+
+/** Which week index each month label should appear at (approx 4.33 weeks/month) */
+const MONTH_WEEK_STARTS = MONTHS.map((_, i) => Math.round(i * (52 / 12)));
+
+/** Total "reactions" count (sum of all cells mapped to representative counts) */
+const YEAR_TOTAL = YEAR_GRID.flat().reduce((s, v) => s + v * 3, 0);
+
+/** Count weeks with at least one active day */
+const ACTIVE_DAYS = YEAR_GRID.flat().filter((v) => v > 0).length;
+
+/** Colour for each intensity level — ChemClash violet/emerald theme */
+function heatColor(v: number): string {
+  switch (v) {
+    case 0: return "#f1f5f9"; // slate-100 — empty
+    case 1: return "#c4b5fd"; // violet-300
+    case 2: return "#7c3aed"; // violet-600
+    case 3: return "#059669"; // emerald-600
+    case 4: return "#047857"; // emerald-700 — peak
+    default: return "#f1f5f9";
+  }
+}
 
 // ── Daily Missions card ────────────────────────────────────────────────────
 
@@ -532,36 +585,93 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* ── Activity strip ── */}
-        <div className="mt-12 bg-white border border-slate-200 rounded-xl p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-            <span className="text-xs font-semibold tracking-widest text-slate-400 uppercase">Weekly Activity</span>
-            <span className="text-xs text-slate-400 font-medium">last 7 days</span>
+        {/* ── Yearly Activity Heatmap ── */}
+        <div className="mt-12 bg-white border border-slate-200 rounded-xl p-6 animate-fade-in overflow-x-auto">
+
+          {/* Header row */}
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-5 min-w-[560px]">
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-black text-slate-900">{YEAR_TOTAL}</span>
+              <span className="text-xs text-slate-500 font-medium">reactions in the past year</span>
+            </div>
+            <div className="flex items-center gap-5">
+              <span className="text-xs text-slate-500">
+                Active days: <span className="font-bold text-slate-700">{ACTIVE_DAYS}</span>
+              </span>
+              <span className="text-xs text-slate-500">
+                Streak: <span className="font-bold text-emerald-600">{dailyStreak}d</span>
+              </span>
+            </div>
           </div>
-          <div className="flex gap-1.5 items-end h-12">
-            {ACTIVITY.map((h, i) => (
-              <div key={i} className="flex-1 flex flex-col gap-1 items-center">
+
+          {/* Heatmap grid */}
+          <div className="min-w-[560px]">
+
+            {/* Month labels */}
+            <div className="flex mb-1.5 pl-6">
+              {MONTHS.map((m, mi) => {
+                const weekIdx = MONTH_WEEK_STARTS[mi];
+                return (
+                  <div
+                    key={m}
+                    className="text-[0.6rem] font-semibold text-slate-400 uppercase tracking-wide"
+                    style={{ position: "relative", left: `calc(${weekIdx} * (10px + 2px))`, marginRight: 0, width: 0, whiteSpace: "nowrap" }}
+                  >
+                    {m}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Day-of-week labels + cell grid */}
+            <div className="flex gap-0.5 items-start">
+              {/* Day labels column */}
+              <div className="flex flex-col gap-0.5 mr-1.5" style={{ paddingTop: 0 }}>
+                {["Mon","","Wed","","Fri","","Sun"].map((d, i) => (
+                  <div key={i} className="text-[0.55rem] text-slate-400 font-medium leading-none" style={{ height: 10, lineHeight: "10px" }}>
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              {/* Week columns */}
+              <div className="flex gap-0.5">
+                {YEAR_GRID.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-0.5">
+                    {week.map((val, di) => (
+                      <div
+                        key={di}
+                        title={val > 0 ? `${val * 3} reactions` : "No activity"}
+                        className="rounded-sm transition-opacity hover:opacity-75"
+                        style={{
+                          width:  10,
+                          height: 10,
+                          backgroundColor: heatColor(val),
+                          border: val === 0 ? "1px solid #e2e8f0" : "none",
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-1.5 mt-3 justify-end">
+              <span className="text-[0.6rem] text-slate-400 font-medium">Less</span>
+              {[0,1,2,3,4].map((v) => (
                 <div
-                  className="w-full rounded-t-sm transition-all duration-500"
+                  key={v}
+                  className="rounded-sm"
                   style={{
-                    height: `${h}%`,
-                    minHeight: 4,
-                    background:
-                      h === 100
-                        ? "linear-gradient(180deg, #059669, #047857)"
-                        : `rgba(5,150,105,${0.2 + h / 250})`,
-                    border: h === 100 ? "none" : "1px solid rgba(5,150,105,0.2)",
+                    width: 10, height: 10,
+                    backgroundColor: heatColor(v),
+                    border: v === 0 ? "1px solid #e2e8f0" : "none",
                   }}
                 />
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-2">
-            {DAYS.map((d, i) => (
-              <span key={i} className="flex-1 text-center text-[0.65rem] font-medium text-slate-400">
-                {d}
-              </span>
-            ))}
+              ))}
+              <span className="text-[0.6rem] text-slate-400 font-medium">More</span>
+            </div>
           </div>
         </div>
 
