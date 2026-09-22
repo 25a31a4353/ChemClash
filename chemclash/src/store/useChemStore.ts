@@ -277,12 +277,12 @@ export const useChemStore = create<ChemStore>((set, get) => ({
   // ── loadPlayerProfile ──────────────────────────────────────────────────
   loadPlayerProfile: async () => {
     const { userId } = get();
+    if (!userId || userId === "ssr-placeholder") return;
     try {
       const p = await fetchUserProfile(userId);
       set({
-        eloRating: p.elo_rating,
-        dailyStreak: p.streak_days,
-        username: userId,
+        eloRating: p.elo_rating ?? 1200,
+        dailyStreak: p.streak_days ?? 0,
       });
     } catch {
       // Non-fatal: keep existing defaults if backend is unreachable
@@ -406,6 +406,7 @@ export const useChemStore = create<ChemStore>((set, get) => ({
   // ── refreshProfile ─────────────────────────────────────────────────────
   refreshProfile: async () => {
     const { userId } = get();
+    if (!userId || userId === "ssr-placeholder") return;
     try {
       const p = await fetchProfile(userId);
       set({ profile: p, dailyStreak: get().dailyStreak });

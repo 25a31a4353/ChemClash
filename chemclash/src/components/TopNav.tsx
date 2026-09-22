@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useChemStore } from "@/store/useChemStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface TopNavProps {
   eloRating?: number;
@@ -17,6 +19,7 @@ export default function TopNav({
   username: usernameProp = "CH3M_L0RD",
   onLogout,
 }: TopNavProps) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Live values from global store (props are fallback defaults)
@@ -131,10 +134,18 @@ export default function TopNav({
                 ].map((item) => (
                   <button
                     key={item.label}
-                    onClick={() => {
+                    onClick={async () => {
                       setMenuOpen(false);
-                      if (item.label === "Sign Out" && onLogout) { onLogout(); return; }
-                      if (item.href) window.location.href = item.href;
+                      if (item.label === "Sign Out") {
+                        if (onLogout) {
+                          onLogout();
+                        } else {
+                          await useAuthStore.getState().logout();
+                          router.push("/login");
+                        }
+                        return;
+                      }
+                      if (item.href) router.push(item.href);
                     }}
                     className={[
                       "w-full bg-transparent border-none px-4 py-2.5 flex items-center gap-2.5 cursor-pointer text-sm font-medium tracking-wide transition-all duration-100 text-left",

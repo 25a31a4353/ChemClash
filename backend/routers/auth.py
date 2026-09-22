@@ -42,11 +42,17 @@ import tempfile
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
+import sys
 from pathlib import Path
 from typing import Any, Optional
 
+# Ensure backend directory is on sys.path for config import
+_BACKEND_DIR = str(Path(__file__).resolve().parent.parent)
+if _BACKEND_DIR not in sys.path:
+    sys.path.insert(0, _BACKEND_DIR)
+
 import bcrypt
-from fastapi import APIRouter, Cookie, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Header, HTTPException, Response, status
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -148,19 +154,31 @@ async def _find_by_email(email: str) -> dict | None:
     if _mongo_available and _accounts_collection is not None:
         try:
             doc = await _accounts_collection.find_one({"email": email}, {"_id": 0})
-            return doc
+            if doc:
+                return doc
         except Exception as exc:
             logger.warning("Auth DB read failed (%s)", exc)
-    return _ACCOUNTS.get(_EMAIL_INDEX.get(email, ""))
+    uid = _EMAIL_INDEX.get(email)
+    if not uid:
+        fresh = _load_accounts()
+        _ACCOUNTS.update(fresh)
+        _EMAIL_INDEX.update({v["email"]: k for k, v in fresh.items() if "email" in v})
+        uid = _EMAIL_INDEX.get(email)
+    return _ACCOUNTS.get(uid) if uid else None
 
 
 async def _find_by_id(user_id: str) -> dict | None:
     if _mongo_available and _accounts_collection is not None:
         try:
             doc = await _accounts_collection.find_one({"user_id": user_id}, {"_id": 0})
-            return doc
+            if doc:
+                return doc
         except Exception as exc:
             logger.warning("Auth DB read failed (%s)", exc)
+    if user_id not in _ACCOUNTS:
+        fresh = _load_accounts()
+        _ACCOUNTS.update(fresh)
+        _EMAIL_INDEX.update({v["email"]: k for k, v in fresh.items() if "email" in v})
     return _ACCOUNTS.get(user_id)
 
 
@@ -247,26 +265,42 @@ _COOKIE_MAX_AGE = JWT_EXPIRE_DAYS * 86400  # seconds
 
 
 def _set_cookie(response: Response, token: str) -> None:
+    is_prod = os.getenv("ENVIRONMENT") == "production" or os.getenv("RENDER") == "true"
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         httponly=True,
-        samesite="lax",
+        samesite="none" if is_prod else "lax",
         max_age=_COOKIE_MAX_AGE,
-        secure=False,   # set True behind HTTPS in production
+        secure=True if is_prod else False,
         path="/",
     )
 
 
 def _clear_cookie(response: Response) -> None:
-    response.delete_cookie(key=_COOKIE_NAME, path="/")
+    is_prod = os.getenv("ENVIRONMENT") == "production" or os.getenv("RENDER") == "true"
+    response.delete_cookie(
+        key=_COOKIE_NAME,
+        path="/",
+        samesite="none" if is_prod else "lax",
+        secure=True if is_prod else False,
+    )
 
 
-async def _require_auth(cc_session: str | None) -> dict:
-    """Dependency-style helper: decode cookie and return account doc."""
-    if not cc_session:
+async def _require_auth(
+    authorization: str | None = Header(default=None),
+    cc_session: str | None = Cookie(default=None),
+) -> dict:
+    """Extract token from Authorization: Bearer <token> or cc_session cookie."""
+    token = None
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization[7:].strip()
+    if not token:
+        token = cc_session
+    if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    user_id = _decode_token(cc_session)
+
+    user_id = _decode_token(token)
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired session")
     account = await _find_by_id(user_id)
@@ -306,7 +340,7 @@ async def signup(body: SignupRequest, response: Response):
 
     token = _make_token(user_id)
     _set_cookie(response, token)
-    return {"ok": True, "account": _public(account)}
+    return {"ok": True, "token": token, "account": _public(account)}
 
 
 # ── POST /auth/login ──────────────────────────────────────────────────────────
@@ -323,7 +357,7 @@ async def login(body: LoginRequest, response: Response):
 
     token = _make_token(account["user_id"])
     _set_cookie(response, token)
-    return {"ok": True, "account": _public(account)}
+    return {"ok": True, "token": token, "account": _public(account)}
 
 
 # ── POST /auth/logout ─────────────────────────────────────────────────────────
@@ -337,8 +371,11 @@ async def logout(response: Response):
 # ── GET /auth/me ──────────────────────────────────────────────────────────────
 
 @router.get("/me", summary="Return the authenticated account")
-async def get_me(cc_session: str | None = Cookie(default=None)):
-    account = await _require_auth(cc_session)
+async def get_me(
+    authorization: str | None = Header(default=None),
+    cc_session: str | None = Cookie(default=None),
+):
+    account = await _require_auth(authorization, cc_session)
     return _public(account)
 
 
@@ -347,9 +384,10 @@ async def get_me(cc_session: str | None = Cookie(default=None)):
 @router.put("/me", summary="Update onboarding/tour prefs")
 async def update_me(
     body: UpdateMeRequest,
+    authorization: str | None = Header(default=None),
     cc_session: str | None = Cookie(default=None),
 ):
-    account = await _require_auth(cc_session)
+    account = await _require_auth(authorization, cc_session)
     updates: dict[str, Any] = {}
     if body.display_name is not None:
         updates["display_name"] = body.display_name.strip()
@@ -373,13 +411,14 @@ async def update_me(
 @router.post("/coins", summary="Adjust ChemCoin balance (earn or spend)")
 async def adjust_coins(
     body: UpdateCoinsRequest,
+    authorization: str | None = Header(default=None),
     cc_session: str | None = Cookie(default=None),
 ):
     """
     Atomic balance update. Prevents negative balances.
     If reward_id is provided (purchase), also appends to owned_rewards.
     """
-    account = await _require_auth(cc_session)
+    account = await _require_auth(authorization, cc_session)
     current = account.get("chem_coins", 0)
     new_balance = current + body.delta
     if new_balance < 0:

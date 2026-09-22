@@ -46,12 +46,11 @@ MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "chemclash")
 
 # ── Authentication ────────────────────────────────────────────────────────────
 # JWT_SECRET — used to sign/verify session tokens.
-# In development a random fallback is generated at startup. In production,
-# set a stable secret so tokens survive server restarts.
-import secrets as _secrets
+# In development, a stable fallback is used so tokens survive server restarts.
+# In production, set JWT_SECRET in environment variables.
 JWT_SECRET: str = os.getenv(
     "JWT_SECRET",
-    _secrets.token_hex(32),  # random dev fallback — set stable value in prod
+    "chemclash-dev-secret-key-stable-session-2026-fallback-32b",
 )
 JWT_ALGORITHM: str = "HS256"
 JWT_EXPIRE_DAYS: int = int(os.getenv("JWT_EXPIRE_DAYS", "30"))

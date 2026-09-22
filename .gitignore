@@ -12,3 +12,6 @@ backend/.env
 # OS
 .DS_Store
 Thumbs.db
+
+# Local storage data
+backend/data/

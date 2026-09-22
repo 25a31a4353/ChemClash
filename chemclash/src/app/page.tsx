@@ -466,6 +466,10 @@ export default function Dashboard() {
       router.replace("/onboarding");
       return;
     }
+    if (!account.tour_done) {
+      router.replace("/tour");
+      return;
+    }
     // Sync display name into chem store
     const savedName = localStorage.getItem(LS_USER_NAME) || account.display_name;
     if (savedName) useChemStore.setState({ username: savedName });
@@ -515,8 +519,8 @@ export default function Dashboard() {
       </div>
     );
   }
-  // Blank while redirect fires for unauthenticated / non-onboarded users
-  if (!account || !account.onboarding_done) return null;
+  // Blank while redirect fires for unauthenticated / non-onboarded / non-toured users
+  if (!account || !account.onboarding_done || !account.tour_done) return null;
 
   return (
     <div className="min-h-screen bg-slate-50">

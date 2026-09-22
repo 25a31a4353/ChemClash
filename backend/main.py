@@ -14,6 +14,14 @@ from __future__ import annotations
 
 # ── Standard library ──────────────────────────────────────────────────────────
 import logging
+import os
+import sys
+from pathlib import Path
+
+# Ensure backend directory is in sys.path regardless of how or where uvicorn is launched
+_BACKEND_DIR = str(Path(__file__).resolve().parent)
+if _BACKEND_DIR not in sys.path:
+    sys.path.insert(0, _BACKEND_DIR)
 
 # ── Third-party ───────────────────────────────────────────────────────────────
 import uvicorn
@@ -51,9 +59,11 @@ app = FastAPI(
     version="0.3.0",
 )
 
+# allow_origin_regex dynamically reflects the requesting origin so that
+# allow_credentials=True adheres to the CORS specification (which forbids '*' with credentials).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # tighten to your deployed frontend domain in production
+    allow_origin_regex=r"^https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

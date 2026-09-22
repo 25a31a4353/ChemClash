@@ -37,13 +37,38 @@ interface AuthState {
   setAccount: (account: ChemAccount | null) => void;
 }
 
+function syncAccountToStorage(account: ChemAccount) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("chemclash_user_id", account.user_id);
+  localStorage.setItem("chemclash_user_email", account.email);
+  localStorage.setItem("chemclash_user_name", account.display_name);
+  localStorage.setItem("chemclash_coins", String(account.chem_coins));
+  if (account.onboarding_done) {
+    localStorage.setItem("chemclash_onboarding_done", "1");
+  }
+  if (account.tour_done) {
+    localStorage.setItem("chemclash_tour_done", "1");
+  }
+}
+
+function clearAccountStorage() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("chemclash_token");
+  localStorage.removeItem("chemclash_user_id");
+  localStorage.removeItem("chemclash_user_email");
+  localStorage.removeItem("chemclash_user_name");
+  localStorage.removeItem("chemclash_onboarding_done");
+  localStorage.removeItem("chemclash_tour_done");
+  localStorage.removeItem("chemclash_coins");
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   account: null,
   loading: false,
   initialized: false,
 
   // ── initAuth ────────────────────────────────────────────────────────────
-  // Checks if a valid session cookie exists; hydrates account if so.
+  // Checks if a valid session cookie or token exists; hydrates account if so.
   // Called once on app mount; subsequent page navigations are instant.
   initAuth: async () => {
     if (get().initialized) return;
@@ -51,12 +76,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const account = await authGetMe();
       set({ account, loading: false, initialized: true });
+      syncAccountToStorage(account);
       // Sync name + userId into the existing Zustand chemistry store
       useChemStore.setState({
         username: account.display_name,
         userId:   account.user_id,
         chemCoins: account.chem_coins,
       });
+      Promise.all([
+        useChemStore.getState().loadPlayerProfile(),
+        useChemStore.getState().refreshProfile(),
+      ]).catch(() => {});
     } catch {
       // 401 means no valid session — that's normal for unauthenticated users
       set({ account: null, loading: false, initialized: true });
@@ -69,11 +99,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { account } = await authLogin(email, password);
       set({ account, loading: false });
+      syncAccountToStorage(account);
       useChemStore.setState({
         username: account.display_name,
         userId:   account.user_id,
         chemCoins: account.chem_coins,
       });
+      Promise.all([
+        useChemStore.getState().loadPlayerProfile(),
+        useChemStore.getState().refreshProfile(),
+      ]).catch(() => {});
       return account;
     } catch (err) {
       set({ loading: false });
@@ -87,11 +122,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { account } = await authSignup(email, password, displayName);
       set({ account, loading: false });
+      syncAccountToStorage(account);
       useChemStore.setState({
         username: account.display_name,
         userId:   account.user_id,
         chemCoins: account.chem_coins,
       });
+      Promise.all([
+        useChemStore.getState().loadPlayerProfile(),
+        useChemStore.getState().refreshProfile(),
+      ]).catch(() => {});
       return account;
     } catch (err) {
       set({ loading: false });
@@ -102,6 +142,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // ── logout ───────────────────────────────────────────────────────────────
   logout: async () => {
     await authLogout();
+    clearAccountStorage();
     set({ account: null });
     useChemStore.setState({
       username: "player",

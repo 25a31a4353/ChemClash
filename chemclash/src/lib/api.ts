@@ -89,12 +89,21 @@ export interface ChemAccount {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-/** apiFetch with credentials so the session cookie is sent on every request */
+export const LS_AUTH_TOKEN = "chemclash_token";
+
+/** apiFetch with credentials and Bearer token so sessions persist across all browser environments */
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = typeof window !== "undefined" ? localStorage.getItem(LS_AUTH_TOKEN) : null;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...((init?.headers as Record<string, string>) ?? {}),
+  };
+
   const res = await fetch(`${BASE}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers,
   });
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
@@ -334,24 +343,35 @@ export async function authSignup(
   email: string,
   password: string,
   displayName: string
-): Promise<{ ok: boolean; account: ChemAccount }> {
-  return apiFetch("/auth/signup", {
+): Promise<{ ok: boolean; token: string; account: ChemAccount }> {
+  const res = await apiFetch<{ ok: boolean; token: string; account: ChemAccount }>("/auth/signup", {
     method: "POST",
     body: JSON.stringify({ email, password, display_name: displayName }),
   });
+  if (res.token && typeof window !== "undefined") {
+    localStorage.setItem(LS_AUTH_TOKEN, res.token);
+  }
+  return res;
 }
 
 export async function authLogin(
   email: string,
   password: string
-): Promise<{ ok: boolean; account: ChemAccount }> {
-  return apiFetch("/auth/login", {
+): Promise<{ ok: boolean; token: string; account: ChemAccount }> {
+  const res = await apiFetch<{ ok: boolean; token: string; account: ChemAccount }>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+  if (res.token && typeof window !== "undefined") {
+    localStorage.setItem(LS_AUTH_TOKEN, res.token);
+  }
+  return res;
 }
 
 export async function authLogout(): Promise<void> {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(LS_AUTH_TOKEN);
+  }
   await apiFetch("/auth/logout", { method: "POST" }).catch(() => {});
 }
 

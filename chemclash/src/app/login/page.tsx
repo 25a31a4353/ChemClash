@@ -35,10 +35,16 @@ export default function LoginPage() {
   const [error,       setError]       = useState("");
   const [submitting,  setSubmitting]  = useState(false);
 
-  // Already authenticated — go straight to Dashboard
+  // Already authenticated — route to appropriate stage
   useEffect(() => {
     if (initialized && account) {
-      router.replace("/");
+      if (!account.onboarding_done) {
+        router.replace("/onboarding");
+      } else if (!account.tour_done) {
+        router.replace("/tour");
+      } else {
+        router.replace("/");
+      }
     }
   }, [initialized, account, router]);
 
@@ -58,6 +64,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
+    const trimmedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     if (mode === "signup") {
       if (!name.trim()) { setError("Please enter your name."); return; }
       if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
@@ -67,13 +80,21 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       if (mode === "login") {
-        await loginFn(email.trim().toLowerCase(), password);
-        router.replace("/");
-      } else {
-        const acc = await signupFn(email.trim().toLowerCase(), password, name.trim());
-        // New users go through onboarding
+        const acc = await loginFn(trimmedEmail, password);
         if (!acc.onboarding_done) {
           router.replace("/onboarding");
+        } else if (!acc.tour_done) {
+          router.replace("/tour");
+        } else {
+          router.replace("/");
+        }
+      } else {
+        const acc = await signupFn(trimmedEmail, password, name.trim());
+        // New users go through onboarding first
+        if (!acc.onboarding_done) {
+          router.replace("/onboarding");
+        } else if (!acc.tour_done) {
+          router.replace("/tour");
         } else {
           router.replace("/");
         }
@@ -85,6 +106,8 @@ export default function LoginPage() {
         setError("An account with this email already exists. Try logging in.");
       } else if (msg.includes("401") || msg.includes("Invalid email or password")) {
         setError("Invalid email or password. Please try again.");
+      } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("Load failed")) {
+        setError("Cannot reach the ChemClash backend server. Please verify the backend is running at http://localhost:8000.");
       } else {
         setError(msg.replace(/^API \d+: /, ""));
       }
