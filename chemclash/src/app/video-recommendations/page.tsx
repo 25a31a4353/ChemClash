@@ -226,6 +226,79 @@ const FOUNDATIONAL_CARDS: VideoCard[] = [
   },
 ];
 
+// ── Curated Playlists ─────────────────────────────────────────────────────
+
+interface PlaylistTopic {
+  label: string;
+  emoji: string;
+}
+
+interface CuratedPlaylist {
+  title: string;
+  url: string;
+  description: string;
+  accent: {
+    gradient: string;
+    badge: string;
+    btn: string;
+    glow: string;
+    icon: string;
+  };
+  topics: PlaylistTopic[];
+}
+
+const CURATED_PLAYLISTS: CuratedPlaylist[] = [
+  {
+    title: "Playlist 1 — Purification, GOC & Hydrocarbons",
+    url: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    description: "Master the analytical backbone of Organic Chemistry — from purification techniques to the fundamentals of GOC and all hydrocarbon reactions.",
+    accent: {
+      gradient: "from-violet-600 to-purple-700",
+      badge: "bg-violet-100 text-violet-700 border-violet-200",
+      btn: "bg-violet-600 hover:bg-violet-700 shadow-violet-200",
+      glow: "shadow-violet-100",
+      icon: "🧪",
+    },
+    topics: [
+      { label: "Purification & Characterisation", emoji: "🔬" },
+      { label: "GOC (Basic Principles)", emoji: "⚛️" },
+      { label: "Hydrocarbons", emoji: "🛢️" },
+    ],
+  },
+  {
+    title: "Playlist 2 — Halogens & Oxygen Compounds",
+    url: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    description: "Deep dive into haloalkanes, haloarenes, and all oxygen-containing functional groups — alcohols, ethers, aldehydes, ketones, carboxylic acids and derivatives.",
+    accent: {
+      gradient: "from-blue-600 to-cyan-600",
+      badge: "bg-blue-100 text-blue-700 border-blue-200",
+      btn: "bg-blue-600 hover:bg-blue-700 shadow-blue-200",
+      glow: "shadow-blue-100",
+      icon: "💧",
+    },
+    topics: [
+      { label: "Haloalkanes & Haloarenes", emoji: "⚗️" },
+      { label: "Organic Compounds with Oxygen", emoji: "🧬" },
+    ],
+  },
+  {
+    title: "Playlist 3 — Nitrogen Compounds & Biomolecules",
+    url: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
+    description: "Complete coverage of amines, diazonium salts, and the rich world of biomolecules — carbohydrates, proteins, nucleic acids, vitamins, and polymers.",
+    accent: {
+      gradient: "from-emerald-600 to-teal-600",
+      badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
+      btn: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200",
+      glow: "shadow-emerald-100",
+      icon: "🧬",
+    },
+    topics: [
+      { label: "Amines (Org. Nitrogen)", emoji: "🔵" },
+      { label: "Biomolecules", emoji: "🌿" },
+    ],
+  },
+];
+
 // ── Pick cards from weakness list ─────────────────────────────────────────
 
 function pickCards(topWeaknesses: string[]): VideoCard[] {
@@ -299,6 +372,63 @@ function VideoCardUI({ card, index }: { card: VideoCard; index: number }) {
       >
         <span>▶</span> Watch on YouTube →
       </a>
+    </div>
+  );
+}
+
+// ── Curated Playlist Card ─────────────────────────────────────────────────
+
+function PlaylistCard({ playlist, index }: { playlist: CuratedPlaylist; index: number }) {
+  const { accent } = playlist;
+  return (
+    <div
+      className={`relative rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-lg flex flex-col`}
+      style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.07)" }}
+    >
+      {/* Gradient header */}
+      <div className={`bg-gradient-to-r ${accent.gradient} px-5 pt-5 pb-6`}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <span className="text-white/70 text-[0.6rem] font-bold uppercase tracking-widest">
+              Curated Playlist {index + 1}
+            </span>
+            <h3 className="text-white font-black text-base leading-snug mt-0.5">
+              {playlist.title}
+            </h3>
+          </div>
+          <span className="text-3xl flex-shrink-0 mt-1">{accent.icon}</span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="px-5 py-4 flex flex-col gap-4 flex-1">
+        {/* Description */}
+        <p className="text-xs text-slate-600 leading-relaxed">{playlist.description}</p>
+
+        {/* Topic pills */}
+        <div className="flex flex-wrap gap-1.5">
+          {playlist.topics.map((t) => (
+            <span
+              key={t.label}
+              className={`inline-flex items-center gap-1 text-[0.6rem] font-semibold px-2.5 py-1 rounded-full border ${accent.badge}`}
+            >
+              <span>{t.emoji}</span>
+              {t.label}
+            </span>
+          ))}
+        </div>
+
+        {/* Watch button */}
+        <a
+          href={playlist.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-flex items-center justify-center gap-2 ${accent.btn} text-white text-xs font-bold rounded-xl py-3 shadow-md transition-all no-underline mt-auto`}
+        >
+          <span className="text-base">▶</span>
+          Open Full Playlist on YouTube →
+        </a>
+      </div>
     </div>
   );
 }
