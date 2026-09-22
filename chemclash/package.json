@@ -20,14 +20,20 @@
     }
   },
   "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/uuid": "^10.0.0",
+    "bcryptjs": "^3.0.3",
     "framer-motion": "^13.1.1",
+    "jose": "^6.2.12",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "konva": "^10.3.2",
+    "mongodb": "^7.6.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-konva": "^19.2.5",
+    "uuid": "^14.0.2",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
