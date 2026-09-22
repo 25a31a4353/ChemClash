@@ -127,7 +127,7 @@ export default function TopNav({
                 className="animate-slide-down absolute right-0 top-[calc(100%+8px)] bg-white border border-slate-200 rounded-xl min-w-[180px] overflow-hidden shadow-lg z-50"
               >
                 {[
-                  { label: "My Profile",  icon: "👤", href: "/leaderboard" },
+                  { label: "My Profile",  icon: "👤", href: "/profile" },
                   { label: "Leaderboard", icon: "🏆", href: "/leaderboard" },
                   { label: "Rewards",     icon: "🪙", href: "/rewards" },
                   { label: "Sign Out",    icon: "→",  href: undefined, danger: true },
