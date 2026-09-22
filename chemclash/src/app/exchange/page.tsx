@@ -380,7 +380,7 @@ function DetailModal({
         <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
           <p className="text-[0.65rem] font-bold text-amber-700 uppercase tracking-widest mb-0.5">Exchange MVP</p>
           <p className="text-xs text-amber-700 leading-relaxed">
-            This is a prototype listing. No real transactions, payments, or seller contact is available yet. "Interested" saves this listing locally for your reference.
+            This is a prototype listing. No real transactions, payments, or seller contact is available yet. &ldquo;Interested&rdquo; saves this listing locally for your reference.
           </p>
         </div>
 
@@ -416,6 +416,7 @@ export default function ExchangePage() {
   const [openId, setOpenId]           = useState<string | null>(null);
 
   // Hydrate interested set from localStorage
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional localStorage hydration
   useEffect(() => { setInterested(readInterested()); }, []);
 
   const toggleInterested = (id: string) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useChemStore } from "@/store/useChemStore";
@@ -43,14 +43,22 @@ export default function LeaderboardPage() {
   const [tab, setTab] = useState<"global" | "weekly">("global");
   const eloRating = useChemStore((s) => s.eloRating);
   const username  = useChemStore((s) => s.username);
+  const profile   = useChemStore((s) => s.profile);
+  const refreshProfile = useChemStore((s) => s.refreshProfile);
 
   const board = tab === "global" ? GLOBAL_BOARD : WEEKLY_BOARD;
 
-  const myEntry: LeaderboardEntry = {
-    rank: tab === "weekly" ? 5 : 84, username,
-    elo: eloRating, accuracy: 73, streak: 7,
-    badge: "⚗️", change: "up", delta: tab === "weekly" ? 5 : 2,
-  };
+  // Compute the player's approximate rank: count how many board entries have
+  // a higher ELO, then add an offset for players not in the top-10 list.
+  const myRank = (() => {
+    const above = GLOBAL_BOARD.filter((e) => e.elo > eloRating).length;
+    // If ELO is above everyone in the board, rank is 1; below all, rank ≈ above + 11
+    return above + 1;
+  })();
+
+  useEffect(() => { refreshProfile(); }, [refreshProfile]);
+
+  const myAccuracy = profile != null ? `${Math.round(profile.accuracy * 100)}%` : "—";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -68,7 +76,7 @@ export default function LeaderboardPage() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <p className="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-2">Global Rankings</p>
           <h1 className="text-3xl font-black text-slate-900 mb-1">🏆 Leaderboard</h1>
-          <p className="text-sm text-slate-500">Ranked by ELO · Updated live</p>
+          <p className="text-sm text-slate-500">Your row (bottom) uses live data. Top-10 board shows seeded demo players until multiplayer launches.</p>
         </motion.div>
 
         {/* Tab switcher */}
@@ -143,15 +151,15 @@ export default function LeaderboardPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
             className="mt-4 bg-emerald-50 border border-emerald-200 border-l-4 border-l-emerald-400 rounded-2xl px-5 py-3 grid gap-2 items-center shadow-sm"
             style={{ gridTemplateColumns: "44px 1fr 80px 70px 60px 50px" }}>
-            <span className="text-sm font-bold text-emerald-700">#84</span>
+            <span className="text-sm font-bold text-emerald-700">#{myRank}</span>
             <div>
               <span className="text-sm font-bold text-emerald-700">{username}</span>
               <span className="ml-2 text-[0.6rem] font-bold bg-emerald-100 border border-emerald-200 text-emerald-700 px-1.5 py-0.5 rounded">YOU</span>
             </div>
             <span className="text-sm font-bold text-slate-800">{eloRating.toLocaleString()}</span>
-            <span className="text-sm text-slate-500">73%</span>
-            <span className="text-sm text-amber-600 font-medium">🔥 7d</span>
-            <span className="text-sm font-bold text-emerald-600">↑2</span>
+            <span className="text-sm text-slate-500">{myAccuracy}</span>
+            <span className="text-sm text-amber-600 font-medium">🔥 —</span>
+            <span className="text-sm font-bold text-slate-400">—</span>
           </motion.div>
         )}
       </div>

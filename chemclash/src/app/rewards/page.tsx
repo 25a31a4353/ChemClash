@@ -58,7 +58,7 @@ const REWARDS: Reward[] = [
     id: "sn2_practice_pack",
     name: "SN2 Practice Pack",
     description: "Unlocks a focused run of SN2 mechanism questions in the Adaptive PYQ targeting backside attack, inversion, and solvent effects.",
-    cost: 5,
+    cost: 2,
     icon: "⚗️",
     category: "Practice",
     href: "/adaptive-pyq",
@@ -68,7 +68,7 @@ const REWARDS: Reward[] = [
     id: "eas_challenge",
     name: "EAS Concept Challenge",
     description: "Bonus Tutor Shorts session filtered to Electrophilic Aromatic Substitution — directing effects, arenium ions, and halogen anomaly.",
-    cost: 5,
+    cost: 2,
     icon: "🔬",
     category: "Micro-Learn",
     href: "/tutor-shorts",
@@ -78,7 +78,7 @@ const REWARDS: Reward[] = [
     id: "stereochemistry_revision",
     name: "Stereochemistry Revision Pack",
     description: "Curated Tutor Shorts on chirality, R/S configuration, enantiomers, and diastereomers — the most calculation-heavy JEE topic.",
-    cost: 8,
+    cost: 3,
     icon: "🧬",
     category: "Revision",
     href: "/tutor-shorts",
@@ -88,7 +88,7 @@ const REWARDS: Reward[] = [
     id: "carbocation_mastery",
     name: "Carbocation Mastery Pack",
     description: "Unlocks a targeted Adaptive PYQ run on carbocation stability, hyperconjugation, and 1,2-shifts — essential for SN1, E1, and Markovnikov reactions.",
-    cost: 8,
+    cost: 3,
     icon: "⚡",
     category: "Practice",
     href: "/adaptive-pyq",
@@ -98,7 +98,7 @@ const REWARDS: Reward[] = [
     id: "mechanism_builder_bonus",
     name: "Mechanism Builder Bonus Session",
     description: "Activates a full Reaction Pathway Lab session with extra hints enabled — work through 5 reaction pathways at your own pace.",
-    cost: 10,
+    cost: 4,
     icon: "🧪",
     category: "Practice",
     href: "/mechanism-builder",
@@ -108,7 +108,7 @@ const REWARDS: Reward[] = [
     id: "video_pack_elimination",
     name: "Elimination Reactions Video Pack",
     description: "Unlocks the curated E1/E2 video recommendations playlist — anti-periplanar geometry, Zaitsev, and competing SN/E pathways.",
-    cost: 5,
+    cost: 2,
     icon: "🎬",
     category: "Videos",
     href: "/video-recommendations",
@@ -118,7 +118,7 @@ const REWARDS: Reward[] = [
     id: "arena_wildcard",
     name: "Practice Arena Wildcard",
     description: "Grants a bonus 5-question Practice Arena match — a great way to test whether your revision is paying off in ELO.",
-    cost: 12,
+    cost: 4,
     icon: "⚔️",
     category: "Arena",
     href: "/duel",
@@ -128,7 +128,7 @@ const REWARDS: Reward[] = [
     id: "skill_tree_accelerator",
     name: "Skill Tree Accelerator",
     description: "Unlocks access to the Skill Tree mastery map and highlights the 3 nodes closest to being unlocked — focus your revision where it matters most.",
-    cost: 15,
+    cost: 5,
     icon: "🌳",
     category: "Mastery",
     href: "/skill-tree",
@@ -232,6 +232,7 @@ export default function RewardsPage() {
   useEffect(() => {
     const stored = readCoins();
     useChemStore.setState({ chemCoins: stored });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading localStorage in effect is intentional hydration
     setPurchased(loadPurchased());
   }, []);
 

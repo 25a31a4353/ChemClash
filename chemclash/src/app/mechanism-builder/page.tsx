@@ -72,6 +72,7 @@ function AtomNode({ atom, isDragSource, isTarget, onMouseDown }: AtomNodeProps) 
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function MechanismBuilder({ eloRating }: { eloRating: number }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragFrom, setDragFrom] = useState<Atom | null>(null);
@@ -117,15 +118,21 @@ function MechanismBuilder({ eloRating }: { eloRating: number }) {
     setDragFrom(null); setDragPos(null); setTargetAtom(null);
   }, [dragFrom, svgPoint]);
 
+  // Stable ref so the mouseup listener can remove itself without triggering
+  // a circular dependency warning. Updated via useEffect so it never mutates during render.
+  const mouseUpHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  useEffect(() => {
+    mouseUpHandlerRef.current = (e: MouseEvent) => {
+      handleMouseUp(e);
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (mouseUpHandlerRef.current) window.removeEventListener("mouseup", mouseUpHandlerRef.current);
+    };
+  }); // no deps — update on every render to capture latest handleMouseUp / handleMouseMove
+
   const handleCanvasMouseDown = () => {
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUpGlobal);
+    if (mouseUpHandlerRef.current) window.addEventListener("mouseup", mouseUpHandlerRef.current);
   };
-  const handleMouseUpGlobal = useCallback((e: MouseEvent) => {
-    handleMouseUp(e);
-    window.removeEventListener("mousemove", handleMouseMove);
-    window.removeEventListener("mouseup", handleMouseUpGlobal);
-  }, [handleMouseMove, handleMouseUp]);
 
   const lastConnection = connections.length > 0 ? connections[connections.length - 1] : null;
   const progress = Math.round((completedSteps.length / MECH_STEPS.length) * 100);
@@ -174,7 +181,7 @@ function MechanismBuilder({ eloRating }: { eloRating: number }) {
               );
             })()}
             {ATOMS.map((atom) => <AtomNode key={atom.id} atom={atom} isDragSource={dragFrom?.id === atom.id} isTarget={targetAtom?.id === atom.id} onMouseDown={handleMouseDown} />)}
-            <text x="390" y="456" textAnchor="middle" fill="#94a3b8" fontSize={9} fontFamily="ui-monospace, monospace">// DRAG FROM ATOM TO DRAW ELECTRON ARROW</text>
+            <text x="390" y="456" textAnchor="middle" fill="#94a3b8" fontSize={9} fontFamily="ui-monospace, monospace">DRAG FROM ATOM TO DRAW ELECTRON ARROW</text>
           </svg>
         </div>
         <div className="flex gap-5 mt-3 flex-wrap">
@@ -307,6 +314,7 @@ const FALLBACK_CHALLENGES: Challenge[] = [
   { id: 5, nucleophile: "OH⁻",  electrophile: "(CH₃)₂CHBr",  shouldReact: true,  hint: "Secondary substrates — will SN2 or E2 dominate?", mechanism: "SN2/E2", explanation: "With OH⁻ and a secondary substrate, both SN2 and E2 compete. Temperature and solvent determine the ratio.", difficulty: "hard" },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PathwayLab({ eloRating }: { eloRating: number }) {
   const [challenges, setChallenges] = useState<Challenge[]>(FALLBACK_CHALLENGES);
   const [idx, setIdx] = useState(0);
@@ -329,11 +337,15 @@ function PathwayLab({ eloRating }: { eloRating: number }) {
     if (step === 2) return buildStep2Options(challenge);
     return buildStep3Options(challenge);
   })();
-  // Memoize options per (idx, step) to avoid re-shuffling on render
+  // Memoize options per (idx, step) to avoid re-shuffling on render.
+  // Use key-based reset instead of ref mutation during render.
   const [stableOptions, setStableOptions] = useState<PathOption[]>(currentOptions);
-  const lastKey = useRef(`${idx}-${step}`);
-  const key = `${idx}-${step}`;
-  if (key !== lastKey.current) { lastKey.current = key; setStableOptions(currentOptions); }
+  const [stableKey,     setStableKey]     = useState(`${idx}-${step}`);
+  const newKey = `${idx}-${step}`;
+  if (newKey !== stableKey) {
+    setStableKey(newKey);
+    setStableOptions(currentOptions);
+  }
 
   function handleSelect(optId: string) {
     if (chosen !== null) return;
@@ -438,7 +450,7 @@ function PathwayLab({ eloRating }: { eloRating: number }) {
               <div className="text-4xl mb-4">🔬</div>
               <p className="text-base font-bold text-slate-700 mb-2">Ready to build this pathway?</p>
               <p className="text-sm text-slate-500 mb-1 leading-relaxed">{challenge.hint}</p>
-              <p className="text-xs text-slate-400 mb-6">You'll answer 3 questions: nucleophile → mechanism → product</p>
+              <p className="text-xs text-slate-400 mb-6">You&apos;ll answer 3 questions: nucleophile → mechanism → product</p>
               <button onClick={() => setPhase("step1")} className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-colors">
                 Start Pathway →
               </button>

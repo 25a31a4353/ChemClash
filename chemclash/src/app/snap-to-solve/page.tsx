@@ -209,7 +209,7 @@ function MentorPanel({ response, persona, language }: MentorPanelProps) {
           {persona === "quick_revision" ? "Key Takeaway →" : "Think about this →"}
         </p>
         <p className="text-sm font-bold text-slate-800 leading-relaxed italic">
-          "{response.socratic_question}"
+          &ldquo;{response.socratic_question}&rdquo;
         </p>
       </div>
 

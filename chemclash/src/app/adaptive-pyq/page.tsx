@@ -119,7 +119,7 @@ function DiagnosisPanel({ chosen, question, onTryAgain }: DiagnosisProps) {
             Next clue
           </p>
           <p className="text-sm italic text-slate-600 leading-relaxed">
-            "{question.socratic_hint}"
+            &ldquo;{question.socratic_hint}&rdquo;
           </p>
         </div>
       )}
@@ -166,10 +166,13 @@ export default function AdaptivePYQPage() {
     startSession();
   }, [startSession]);
 
-  // Reset local chosen state when a new question arrives
+  // Reset local chosen state when a new question arrives.
   useEffect(() => {
-    if (phase === "answering") setChosenAnswer(null);
-  }, [phase, current?.question.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (phase === "answering") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setChosenAnswer(null);
+    }
+  }, [phase, current?.question.id]);
 
   function handleChoose(answer: string) {
     if (phase !== "answering") return;

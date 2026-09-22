@@ -24,6 +24,77 @@ import {
 } from "@/lib/api";
 import { useChemStore } from "@/store/useChemStore";
 
+// ── Static fallback questions (used when backend is unreachable) ───────────
+
+const FALLBACK_QUESTIONS: AdaptivePYQResponse[] = [
+  {
+    question: {
+      id: "FB-001", exam: "JEE Mains", exam_year: 2023,
+      question_text: "In an SN2 reaction, which substrate reacts fastest?",
+      image_url: null,
+      options: { A: "Neopentyl chloride", B: "Methyl chloride", C: "tert-Butyl chloride", D: "Isopropyl chloride" },
+      correct_answer: "B", difficulty_level: "easy",
+      concept_tags: ["SN2", "steric_hindrance"],
+      socratic_hint: "Which substrate has the least steric crowding around the electrophilic carbon?",
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["SN2"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-002", exam: "JEE Mains", exam_year: 2022,
+      question_text: "Which reagent converts an alkene to a Markovnikov alcohol?",
+      image_url: null,
+      options: { A: "BH₃/THF then H₂O₂/NaOH", B: "H₂SO₄/H₂O", C: "OsO₄", D: "mCPBA" },
+      correct_answer: "B", difficulty_level: "easy",
+      concept_tags: ["Markovnikov", "electrophilic_addition"],
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["Markovnikov"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-003", exam: "JEE Mains", exam_year: 2021,
+      question_text: "E2 elimination requires the H and leaving group to be:",
+      image_url: null,
+      options: { A: "Syn-periplanar (0°)", B: "Gauche (60°)", C: "Anti-periplanar (180°)", D: "Eclipsed (120°)" },
+      correct_answer: "C", difficulty_level: "medium",
+      concept_tags: ["E2", "anti_periplanar"],
+      socratic_hint: "Draw a Newman projection — which geometry allows simultaneous H removal and LG departure?",
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["E2"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-004", exam: "JEE Advanced", exam_year: 2022,
+      question_text: "Which carbocation is most stable?",
+      image_url: null,
+      options: { A: "CH₃⁺", B: "CH₃CH₂⁺", C: "(CH₃)₂CH⁺", D: "(CH₃)₃C⁺" },
+      correct_answer: "D", difficulty_level: "easy",
+      concept_tags: ["carbocation", "stability"],
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["carbocation"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-005", exam: "JEE Mains", exam_year: 2020,
+      question_text: "SN1 reactions proceed with:",
+      image_url: null,
+      options: { A: "Complete inversion", B: "Complete retention", C: "Racemisation", D: "No stereochemical change" },
+      correct_answer: "C", difficulty_level: "medium",
+      concept_tags: ["SN1", "stereochemistry"],
+      socratic_hint: "The carbocation intermediate is planar — from which face(s) can the nucleophile attack?",
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["SN1"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+];
+
+let _fallbackIdx = 0;
+function getFallbackQuestion(seen: string[]): AdaptivePYQResponse {
+  const unseen = FALLBACK_QUESTIONS.filter((q) => !seen.includes(q.question.id));
+  if (unseen.length > 0) return unseen[_fallbackIdx++ % unseen.length];
+  _fallbackIdx = 0;
+  return FALLBACK_QUESTIONS[0];
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const MATCH_LENGTH   = 5;
@@ -32,8 +103,6 @@ const ELO_WRONG      = -6;
 const QUESTION_SECS  = 30;   // countdown per question
 
 // ── Types ──────────────────────────────────────────────────────────────────
-
-type ArenaPhase = "lobby" | "loading" | "question" | "reveal" | "result";
 
 interface RoundRecord {
   question:   AdaptivePYQResponse;
@@ -213,10 +282,10 @@ function ArenaMatch({
   const [timeLeft, setTimeLeft]   = useState(QUESTION_SECS);
   const [loadingQ, setLoadingQ]   = useState(true);
   const [runningElo, setRunningElo] = useState(eloRating);
-  const timerRef  = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startTime = useRef<number>(Date.now());
+  const timerRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTime   = useRef<number>(0);  // set to Date.now() in loadQuestion
 
-  // Load next question
+  // Load next question (with static fallback so arena always works)
   const loadQuestion = useCallback(async (seen: string[]) => {
     setLoadingQ(true);
     setChosen(null);
@@ -229,49 +298,17 @@ function ArenaMatch({
       setSeenIds((s) => [...s, q.question.id]);
       startTime.current = Date.now();
     } catch {
-      // network error — use same question or abort
+      const q = getFallbackQuestion(seen);
+      setQuestion(q);
+      setSeenIds((s) => [...s, q.question.id]);
+      startTime.current = Date.now();
     } finally {
       setLoadingQ(false);
     }
   }, [userId]);
 
-  // Countdown timer
-  useEffect(() => {
-    if (loadingQ || qPhase === "reveal") return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearInterval(timerRef.current!);
-          // Time up → auto-submit wrong
-          handleAutoExpire();
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadingQ, qPhase, question]);
-
-  // Initial load
-  useEffect(() => {
-    loadQuestion([]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function handleAutoExpire() {
-    if (!question || qPhase === "reveal") return;
-    // Treat as wrong with a dummy answer that can't match
-    processAnswer("X");
-  }
-
-  async function handleChoose(answer: string) {
-    if (qPhase === "reveal" || !question) return;
-    clearInterval(timerRef.current!);
-    setChosen(answer);
-    await processAnswer(answer);
-  }
-
+  // processAnswer — declared BEFORE any useEffect that references it to satisfy
+  // react-hooks/immutability (no forward references to async functions in effects).
   async function processAnswer(answer: string) {
     if (!question) return;
     const timeTaken = Math.round((Date.now() - startTime.current) / 1000);
@@ -290,28 +327,80 @@ function ArenaMatch({
         timeTaken,
       };
       setRecords((prev) => {
-        const next = [...prev, rec];
         // Sync partial ELO to backend fire-and-forget
         const failedConcepts = res.was_correct
           ? {}
           : Object.fromEntries(question.question.concept_tags.map((t) => [t, 1]));
         syncMatchResult(userId, delta, failedConcepts);
-        return next;
+        return [...prev, rec];
       });
     } catch {
-      // keep reveal phase even on error
-      setResult({
-        was_correct: false,
+      // Backend unreachable — grade locally against the stored correct_answer
+      const localCorrect = answer === question.question.correct_answer;
+      // Accumulate wrong-answer tags locally so offline weakness features work
+      if (!localCorrect) {
+        try {
+          const prev = JSON.parse(localStorage.getItem("chemclash_local_weaknesses") ?? "{}") as Record<string, number>;
+          for (const t of question.question.concept_tags) prev[t] = (prev[t] ?? 0) + 1;
+          localStorage.setItem("chemclash_local_weaknesses", JSON.stringify(prev));
+        } catch { /* non-fatal */ }
+      }
+      const delta = localCorrect ? ELO_CORRECT : ELO_WRONG;
+      const res: AnswerResult = {
+        was_correct: localCorrect,
         correct_answer: question.question.correct_answer,
         explanation_tags: question.question.concept_tags,
         profile_summary: { total_answered: 0, total_correct: 0, accuracy: 0, top_weaknesses: [] },
-      });
+      };
+      setResult(res);
+      setRunningElo((e) => e + delta);
+      setRecords((prev) => [...prev, { question, chosen: answer, result: res, eloDelta: delta, timeTaken }]);
     }
   }
 
+  // Countdown timer
+  useEffect(() => {
+    if (loadingQ || qPhase === "reveal") return;
+    timerRef.current = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [loadingQ, qPhase, question]);
+
+  // When the timer hits 0, auto-submit a wrong answer
+  useEffect(() => {
+    if (timeLeft === 0 && qPhase === "question" && question) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- processAnswer sets state; intentional timer-expiry effect
+      processAnswer("X");
+    }
+  }, [timeLeft]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Initial load
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadQuestion([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleChoose(answer: string) {
+    if (qPhase === "reveal" || !question) return;
+    clearInterval(timerRef.current!);
+    setChosen(answer);
+    await processAnswer(answer);
+  }
+
+  // handleNext — called from "Next Question" button after reveal
+  // Uses roundNum (always current) rather than stale records.length to decide
+  // if the match is complete, avoiding the double-onComplete bug (C-3).
   function handleNext() {
-    if (records.length + (result ? 1 : 0) >= MATCH_LENGTH || roundNum >= MATCH_LENGTH) {
-      // Match complete — wait one tick for records state to settle
+    if (roundNum >= MATCH_LENGTH) {
+      // Last round — pass current records + ELO up to the parent
       setRecords((prev) => {
         onComplete(prev, runningElo);
         return prev;
@@ -321,14 +410,6 @@ function ArenaMatch({
     setRoundNum((n) => n + 1);
     loadQuestion(seenIds);
   }
-
-  // Determine when all rounds are recorded
-  useEffect(() => {
-    if (records.length === MATCH_LENGTH) {
-      onComplete(records, runningElo);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [records]);
 
   const q = question?.question;
   const correctAns = result?.correct_answer ?? q?.correct_answer ?? "";

@@ -1,12 +1,57 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import GameModeCard, { GameMode } from "@/components/GameModeCard";
 import CheatSheetDownloader from "@/components/CheatSheetDownloader";
 import { useChemStore } from "@/store/useChemStore";
-import { LS_ONBOARDING_DONE } from "@/app/onboarding/page";
+import { LS_ONBOARDING_DONE, LS_USER_NAME } from "@/app/onboarding/page";
+
+// ── localStorage key for activity log ────────────────────────────────────
+const LS_ACTIVITY_LOG = "chemclash_activity_log";
+
+/** Record a visit timestamp (called on Dashboard mount). */
+function recordActivity() {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(LS_ACTIVITY_LOG);
+    const log: number[] = raw ? JSON.parse(raw) : [];
+    const today = Math.floor(Date.now() / 86400000); // days since epoch
+    if (!log.includes(today)) {
+      log.push(today);
+      // Keep only last 400 days
+      const trimmed = log.sort((a, b) => a - b).slice(-400);
+      localStorage.setItem(LS_ACTIVITY_LOG, JSON.stringify(trimmed));
+    }
+  } catch { /* ignore */ }
+}
+
+/** Read activity days and build a 53×7 grid. */
+function buildRealYearGrid(): number[][] {
+  const today = Math.floor(Date.now() / 86400000);
+  const activeDays = new Set<number>();
+  try {
+    const raw = localStorage.getItem(LS_ACTIVITY_LOG);
+    if (raw) (JSON.parse(raw) as number[]).forEach((d) => activeDays.add(d));
+  } catch { /* ignore */ }
+
+  // Find the Monday of the week 52 weeks ago
+  const todayDate = new Date();
+  const dayOfWeek = (todayDate.getDay() + 6) % 7; // 0=Mon
+  const startEpochDay = today - dayOfWeek - 52 * 7;
+
+  const weeks: number[][] = [];
+  for (let w = 0; w < 53; w++) {
+    const week: number[] = [];
+    for (let d = 0; d < 7; d++) {
+      const epochDay = startEpochDay + w * 7 + d;
+      week.push(activeDays.has(epochDay) ? 3 : 0);
+    }
+    weeks.push(week);
+  }
+  return weeks;
+}
 
 const GAME_MODES: GameMode[] = [
   {
@@ -208,45 +253,8 @@ const GAME_MODES: GameMode[] = [
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-/**
- * Build a 52-week × 7-day grid of simulated activity values (0–4).
- * 0 = no activity, 4 = peak activity.
- * Seeded deterministically so it looks realistic and renders the same on
- * every load (replaced with real backend data when available).
- */
-function buildYearGrid(): number[][] {
-  const weeks: number[][] = [];
-  // Simple deterministic pseudo-random seeded by position
-  const val = (w: number, d: number): number => {
-    const n = Math.sin(w * 7 + d * 13 + 42) * 43758.5453;
-    const r = n - Math.floor(n);
-    // Bias toward 0 (empty) — ~55% empty, rest spread across 1–4
-    if (r < 0.55) return 0;
-    if (r < 0.72) return 1;
-    if (r < 0.85) return 2;
-    if (r < 0.94) return 3;
-    return 4;
-  };
-  for (let w = 0; w < 53; w++) {
-    const week: number[] = [];
-    for (let d = 0; d < 7; d++) {
-      week.push(val(w, d));
-    }
-    weeks.push(week);
-  }
-  return weeks;
-}
-
-const YEAR_GRID = buildYearGrid();
-
 /** Which week index each month label should appear at (approx 4.33 weeks/month) */
 const MONTH_WEEK_STARTS = MONTHS.map((_, i) => Math.round(i * (52 / 12)));
-
-/** Total "reactions" count (sum of all cells mapped to representative counts) */
-const YEAR_TOTAL = YEAR_GRID.flat().reduce((s, v) => s + v * 3, 0);
-
-/** Count weeks with at least one active day */
-const ACTIVE_DAYS = YEAR_GRID.flat().filter((v) => v > 0).length;
 
 /** Colour for each intensity level — ChemClash violet/emerald theme */
 function heatColor(v: number): string {
@@ -424,6 +432,58 @@ function getRecommendation(topWeaknesses: string[]): Recommendation {
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
 
+// ── Tour steps ─────────────────────────────────────────────────────────────
+
+const TOUR_STEPS = [
+  { title: "🎯 Adaptive PYQ",         body: "AI picks JEE questions matched to YOUR weak spots. Answer, get Socratic feedback, fix the gap." },
+  { title: "📚 Curriculum",           body: "Work through concept slides in order. Complete a module to unlock the Skill Tree node." },
+  { title: "🌳 Skill Tree",           body: "Visual mastery map — complete Curriculum modules to turn locked nodes green." },
+  { title: "⚡ Tutor Shorts",         body: "One concept per card — tip, key fact, and a common mistake. Weak topics surface first." },
+  { title: "🎬 Video Recommendations",body: "Personalised YouTube links based on your exact weakness profile." },
+  { title: "⚔️ Practice Arena",       body: "5-question solo match with a countdown timer. Every correct answer earns ELO." },
+  { title: "⚗️ React or Reject",      body: "Swipe right to REACT, left to REJECT. Train chemical intuition under time pressure." },
+  { title: "🪙 Reward Shop",          body: "Earn ChemCoins from Daily Missions. Spend them to unlock practice packs and bonus sessions." },
+];
+
+const LS_TOUR_DONE = "chemclash_tour_done";
+
+function TourOverlay({ onDone }: { onDone: () => void }) {
+  const [idx, setIdx] = useState(0);
+  const step = TOUR_STEPS[idx];
+  const isLast = idx === TOUR_STEPS.length - 1;
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-7 text-center">
+        {/* Progress dots */}
+        <div className="flex justify-center gap-1.5 mb-6">
+          {TOUR_STEPS.map((_, i) => (
+            <div key={i} className={`rounded-full transition-all ${i === idx ? "w-5 h-2 bg-emerald-500" : i < idx ? "w-2 h-2 bg-emerald-300" : "w-2 h-2 bg-slate-200"}`} />
+          ))}
+        </div>
+        <h3 className="text-xl font-black text-slate-900 mb-3">{step.title}</h3>
+        <p className="text-sm text-slate-600 leading-relaxed mb-8">{step.body}</p>
+        <div className="flex gap-3">
+          {idx > 0 && (
+            <button onClick={() => setIdx(i => i - 1)} className="flex-1 border border-slate-200 text-slate-600 text-sm font-bold py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              ← Back
+            </button>
+          )}
+          <button
+            onClick={() => { if (isLast) { localStorage.setItem(LS_TOUR_DONE, "1"); onDone(); } else setIdx(i => i + 1); }}
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2.5 rounded-xl transition-colors"
+          >
+            {isLast ? "🚀 Start Playing!" : "Next →"}
+          </button>
+        </div>
+        <button onClick={() => { localStorage.setItem(LS_TOUR_DONE, "1"); onDone(); }} className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors">
+          Skip tour
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const router                 = useRouter();
   const eloRating              = useChemStore((s) => s.eloRating);
@@ -437,10 +497,30 @@ export default function Dashboard() {
   const refreshProfile         = useChemStore((s) => s.refreshProfile);
   const loadPlayerProfile      = useChemStore((s) => s.loadPlayerProfile);
 
-  // Redirect first-time visitors to onboarding (client-only, no SSR flash).
+  const [showTour, setShowTour]     = useState(false);
+  const [yearGrid, setYearGrid]     = useState<number[][]>([]);
+  const [yearTotal, setYearTotal]   = useState(0);
+  const [activeDays, setActiveDays] = useState(0);
+
+  // Redirect first-time visitors to onboarding; hydrate state from localStorage.
   useEffect(() => {
     if (localStorage.getItem(LS_ONBOARDING_DONE) !== "1") {
       router.replace("/onboarding");
+      return;
+    }
+    // Hydrate username from localStorage on every mount
+    const savedName = localStorage.getItem(LS_USER_NAME);
+    if (savedName)  useChemStore.setState({ username: savedName });
+    // Record today's activity and build the real heatmap
+    recordActivity();
+    const grid = buildRealYearGrid();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrating heatmap from localStorage
+    setYearGrid(grid);
+    setYearTotal(grid.flat().filter((v) => v > 0).length);
+    setActiveDays(grid.flat().filter((v) => v > 0).length);
+    // Show tour on first login (after onboarding)
+    if (localStorage.getItem(LS_TOUR_DONE) !== "1") {
+      setShowTour(true);
     }
   }, [router]);
 
@@ -453,9 +533,19 @@ export default function Dashboard() {
 
   const rec = getRecommendation(profile?.top_weaknesses ?? []);
 
+  function handleLogout() {
+    localStorage.removeItem(LS_ONBOARDING_DONE);
+    localStorage.removeItem(LS_USER_NAME);
+    localStorage.removeItem("chemclash_user_id");
+    localStorage.removeItem(LS_TOUR_DONE);
+    useChemStore.setState({ username: "player", userId: "", profile: null, eloRating: 1200, dailyStreak: 0 });
+    router.replace("/onboarding");
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <TopNav eloRating={eloRating} dailyStreak={dailyStreak} username={username} />
+      {showTour && <TourOverlay onDone={() => setShowTour(false)} />}
+      <TopNav eloRating={eloRating} dailyStreak={dailyStreak} username={username} onLogout={handleLogout} />
 
       <main className="max-w-6xl mx-auto px-6 py-12 pb-20">
 
@@ -475,8 +565,11 @@ export default function Dashboard() {
 
           <p className="text-base text-slate-600 leading-relaxed mb-8">
             Your ELO is{" "}
-            <span className="text-emerald-600 font-bold">{eloRating}</span> · Top{" "}
-            <span className="text-amber-600 font-bold">12%</span> globally · Keep reacting.
+            <span className="text-emerald-600 font-bold">{eloRating}</span>
+            {profile?.total_answered
+              ? <> · <span className="text-blue-600 font-bold">{Math.round(profile.accuracy * 100)}%</span> accuracy · Keep reacting.</>
+              : <> · Start practicing to build your profile.</>
+            }
           </p>
 
           {/* Stats bar — 5 cols on sm+, 2 on mobile */}
@@ -591,12 +684,12 @@ export default function Dashboard() {
           {/* Header row */}
           <div className="flex items-center justify-between flex-wrap gap-3 mb-5 min-w-[560px]">
             <div className="flex items-baseline gap-2">
-              <span className="text-xl font-black text-slate-900">{YEAR_TOTAL}</span>
-              <span className="text-xs text-slate-500 font-medium">reactions in the past year</span>
+              <span className="text-xl font-black text-slate-900">{yearTotal}</span>
+              <span className="text-xs text-slate-500 font-medium">active days in the past year</span>
             </div>
             <div className="flex items-center gap-5">
               <span className="text-xs text-slate-500">
-                Active days: <span className="font-bold text-slate-700">{ACTIVE_DAYS}</span>
+                Active days: <span className="font-bold text-slate-700">{activeDays}</span>
               </span>
               <span className="text-xs text-slate-500">
                 Streak: <span className="font-bold text-emerald-600">{dailyStreak}d</span>
@@ -636,12 +729,12 @@ export default function Dashboard() {
 
               {/* Week columns */}
               <div className="flex gap-0.5">
-                {YEAR_GRID.map((week, wi) => (
+                {yearGrid.map((week, wi) => (
                   <div key={wi} className="flex flex-col gap-0.5">
                     {week.map((val, di) => (
                       <div
                         key={di}
-                        title={val > 0 ? `${val * 3} reactions` : "No activity"}
+                        title={val > 0 ? "Active" : "No activity"}
                         className="rounded-sm transition-opacity hover:opacity-75"
                         style={{
                           width:  10,

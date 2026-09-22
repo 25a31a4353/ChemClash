@@ -2,6 +2,13 @@
 
 import React, { useState, useMemo } from "react";
 import defaultOrganicDB from "@/data/organic_db.json";
+import type { jsPDF } from "jspdf";
+
+// jspdf-autotable augments the jsPDF instance at runtime with lastAutoTable.
+// Declaring a local interface avoids every `as any` cast.
+interface JsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: { finalY: number };
+}
 
 // ═════════════════════════════════════════════════════════════════
 // 1. DATA CONTRACT & TYPES
@@ -203,7 +210,7 @@ export async function generateCustomCheatSheetPDF(
       showHead: "everyPage",
     });
 
-    currentY = (doc as any).lastAutoTable.finalY + 10;
+    currentY = (doc as unknown as JsPDFWithAutoTable).lastAutoTable.finalY + 10;
   }
 
   // ── 2. Named Reactions Table ───────────────────────────────────
@@ -248,7 +255,7 @@ export async function generateCustomCheatSheetPDF(
       showHead: "everyPage",
     });
 
-    currentY = (doc as any).lastAutoTable.finalY + 10;
+    currentY = (doc as unknown as JsPDFWithAutoTable).lastAutoTable.finalY + 10;
   }
 
   // ── 3. Basic Rules Table ───────────────────────────────────────
@@ -292,7 +299,7 @@ export async function generateCustomCheatSheetPDF(
       showHead: "everyPage",
     });
 
-    currentY = (doc as any).lastAutoTable.finalY + 10;
+    currentY = (doc as unknown as JsPDFWithAutoTable).lastAutoTable.finalY + 10;
   }
 
   // ── 4. Core Concepts Table ─────────────────────────────────────
@@ -447,9 +454,9 @@ export default function CheatSheetDownloader({
       await generateCustomCheatSheetPDF(dataset, selected);
       setDownloadStatus("success");
       setTimeout(() => setDownloadStatus("idle"), 3000);
-    } catch (err: any) {
-      console.error("PDF generation failed:", err);
-      setErrorMessage(err?.message || "An unexpected error occurred during PDF generation.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred during PDF generation.";
+      setErrorMessage(msg);
       setDownloadStatus("error");
     }
   };
@@ -462,8 +469,9 @@ export default function CheatSheetDownloader({
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2">
+            {/* STUDY ARSENAL */}
             <span className="text-emerald-600 font-mono text-xs font-semibold tracking-widest uppercase">
-              // STUDY ARSENAL
+              STUDY ARSENAL
             </span>
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-[10px] text-emerald-700 border border-emerald-200 font-semibold">
               {totalSelectedItems} / {totalAvailableItems} items active

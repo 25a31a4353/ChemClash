@@ -8,6 +8,21 @@ import { fetchChallenges, Challenge } from "@/lib/api";
 
 type ChemCard = Challenge;
 
+// ── Static deck — always works even when backend is down ──────────────────
+
+const STATIC_CHALLENGES: Challenge[] = [
+  { id: 1,  nucleophile: "OH⁻",   electrophile: "CH₃Br",      shouldReact: true,  hint: "Strong nucleophile + primary substrate → SN2.",           mechanism: "SN2", explanation: "Hydroxide attacks CH₃Br via backside attack.",       difficulty: "easy" },
+  { id: 2,  nucleophile: "H₂O",   electrophile: "CH₄",        shouldReact: false, hint: "Methane has no leaving group.",                           mechanism: "",    explanation: "No electrophilic carbon, no leaving group.",         difficulty: "easy" },
+  { id: 3,  nucleophile: "NH₃",   electrophile: "CH₃Cl",      shouldReact: true,  hint: "Ammonia is a nucleophile; CH₃Cl is electrophilic.",       mechanism: "SN2", explanation: "Ammonia displaces Cl⁻ via SN2.",                     difficulty: "easy" },
+  { id: 4,  nucleophile: "I⁻",    electrophile: "(CH₃)₃CBr",  shouldReact: true,  hint: "tert-Butyl with a weak nucleophile → SN1.",               mechanism: "SN1", explanation: "tBuBr ionises to a stable 3° carbocation.",          difficulty: "medium" },
+  { id: 5,  nucleophile: "CN⁻",   electrophile: "CH₃CH₂Br",   shouldReact: true,  hint: "Good nucleophile + primary substrate → SN2.",             mechanism: "SN2", explanation: "Cyanide attacks the primary carbon.",                difficulty: "easy" },
+  { id: 6,  nucleophile: "NaOH",  electrophile: "CH₃COOH",    shouldReact: true,  hint: "NaOH neutralises carboxylic acids.",                      mechanism: "Neutralisation", explanation: "Acid-base reaction forming sodium acetate.",   difficulty: "easy" },
+  { id: 7,  nucleophile: "Br₂",   electrophile: "Benzene",    shouldReact: false, hint: "Br₂ alone cannot electrophilic-aromatic-substitute benzene.", mechanism: "", explanation: "EAS on benzene needs a Lewis acid catalyst (FeBr₃).", difficulty: "medium" },
+  { id: 8,  nucleophile: "KOtBu", electrophile: "2-bromobutane", shouldReact: true, hint: "Bulky base favours E2 over SN2.",                        mechanism: "E2", explanation: "Bulky KOtBu abstracts β-H; Br⁻ leaves, giving alkene.", difficulty: "medium" },
+  { id: 9,  nucleophile: "H⁺",    electrophile: "CH₂=CH₂",   shouldReact: true,  hint: "H⁺ adds to alkene via Markovnikov.",                       mechanism: "Electrophilic Addition", explanation: "Proton adds to ethene forming carbocation.", difficulty: "easy" },
+  { id: 10, nucleophile: "LiAlH₄",electrophile: "CH₃COCH₃",  shouldReact: true,  hint: "Hydride reduces ketones to secondary alcohols.",           mechanism: "Nucleophilic Addition", explanation: "Hydride attacks carbonyl; protonation gives 2-propanol.", difficulty: "medium" },
+];
+
 function FeedbackOverlay({ verdict }: { verdict: Verdict }) {
   if (!verdict) return null;
   const isReact = verdict === "react";
@@ -144,13 +159,16 @@ export default function ReactOrRejectPage() {
       const data = await fetchChallenges();
       setAllCards(data);
       setCards(data);
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "Failed to load challenges");
+    } catch {
+      // Backend unreachable — use built-in static deck so the game always works
+      setAllCards(STATIC_CHALLENGES);
+      setCards(STATIC_CHALLENGES);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch; setState in finally is standard pattern
   useEffect(() => { loadCards(); }, [loadCards]);
 
   const triggerVerdict = (direction: "left" | "right", card: ChemCard) => {

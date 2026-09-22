@@ -360,7 +360,8 @@ export default function TutorShortsPage() {
     return [...weak, ...rest];
   }, [filter, topWeaknesses]);
 
-  // Reset index when filter or deck changes
+  // Reset index when filter changes — intentional setState-in-effect pattern
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setCurrentIdx(0); }, [filter]);
 
   function scrollToCard() {

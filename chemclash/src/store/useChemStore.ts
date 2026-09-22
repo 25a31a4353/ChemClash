@@ -16,11 +16,82 @@ import {
   fetchProfile,
   fetchUserProfile,
   syncMatchResult,
-  type PYQQuestion,
   type AdaptivePYQResponse,
   type AnswerResult,
   type WeaknessProfile,
 } from "@/lib/api";
+
+// ── Static fallback PYQs (used when backend is unreachable) ──────────────
+
+const _FALLBACK_PYQ: AdaptivePYQResponse[] = [
+  {
+    question: {
+      id: "FB-001", exam: "JEE Mains", exam_year: 2023,
+      question_text: "In an SN2 reaction, the rate depends on:",
+      image_url: null,
+      options: { A: "Only the substrate", B: "Only the nucleophile", C: "Both substrate and nucleophile", D: "Neither" },
+      correct_answer: "C", difficulty_level: "easy",
+      concept_tags: ["SN2", "kinetics"],
+      socratic_hint: "SN2 is bimolecular — what does 'bi' imply about the rate law?",
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["SN2"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-002", exam: "JEE Mains", exam_year: 2022,
+      question_text: "Which undergoes SN1 most readily?",
+      image_url: null,
+      options: { A: "CH₃Cl", B: "CH₃CH₂Cl", C: "(CH₃)₂CHCl", D: "(CH₃)₃CCl" },
+      correct_answer: "D", difficulty_level: "easy",
+      concept_tags: ["SN1", "carbocation"],
+      socratic_hint: "SN1 needs a stable carbocation. Which substrate gives the most stable one?",
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["SN1"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-003", exam: "JEE Mains", exam_year: 2021,
+      question_text: "Best solvent for SN2 reaction:",
+      image_url: null,
+      options: { A: "Water", B: "Ethanol", C: "DMSO", D: "Acetic acid" },
+      correct_answer: "C", difficulty_level: "medium",
+      concept_tags: ["SN2", "solvent"],
+      socratic_hint: "Which solvent type avoids H-bonding to the nucleophile, leaving it reactive?",
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["SN2"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-004", exam: "JEE Mains", exam_year: 2020,
+      question_text: "Markovnikov addition of HBr to propene gives:",
+      image_url: null,
+      options: { A: "1-bromopropane", B: "2-bromopropane", C: "Allyl bromide", D: "Propan-1-ol" },
+      correct_answer: "B", difficulty_level: "easy",
+      concept_tags: ["Markovnikov", "electrophilic_addition"],
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["Markovnikov"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+  {
+    question: {
+      id: "FB-005", exam: "JEE Advanced", exam_year: 2022,
+      question_text: "E2 elimination requires H and leaving group to be:",
+      image_url: null,
+      options: { A: "Syn-periplanar (0°)", B: "Gauche (60°)", C: "Anti-periplanar (180°)", D: "Any geometry" },
+      correct_answer: "C", difficulty_level: "medium",
+      concept_tags: ["E2", "anti_periplanar"],
+      socratic_hint: "Which dihedral angle allows simultaneous H removal and LG departure?",
+    },
+    meta: { selection_method: "demo_rule_based", matched_weakness_tags: ["E2"], student_accuracy: 0, candidate_pool_size: 1 },
+  },
+];
+
+let _fbIdx = 0;
+function _getNextFallback(seenIds: string[]): AdaptivePYQResponse {
+  const unseen = _FALLBACK_PYQ.filter((q) => !seenIds.includes(q.question.id));
+  if (unseen.length > 0) return unseen[_fbIdx++ % unseen.length];
+  _fbIdx = 0;
+  return _FALLBACK_PYQ[0];
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -64,6 +135,46 @@ function getAnonId(): string {
     localStorage.setItem(LS_KEY_USER_ID, id);
   }
   return id;
+}
+
+// ── Local weakness accumulator ────────────────────────────────────────────
+// Persists wrong-answer concept tags to localStorage so weakness-driven
+// features (Dashboard recommendation, Video Recommendations, Tutor Shorts)
+// work offline even when the backend is unreachable.
+
+const LS_KEY_LOCAL_WEAKNESSES = "chemclash_local_weaknesses";
+
+function readLocalWeaknesses(): Record<string, number> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(LS_KEY_LOCAL_WEAKNESSES);
+    return raw ? (JSON.parse(raw) as Record<string, number>) : {};
+  } catch { return {}; }
+}
+
+function addLocalWeaknesses(tags: string[]): void {
+  if (typeof window === "undefined" || tags.length === 0) return;
+  const map = readLocalWeaknesses();
+  for (const t of tags) map[t] = (map[t] ?? 0) + 1;
+  localStorage.setItem(LS_KEY_LOCAL_WEAKNESSES, JSON.stringify(map));
+}
+
+function localWeaknessProfile(userId: string): WeaknessProfile {
+  const map = readLocalWeaknesses();
+  const top = Object.entries(map)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([t]) => t);
+  return {
+    user_id: userId,
+    total_answered: 0,
+    total_correct: 0,
+    accuracy: 0,
+    weakness_scores: map,
+    strength_scores: {},
+    top_weaknesses: top,
+    history: [],
+  };
 }
 
 // ── ChemCoins / Daily Missions ────────────────────────────────────────────
@@ -192,24 +303,23 @@ export const useChemStore = create<ChemStore>((set, get) => ({
       });
     }
     set({ userId, phase: "loading", seenIds: [], prefetchQueue: [], error: null });
-    // Fire loadPlayerProfile AND the first PYQ fetch in parallel — saves one full
-    // round-trip compared to the previous sequential await.
     try {
       const [q] = await Promise.all([
         demo ? fetchDemoPYQ() : fetchAdaptivePYQ(userId),
         get().loadPlayerProfile().catch(() => {}),
       ]);
       set({ current: q, phase: "answering", seenIds: [q.question.id] });
-      // Kick off background prefetch immediately
       get()._prefetchNext();
-    } catch (e) {
-      set({ error: String(e), phase: "answering" });
+    } catch {
+      // Backend unreachable — use first fallback question so the page never hangs
+      const fallback = _FALLBACK_PYQ[0];
+      set({ current: fallback, phase: "answering", seenIds: [fallback.question.id], error: null });
     }
   },
 
   // ── chooseAnswer (optimistic: phase changes instantly) ─────────────────
   chooseAnswer: async (answer) => {
-    const { userId, current, seenIds } = get();
+    const { userId, current } = get();
     if (!current || get().phase !== "answering") return;
 
     // Optimistic: show revealing overlay immediately — no network wait
@@ -229,19 +339,18 @@ export const useChemStore = create<ChemStore>((set, get) => ({
         : Object.fromEntries(current.question.concept_tags.map((t) => [t, 1]));
       syncMatchResult(userId, eloDelta, failedConcepts);
     } catch {
-      // Even on network error, keep the reveal so UI never freezes
+      // Backend unreachable — grade locally so the session continues
+      const localCorrect = answer === current.question.correct_answer;
+      // Persist wrong-answer tags so offline weakness features still work
+      if (!localCorrect) addLocalWeaknesses(current.question.concept_tags);
       set({
         lastResult: {
-          was_correct: false,
+          was_correct: localCorrect,
           correct_answer: current.question.correct_answer,
           explanation_tags: current.question.concept_tags,
-          profile_summary: {
-            total_answered: 0,
-            total_correct: 0,
-            accuracy: 0,
-            top_weaknesses: [],
-          },
+          profile_summary: { total_answered: 0, total_correct: 0, accuracy: 0, top_weaknesses: [] },
         },
+        eloRating: get().eloRating + (localCorrect ? 10 : -5),
       });
     }
   },
@@ -263,24 +372,22 @@ export const useChemStore = create<ChemStore>((set, get) => ({
       // Replenish queue in background
       get()._prefetchNext();
     } else {
-      // Queue empty — fetch now (rare, only on first session start)
+      // Queue empty — fetch now (rare)
       try {
         const q = await fetchAdaptivePYQ(userId, seenIds);
-        set({
-          current: q,
-          seenIds: [...seenIds, q.question.id],
-          phase: "answering",
-        });
+        set({ current: q, seenIds: [...seenIds, q.question.id], phase: "answering" });
         get()._prefetchNext();
-      } catch (e) {
-        set({ error: String(e), phase: "answering" });
+      } catch {
+        // Backend unreachable — pick from fallback pool
+        const fb = _getNextFallback(seenIds);
+        set({ current: fb, seenIds: [...seenIds, fb.question.id], phase: "answering", error: null });
       }
     }
   },
 
   // ── _prefetchNext (background, silent) ────────────────────────────────
   _prefetchNext: async () => {
-    const { userId, seenIds, prefetchQueue, current } = get();
+    const { userId, seenIds, prefetchQueue } = get();
     // Don't over-fill the queue
     if (prefetchQueue.length >= 2) return;
 
@@ -302,6 +409,13 @@ export const useChemStore = create<ChemStore>((set, get) => ({
     try {
       const p = await fetchProfile(userId);
       set({ profile: p, dailyStreak: get().dailyStreak });
-    } catch { /* ignore */ }
+    } catch {
+      // Backend unreachable — fall back to locally accumulated weakness data
+      // so Dashboard recommendations and Video Recs still personalise offline.
+      const local = localWeaknessProfile(userId);
+      if (local.top_weaknesses.length > 0) {
+        set({ profile: local });
+      }
+    }
   },
 }));

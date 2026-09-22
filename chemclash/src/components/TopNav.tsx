@@ -8,12 +8,14 @@ interface TopNavProps {
   eloRating?: number;
   dailyStreak?: number;
   username?: string;
+  onLogout?: () => void;
 }
 
 export default function TopNav({
   eloRating: eloProp = 1337,
   dailyStreak: streakProp = 7,
   username: usernameProp = "CH3M_L0RD",
+  onLogout,
 }: TopNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -21,6 +23,7 @@ export default function TopNav({
   const storeElo      = useChemStore((s) => s.eloRating);
   const storeStreak   = useChemStore((s) => s.dailyStreak);
   const storeUsername = useChemStore((s) => s.username);
+  const chemCoins     = useChemStore((s) => s.chemCoins);
 
   const eloRating   = storeElo      ?? eloProp;
   const dailyStreak = storeStreak   ?? streakProp;
@@ -69,6 +72,14 @@ export default function TopNav({
         {/* ── Right stats + user ── */}
         <div className="flex items-center gap-2">
 
+          {/* ChemCoins pill */}
+          <Link href="/rewards" className="hidden sm:flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 no-underline hover:bg-amber-100 transition-colors" title="ChemCoins — click to visit Reward Shop">
+            <span className="text-sm leading-none">🪙</span>
+            <div className="leading-none">
+              <div className="text-amber-600 text-sm font-black">{chemCoins}</div>
+            </div>
+          </Link>
+
           {/* Streak pill */}
           <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
             <span className="text-base leading-none">🔥</span>
@@ -113,14 +124,18 @@ export default function TopNav({
                 className="animate-slide-down absolute right-0 top-[calc(100%+8px)] bg-white border border-slate-200 rounded-xl min-w-[180px] overflow-hidden shadow-lg z-50"
               >
                 {[
-                  { label: "Profile",     icon: "👤", href: undefined },
+                  { label: "My Profile",  icon: "👤", href: "/leaderboard" },
                   { label: "Leaderboard", icon: "🏆", href: "/leaderboard" },
-                  { label: "Settings",    icon: "⚙️", href: undefined },
+                  { label: "Rewards",     icon: "🪙", href: "/rewards" },
                   { label: "Sign Out",    icon: "→",  href: undefined, danger: true },
                 ].map((item) => (
                   <button
                     key={item.label}
-                    onClick={() => { setMenuOpen(false); if (item.href) window.location.href = item.href; }}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      if (item.label === "Sign Out" && onLogout) { onLogout(); return; }
+                      if (item.href) window.location.href = item.href;
+                    }}
                     className={[
                       "w-full bg-transparent border-none px-4 py-2.5 flex items-center gap-2.5 cursor-pointer text-sm font-medium tracking-wide transition-all duration-100 text-left",
                       item.danger

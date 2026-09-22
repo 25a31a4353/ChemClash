@@ -404,7 +404,7 @@ function DialoguePanel({ entity, visible }: { entity: Entity | null; visible: bo
           <p className={`text-[0.65rem] font-bold uppercase tracking-widest mb-1 ${entity.textColor}`}>
             {entity.role}
           </p>
-          <p className="text-xs text-slate-700 leading-relaxed italic">"{entity.dialogue}"</p>
+          <p className="text-xs text-slate-700 leading-relaxed italic">&ldquo;{entity.dialogue}&rdquo;</p>
         </motion.div>
       )}
     </AnimatePresence>
@@ -442,15 +442,17 @@ export default function LivingMoleculesPage() {
 
   const concept = CONCEPTS.find((c) => c.id === selectedId)!;
 
-  // Reset when concept changes
+  // Reset when concept changes — intentional setState resets on concept selection
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhase("idle");
     setStepIndex(0);
     setReactedIds(new Set());
     setActiveEntity(null);
     setAutoPlay(false);
     if (timerRef[0]) clearTimeout(timerRef[0]);
-  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   // Auto-advance steps
   const advance = useCallback(() => {
@@ -680,7 +682,7 @@ export default function LivingMoleculesPage() {
                 </div>
                 <div>
                   <p className={`text-[0.6rem] font-bold uppercase tracking-widest ${entity.textColor}`}>{entity.role}</p>
-                  <p className="text-xs text-slate-600 italic leading-relaxed">"{entity.dialogue}"</p>
+                  <p className="text-xs text-slate-600 italic leading-relaxed">&ldquo;{entity.dialogue}&rdquo;</p>
                 </div>
               </div>
             ))}

@@ -13,6 +13,88 @@ import {
   CurriculumSlide,
 } from "@/lib/api";
 
+// ── Offline fallback modules (3 Tier-1 basics, always available) ────────────
+// These match the Skill Tree node IDs bas_01/bas_02/bas_04 so completing them
+// offline still unlocks the Skill Tree correctly.
+
+const FALLBACK_MODULES: CurriculumModuleSummary[] = [
+  {
+    module_id: "bas_01",
+    title: "Lewis Structures & Bonding",
+    difficulty: "basics",
+    difficulty_tier: 1,
+    game_tags: ["lewis_structure", "covalent_bond", "lone_pairs"],
+    slide_count: 3,
+  },
+  {
+    module_id: "bas_02",
+    title: "Electronegativity & Polarity",
+    difficulty: "basics",
+    difficulty_tier: 1,
+    game_tags: ["electronegativity", "polarity", "dipole_moment"],
+    slide_count: 3,
+  },
+  {
+    module_id: "bas_04",
+    title: "Nucleophiles & Electrophiles",
+    difficulty: "basics",
+    difficulty_tier: 1,
+    game_tags: ["nucleophile", "electrophile", "lewis_acid"],
+    slide_count: 3,
+  },
+];
+
+const FALLBACK_MODULE_DATA: Record<string, CurriculumModule> = {
+  bas_01: {
+    module_id: "bas_01", title: "Lewis Structures & Bonding",
+    difficulty: "basics", difficulty_tier: 1,
+    game_tags: ["lewis_structure", "covalent_bond", "lone_pairs"], slide_count: 3,
+    tutorial_sequence: [
+      { slide: 1, concept_term: "Valence Electrons",
+        short_definition: "Valence electrons are the outermost electrons of an atom. Carbon has 4 valence electrons; oxygen has 6; nitrogen has 5.",
+        action_prompt: "How many valence electrons does a carbon atom have?" },
+      { slide: 2, concept_term: "Octet Rule",
+        short_definition: "Most atoms are stable when surrounded by 8 electrons (an octet). Hydrogen is the exception — it needs only 2 (duet).",
+        action_prompt: "Which molecule satisfies the octet rule for carbon: CH₄ or CH₃?" },
+      { slide: 3, concept_term: "Lone Pairs",
+        short_definition: "Lone pairs are non-bonding electron pairs. Water has 2 lone pairs on oxygen; ammonia has 1 lone pair on nitrogen.",
+        action_prompt: "How many lone pairs does nitrogen have in ammonia (NH₃)?" },
+    ],
+  },
+  bas_02: {
+    module_id: "bas_02", title: "Electronegativity & Polarity",
+    difficulty: "basics", difficulty_tier: 1,
+    game_tags: ["electronegativity", "polarity", "dipole_moment"], slide_count: 3,
+    tutorial_sequence: [
+      { slide: 1, concept_term: "Electronegativity",
+        short_definition: "Electronegativity measures how strongly an atom attracts shared electrons. F > O > N > Cl > Br > C > H.",
+        action_prompt: "Which bond is more polar: C–F or C–Cl?" },
+      { slide: 2, concept_term: "Bond Polarity",
+        short_definition: "A bond is polar when atoms of different electronegativities share electrons unequally. The more electronegative atom gets δ⁻.",
+        action_prompt: "In C–O, which atom carries the partial negative charge (δ⁻)?" },
+      { slide: 3, concept_term: "Dipole Moment",
+        short_definition: "A molecule's net dipole moment is the vector sum of all bond dipoles. CO₂ is linear and symmetric — its dipoles cancel to zero.",
+        action_prompt: "Does CO₂ have a net dipole moment? Answer yes or no and why." },
+    ],
+  },
+  bas_04: {
+    module_id: "bas_04", title: "Nucleophiles & Electrophiles",
+    difficulty: "basics", difficulty_tier: 1,
+    game_tags: ["nucleophile", "electrophile", "lewis_acid"], slide_count: 3,
+    tutorial_sequence: [
+      { slide: 1, concept_term: "Nucleophile",
+        short_definition: "A nucleophile is an electron-rich species that donates electrons to form a new bond. Examples: OH⁻, NH₃, CN⁻, I⁻.",
+        action_prompt: "Is BF₃ a nucleophile or an electrophile? Why?" },
+      { slide: 2, concept_term: "Electrophile",
+        short_definition: "An electrophile is an electron-poor species that accepts electrons. Examples: carbocations, BF₃, carbonyl carbon.",
+        action_prompt: "In CH₃Br, which atom is the electrophilic centre?" },
+      { slide: 3, concept_term: "Nucleophilicity vs. Basicity",
+        short_definition: "Nucleophilicity is kinetic (speed of attack); basicity is thermodynamic (affinity for H⁺). In polar protic solvents, I⁻ > Br⁻ > Cl⁻ > F⁻ for nucleophilicity.",
+        action_prompt: "Rank these by nucleophilicity in DMSO: I⁻, Br⁻, Cl⁻, F⁻" },
+    ],
+  },
+};
+
 // ── Answer key (quiz behavior is preserved exactly) ────────────────────────
 const ANSWERS: Record<string, string> = {
   "Valence Electrons":"4","Octet Rule":"CH₄","Lone Pairs":"1","Electronegativity":"C–F","Bond Polarity":"O",
@@ -95,7 +177,20 @@ export default function CurriculumPage() {
 
   // Tutorial progress
   const [slideIndex, setSlideIndex] = useState(0);
-  const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
+  const [completedModules, setCompletedModules] = useState<Set<string>>(() => {
+    // Hydrate from localStorage on initial render so already-done modules show correctly.
+    // Scan all localStorage keys that match the completion prefix.
+    if (typeof window === "undefined") return new Set<string>();
+    const ids = new Set<string>();
+    const prefix = "chemclash_completed_";
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k?.startsWith(prefix) && localStorage.getItem(k) === "1") {
+        ids.add(k.slice(prefix.length));
+      }
+    }
+    return ids;
+  });
   const [slidesDone, setSlidesDone] = useState<number[]>([]);
 
   // Filter
@@ -110,14 +205,22 @@ export default function CurriculumPage() {
     try {
       const data = await fetchCurriculumModules(filterDiff);
       setModules(data);
-    } catch (err) {
-      setListError(err instanceof Error ? err.message : "Failed to load curriculum");
-      setModules([]);
+    } catch {
+      // Backend unreachable — surface the 3 built-in basics modules so Learn
+      // flow and Skill Tree still work offline.
+      const fallback = filterDiff === "all" || filterDiff === "basics"
+        ? FALLBACK_MODULES
+        : [];
+      setModules(fallback);
+      if (fallback.length === 0) {
+        setListError("Backend offline. Switch to 'ALL' or 'BASICS' to use offline modules.");
+      }
     } finally {
       setLoadingList(false);
     }
   }, [filterDiff]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch in effect; setState calls are in try/finally
   useEffect(() => { loadModules(); }, [loadModules]);
 
   // ── Open a module: fetch full data (includes tutorial_sequence) ─────────
@@ -129,8 +232,15 @@ export default function CurriculumPage() {
       setSlideIndex(0);
       setSlidesDone([]);
     } catch {
-      // Fall back gracefully — show error inline rather than crashing
-      setListError(`Could not load module "${summary.title}". Please try again.`);
+      // Backend unreachable — check local fallback before showing error
+      const fallback = FALLBACK_MODULE_DATA[summary.module_id];
+      if (fallback) {
+        setSelectedModule(fallback);
+        setSlideIndex(0);
+        setSlidesDone([]);
+      } else {
+        setListError(`Could not load module "${summary.title}". Please try again.`);
+      }
     } finally {
       setLoadingModule(false);
     }
@@ -145,6 +255,8 @@ export default function CurriculumPage() {
         setCompletedModules((prev) => new Set([...prev, selectedModule.module_id]));
         // Persist to localStorage so the Skill Tree can read mastery status
         localStorage.setItem(LS_MODULE_KEY(selectedModule.module_id), "1");
+        // Dispatch a custom event so the Skill Tree updates in the same tab
+        window.dispatchEvent(new StorageEvent("storage", { key: LS_MODULE_KEY(selectedModule.module_id) }));
         useChemStore.setState((s) => ({ eloRating: s.eloRating + 20 }));
       }
       setSelectedModule(null);
