@@ -14,8 +14,10 @@
  */
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import LogoSpinner from "@/components/LogoSpinner";
 
 type Mode = "login" | "signup";
 
@@ -50,11 +52,7 @@ export default function LoginPage() {
 
   // Don't render until auth check is done (avoids flash)
   if (!initialized) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-7 h-7 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-      </div>
-    );
+    return <LogoSpinner label="Checking session…" />;
   }
 
   // Already authenticated — blank while redirect fires
@@ -129,11 +127,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
-      <div className="mb-8 text-center">
-        <div className="text-5xl mb-3">⚗️</div>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-          <span className="text-emerald-600">CHEM</span>CLASH
-        </h1>
+      <div className="mb-8 text-center flex flex-col items-center">
+        <Image src="/logo.png" alt="ChemClash" width={88} height={88} className="rounded-full mb-3" priority />
         <p className="text-sm text-slate-500 mt-1">Master Organic Chemistry</p>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useChemStore } from "@/store/useChemStore";
@@ -41,8 +42,8 @@ export default function TopNav({
 
         {/* ── Logo ── */}
         <Link href="/" className="no-underline flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-base">
-            ⚗
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+            <Image src="/logo.png" alt="ChemClash" width={32} height={32} className="w-full h-full object-cover" priority />
           </div>
           <span className="text-emerald-600 font-black text-lg tracking-wide leading-none">
             CHEM<span className="text-slate-800">CLASH</span>

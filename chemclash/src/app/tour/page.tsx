@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
+import LogoSpinner from "@/components/LogoSpinner";
 
 interface TourStep {
   title: string;
@@ -158,11 +159,7 @@ export default function TourPage() {
   }
 
   if (!initialized) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-7 h-7 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-      </div>
-    );
+    return <LogoSpinner label="Loading…" />;
   }
   if (!account || account.tour_done) return null;
 

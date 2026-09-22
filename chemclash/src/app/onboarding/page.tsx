@@ -16,6 +16,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import LogoSpinner from "@/components/LogoSpinner";
 
 // ── Legacy LS keys (preserved for compatibility with old anonymous flow) ──────
 export const LS_ONBOARDING_DONE  = "chemclash_onboarding_done";
@@ -287,11 +288,7 @@ export default function OnboardingPage() {
   }
 
   if (!initialized) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-7 h-7 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-      </div>
-    );
+    return <LogoSpinner label="Loading…" />;
   }
 
   if (!account) return null;

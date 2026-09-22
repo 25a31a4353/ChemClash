@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import GameModeCard, { GameMode } from "@/components/GameModeCard";
 import CheatSheetDownloader from "@/components/CheatSheetDownloader";
+import LogoSpinner from "@/components/LogoSpinner";
 import { useChemStore } from "@/store/useChemStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { LS_USER_NAME } from "@/app/onboarding/page";
@@ -513,11 +514,7 @@ export default function Dashboard() {
 
   // Loading state while auth initializes
   if (!initialized) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-      </div>
-    );
+    return <LogoSpinner label="Loading ChemClash…" />;
   }
   // Blank while redirect fires for unauthenticated / non-onboarded / non-toured users
   if (!account || !account.onboarding_done || !account.tour_done) return null;

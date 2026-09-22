@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useChemStore } from "@/store/useChemStore";
+import LogoSpinner from "@/components/LogoSpinner";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -121,11 +122,7 @@ export default function ProfilePage() {
   }, []);
 
   if (!initialized) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-7 h-7 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
-      </div>
-    );
+    return <LogoSpinner label="Loading profile…" />;
   }
   if (!account) return null;
 
