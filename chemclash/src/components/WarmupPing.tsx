@@ -2,35 +2,23 @@
 
 import { useEffect } from "react";
 import { pingBackend } from "@/lib/api";
-import { useChemStore } from "@/store/useChemStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 /**
- * Invisible component that:
- * 1. Fires a single fire-and-forget ping to /api/ping to wake the Render free-tier server.
- * 2. Hydrates ChemCoins + daily-mission state + username from localStorage once on mount.
- *    This ensures every page (not just Dashboard) shows the correct coin balance and username.
- * Renders nothing — zero visual impact.
+ * Invisible component mounted in the root layout.
+ * 1. Fires a keep-alive ping to wake the Render free-tier server.
+ * 2. Calls initAuth() exactly once to hydrate the authenticated account
+ *    from the session cookie (GET /auth/me).
+ *    If no valid session exists, this is a silent no-op that sets
+ *    account = null and initialized = true so pages can redirect.
  */
 export default function WarmupPing() {
+  const initAuth = useAuthStore((s) => s.initAuth);
+
   useEffect(() => {
     pingBackend();
+    initAuth();
+  }, [initAuth]);
 
-    // Hydrate Zustand store from localStorage.
-    // SSR initialises chemCoins to 0 and username to "player" — fix on first client render.
-    const storedCoins  = parseInt(localStorage.getItem("chemclash_coins") ?? "0", 10);
-    const storedName   = localStorage.getItem("chemclash_user_name");
-    const storedUserId = localStorage.getItem("chemclash_user_id");
-    const today        = new Date().toISOString().slice(0, 10);
-
-    useChemStore.setState({
-      chemCoins: isNaN(storedCoins) ? 0 : storedCoins,
-      dailyMissions: {
-        loginClaimed:     localStorage.getItem("chemclash_login_date") === today,
-        challengeClaimed: localStorage.getItem("chemclash_challenge_date") === today,
-      },
-      ...(storedName   ? { username: storedName }   : {}),
-      ...(storedUserId ? { userId:   storedUserId } : {}),
-    });
-  }, []);
   return null;
 }

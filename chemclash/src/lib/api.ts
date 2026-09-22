@@ -72,10 +72,27 @@ export interface MechanismVerdict {
   latency_ms: number;
 }
 
+// ── Types: Auth ────────────────────────────────────────────────────────────
+
+export interface ChemAccount {
+  user_id: string;
+  email: string;
+  display_name: string;
+  created_at: string;
+  onboarding_done: boolean;
+  tour_done: boolean;
+  level: string;
+  goals: string[];
+  chem_coins: number;
+  owned_rewards: string[];
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+/** apiFetch with credentials so the session cookie is sent on every request */
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     ...init,
   });
@@ -309,4 +326,58 @@ export async function fetchCurriculumModule(
  */
 export function pingBackend(): void {
   fetch(`${BASE}/api/ping`).catch(() => {/* silent — non-critical */});
+}
+
+// ── Auth endpoints ─────────────────────────────────────────────────────────
+
+export async function authSignup(
+  email: string,
+  password: string,
+  displayName: string
+): Promise<{ ok: boolean; account: ChemAccount }> {
+  return apiFetch("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify({ email, password, display_name: displayName }),
+  });
+}
+
+export async function authLogin(
+  email: string,
+  password: string
+): Promise<{ ok: boolean; account: ChemAccount }> {
+  return apiFetch("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function authLogout(): Promise<void> {
+  await apiFetch("/auth/logout", { method: "POST" }).catch(() => {});
+}
+
+export async function authGetMe(): Promise<ChemAccount> {
+  return apiFetch<ChemAccount>("/auth/me");
+}
+
+export async function authUpdateMe(updates: {
+  display_name?: string;
+  onboarding_done?: boolean;
+  tour_done?: boolean;
+  level?: string;
+  goals?: string[];
+}): Promise<ChemAccount> {
+  return apiFetch<ChemAccount>("/auth/me", {
+    method: "PUT",
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function authAdjustCoins(
+  delta: number,
+  rewardId?: string
+): Promise<ChemAccount> {
+  return apiFetch<ChemAccount>("/auth/coins", {
+    method: "POST",
+    body: JSON.stringify({ delta, reward_id: rewardId ?? null }),
+  });
 }

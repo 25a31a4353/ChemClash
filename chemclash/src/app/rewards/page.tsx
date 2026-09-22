@@ -4,30 +4,20 @@
  * ChemClash — ChemCoins Reward Shop
  *
  * Educational rewards only — no real money, no marketplace.
- * Purchased reward IDs are persisted to localStorage.
- * Coin balance is read from and written back to the existing
- * Zustand store (chemCoins) + localStorage key "chemclash_coins".
+ * Purchased reward IDs are persisted server-side via useAuthStore.spendCoins().
+ * Coin balance is synced from the authenticated account.
  */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useChemStore } from "@/store/useChemStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
-// ── localStorage helpers (mirrors the store's own helpers) ─────────────────
+// ── localStorage fallback for purchased rewards (offline / unauthenticated) ──
 
-const LS_COINS    = "chemclash_coins";
 const LS_PURCHASED = "chemclash_purchased_rewards";
 
-function readCoins(): number {
-  if (typeof window === "undefined") return 0;
-  return parseInt(localStorage.getItem(LS_COINS) ?? "0", 10);
-}
-
-function saveCoins(n: number) {
-  if (typeof window !== "undefined") localStorage.setItem(LS_COINS, String(n));
-}
-
-function loadPurchased(): Set<string> {
+function loadPurchasedLS(): Set<string> {
   if (typeof window === "undefined") return new Set();
   try {
     const raw = localStorage.getItem(LS_PURCHASED);
@@ -35,7 +25,7 @@ function loadPurchased(): Set<string> {
   } catch { return new Set(); }
 }
 
-function savePurchased(ids: Set<string>) {
+function savePurchasedLS(ids: Set<string>) {
   if (typeof window !== "undefined")
     localStorage.setItem(LS_PURCHASED, JSON.stringify(Array.from(ids)));
 }
@@ -224,35 +214,43 @@ function RewardCard({ reward, chemCoins, purchased, onPurchase }: RewardCardProp
 
 export default function RewardsPage() {
   const chemCoins   = useChemStore((s) => s.chemCoins);
+  const account     = useAuthStore((s) => s.account);
+  const spendCoins  = useAuthStore((s) => s.spendCoins);
   const [purchased, setPurchased] = useState<Set<string>>(new Set());
   const [category, setCategory]   = useState("All");
   const [flash, setFlash]         = useState<string | null>(null);
 
-  // Hydrate coins + purchased from localStorage on mount
+  // Hydrate purchased rewards: prefer server account, fall back to localStorage
   useEffect(() => {
-    const stored = readCoins();
-    useChemStore.setState({ chemCoins: stored });
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading localStorage in effect is intentional hydration
-    setPurchased(loadPurchased());
-  }, []);
+    if (account?.owned_rewards && account.owned_rewards.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating from server account
+      setPurchased(new Set(account.owned_rewards));
+    } else {
+      setPurchased(loadPurchasedLS());
+    }
+  }, [account?.owned_rewards?.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handlePurchase(id: string) {
+  async function handlePurchase(id: string) {
     const reward = REWARDS.find((r) => r.id === id);
     if (!reward) return;
     if (purchased.has(id)) return;           // duplicate guard
-    const current = readCoins();
-    if (current < reward.cost) return;       // balance guard
+    if (chemCoins < reward.cost) return;     // balance guard
 
-    // Deduct
-    const next = current - reward.cost;
-    saveCoins(next);
-    useChemStore.setState({ chemCoins: next });
+    try {
+      // Deduct server-side (also updates Zustand + localStorage)
+      await spendCoins(reward.cost, id);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Purchase failed";
+      setFlash(`❌ ${msg}`);
+      setTimeout(() => setFlash(null), 3000);
+      return;
+    }
 
-    // Record purchase
+    // Record purchase locally too (for offline fallback)
     const nextPurchased = new Set(purchased);
     nextPurchased.add(id);
     setPurchased(nextPurchased);
-    savePurchased(nextPurchased);
+    savePurchasedLS(nextPurchased);
 
     // Flash confirmation
     setFlash(`🎉 "${reward.name}" unlocked!`);

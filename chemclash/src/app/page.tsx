@@ -6,7 +6,8 @@ import TopNav from "@/components/TopNav";
 import GameModeCard, { GameMode } from "@/components/GameModeCard";
 import CheatSheetDownloader from "@/components/CheatSheetDownloader";
 import { useChemStore } from "@/store/useChemStore";
-import { LS_ONBOARDING_DONE, LS_USER_NAME } from "@/app/onboarding/page";
+import { useAuthStore } from "@/store/useAuthStore";
+import { LS_USER_NAME } from "@/app/onboarding/page";
 
 // ── localStorage key for activity log ────────────────────────────────────
 const LS_ACTIVITY_LOG = "chemclash_activity_log";
@@ -432,119 +433,93 @@ function getRecommendation(topWeaknesses: string[]): Recommendation {
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
 
-// ── Tour steps ─────────────────────────────────────────────────────────────
-
-const TOUR_STEPS = [
-  { title: "🎯 Adaptive PYQ",         body: "AI picks JEE questions matched to YOUR weak spots. Answer, get Socratic feedback, fix the gap." },
-  { title: "📚 Curriculum",           body: "Work through concept slides in order. Complete a module to unlock the Skill Tree node." },
-  { title: "🌳 Skill Tree",           body: "Visual mastery map — complete Curriculum modules to turn locked nodes green." },
-  { title: "⚡ Tutor Shorts",         body: "One concept per card — tip, key fact, and a common mistake. Weak topics surface first." },
-  { title: "🎬 Video Recommendations",body: "Personalised YouTube links based on your exact weakness profile." },
-  { title: "⚔️ Practice Arena",       body: "5-question solo match with a countdown timer. Every correct answer earns ELO." },
-  { title: "⚗️ React or Reject",      body: "Swipe right to REACT, left to REJECT. Train chemical intuition under time pressure." },
-  { title: "🪙 Reward Shop",          body: "Earn ChemCoins from Daily Missions. Spend them to unlock practice packs and bonus sessions." },
-];
-
-const LS_TOUR_DONE = "chemclash_tour_done";
-
-function TourOverlay({ onDone }: { onDone: () => void }) {
-  const [idx, setIdx] = useState(0);
-  const step = TOUR_STEPS[idx];
-  const isLast = idx === TOUR_STEPS.length - 1;
-
-  return (
-    <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-7 text-center">
-        {/* Progress dots */}
-        <div className="flex justify-center gap-1.5 mb-6">
-          {TOUR_STEPS.map((_, i) => (
-            <div key={i} className={`rounded-full transition-all ${i === idx ? "w-5 h-2 bg-emerald-500" : i < idx ? "w-2 h-2 bg-emerald-300" : "w-2 h-2 bg-slate-200"}`} />
-          ))}
-        </div>
-        <h3 className="text-xl font-black text-slate-900 mb-3">{step.title}</h3>
-        <p className="text-sm text-slate-600 leading-relaxed mb-8">{step.body}</p>
-        <div className="flex gap-3">
-          {idx > 0 && (
-            <button onClick={() => setIdx(i => i - 1)} className="flex-1 border border-slate-200 text-slate-600 text-sm font-bold py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-              ← Back
-            </button>
-          )}
-          <button
-            onClick={() => { if (isLast) { localStorage.setItem(LS_TOUR_DONE, "1"); onDone(); } else setIdx(i => i + 1); }}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2.5 rounded-xl transition-colors"
-          >
-            {isLast ? "🚀 Start Playing!" : "Next →"}
-          </button>
-        </div>
-        <button onClick={() => { localStorage.setItem(LS_TOUR_DONE, "1"); onDone(); }} className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors">
-          Skip tour
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function Dashboard() {
-  const router                 = useRouter();
-  const eloRating              = useChemStore((s) => s.eloRating);
-  const dailyStreak            = useChemStore((s) => s.dailyStreak);
-  const username               = useChemStore((s) => s.username);
-  const chemCoins              = useChemStore((s) => s.chemCoins);
-  const dailyMissions          = useChemStore((s) => s.dailyMissions);
-  const claimLoginReward       = useChemStore((s) => s.claimLoginReward);
+  const router                    = useRouter();
+  const eloRating                 = useChemStore((s) => s.eloRating);
+  const dailyStreak               = useChemStore((s) => s.dailyStreak);
+  const username                  = useChemStore((s) => s.username);
+  const chemCoins                 = useChemStore((s) => s.chemCoins);
+  const dailyMissions             = useChemStore((s) => s.dailyMissions);
+  const claimLoginReward          = useChemStore((s) => s.claimLoginReward);
   const claimDailyChallengeReward = useChemStore((s) => s.claimDailyChallengeReward);
-  const profile                = useChemStore((s) => s.profile);
-  const refreshProfile         = useChemStore((s) => s.refreshProfile);
-  const loadPlayerProfile      = useChemStore((s) => s.loadPlayerProfile);
+  const profile                   = useChemStore((s) => s.profile);
+  const refreshProfile            = useChemStore((s) => s.refreshProfile);
+  const loadPlayerProfile         = useChemStore((s) => s.loadPlayerProfile);
 
-  const [showTour, setShowTour]     = useState(false);
-  const [yearGrid, setYearGrid]     = useState<number[][]>([]);
-  const [yearTotal, setYearTotal]   = useState(0);
+  const account      = useAuthStore((s) => s.account);
+  const initialized  = useAuthStore((s) => s.initialized);
+  const logoutFn     = useAuthStore((s) => s.logout);
+  const earnCoins    = useAuthStore((s) => s.earnCoins);
+
+  const [yearGrid,   setYearGrid]   = useState<number[][]>([]);
+  const [yearTotal,  setYearTotal]  = useState(0);
   const [activeDays, setActiveDays] = useState(0);
 
-  // Redirect first-time visitors to onboarding; hydrate state from localStorage.
+  // Auth guard: redirect unauthenticated users to /login
   useEffect(() => {
-    if (localStorage.getItem(LS_ONBOARDING_DONE) !== "1") {
+    if (!initialized) return;
+    if (!account) {
+      router.replace("/login");
+      return;
+    }
+    if (!account.onboarding_done) {
       router.replace("/onboarding");
       return;
     }
-    // Hydrate username from localStorage on every mount
-    const savedName = localStorage.getItem(LS_USER_NAME);
-    if (savedName)  useChemStore.setState({ username: savedName });
-    // Record today's activity and build the real heatmap
+    // Sync display name into chem store
+    const savedName = localStorage.getItem(LS_USER_NAME) || account.display_name;
+    if (savedName) useChemStore.setState({ username: savedName });
+    // Record today's activity and build the heatmap
     recordActivity();
     const grid = buildRealYearGrid();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrating heatmap from localStorage
     setYearGrid(grid);
     setYearTotal(grid.flat().filter((v) => v > 0).length);
     setActiveDays(grid.flat().filter((v) => v > 0).length);
-    // Show tour on first login (after onboarding)
-    if (localStorage.getItem(LS_TOUR_DONE) !== "1") {
-      setShowTour(true);
-    }
-  }, [router]);
+  }, [initialized, account, router]);
 
-  // Hydrate coins + attempt auto-claim login reward on mount (client-only).
-  // loadPlayerProfile + refreshProfile run in parallel — saves one round-trip.
+  // Hydrate coins + claim daily login reward on mount (client-only).
   useEffect(() => {
+    if (!account) return;
+    // Sync server-side coin balance into Zustand
+    useChemStore.setState({ chemCoins: account.chem_coins });
+    // Claim daily login reward (+1 coin) — debounced by date in useChemStore
     claimLoginReward();
+    // Earn coin server-side for login (fire-and-forget)
+    earnCoins(1).catch(() => {});
     Promise.all([loadPlayerProfile(), refreshProfile()]).catch(() => {});
-  }, [claimLoginReward, loadPlayerProfile, refreshProfile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.user_id]);
+
+  // Wrap claimDailyChallengeReward to also sync server-side
+  const handleClaimChallenge = () => {
+    claimDailyChallengeReward();
+    earnCoins(10).catch(() => {});
+  };
 
   const rec = getRecommendation(profile?.top_weaknesses ?? []);
 
-  function handleLogout() {
-    localStorage.removeItem(LS_ONBOARDING_DONE);
+  async function handleLogout() {
+    await logoutFn();
+    localStorage.removeItem("chemclash_onboarding_done");
     localStorage.removeItem(LS_USER_NAME);
-    localStorage.removeItem("chemclash_user_id");
-    localStorage.removeItem(LS_TOUR_DONE);
-    useChemStore.setState({ username: "player", userId: "", profile: null, eloRating: 1200, dailyStreak: 0 });
-    router.replace("/onboarding");
+    localStorage.removeItem("chemclash_tour_done");
+    router.replace("/login");
   }
+
+  // Loading state while auth initializes
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+  // Blank while redirect fires for unauthenticated / non-onboarded users
+  if (!account || !account.onboarding_done) return null;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {showTour && <TourOverlay onDone={() => setShowTour(false)} />}
       <TopNav eloRating={eloRating} dailyStreak={dailyStreak} username={username} onLogout={handleLogout} />
 
       <main className="max-w-6xl mx-auto px-6 py-12 pb-20">
@@ -640,7 +615,7 @@ export default function Dashboard() {
             label="Complete Daily Challenge"
             reward="10"
             claimed={dailyMissions.challengeClaimed}
-            onClaim={claimDailyChallengeReward}
+            onClaim={handleClaimChallenge}
           />
         </div>
 

@@ -1,21 +1,23 @@
 "use client";
 
 /**
- * ChemClash — Onboarding
+ * ChemClash — Onboarding (post-signup, 3-step preference collection)
  *
- * Step 1 — "What should we call you?" (first name)
- * Step 2 — "Where are you on your organic chemistry journey?" (level)
- * Step 3 — "What do you want to master?" (multi-select goals)
+ * Route: /onboarding
  *
- * After completion the user is redirected to Dashboard.
- * Returning users (LS_ONBOARDING_DONE === "1") are redirected immediately.
- * "Skip Setup" skips directly to Dashboard with defaults.
+ * Shown only to authenticated users who have not yet completed onboarding.
+ * Returning users (account.onboarding_done === true) are redirected to /.
+ * Unauthenticated visitors are redirected to /login.
+ *
+ * After completing all 3 steps the preferences are persisted to the account
+ * via PUT /auth/me and the user is sent to the product tour (/tour).
  */
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useChemStore } from "@/store/useChemStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
+// ── Legacy LS keys (preserved for compatibility with old anonymous flow) ──────
 export const LS_ONBOARDING_DONE  = "chemclash_onboarding_done";
 export const LS_ONBOARDING_PREFS = "chemclash_onboarding_prefs";
 export const LS_USER_EMAIL       = "chemclash_user_email";
@@ -53,10 +55,10 @@ function Dots({ step, total }: { step: number; total: number }) {
 
 function StepName({
   firstName, setFirstName,
-  onContinue, onSkip,
+  onContinue,
 }: {
   firstName: string; setFirstName: (v: string) => void;
-  onContinue: () => void; onSkip: () => void;
+  onContinue: () => void;
 }) {
   const [err, setErr] = useState("");
 
@@ -74,7 +76,7 @@ function StepName({
           Welcome to <span className="text-emerald-600">ChemClash</span>
         </h1>
         <p className="text-sm text-slate-500 leading-relaxed">
-          Your AI-powered Organic Chemistry arena. Let&apos;s get you set up.
+          Your AI-powered Organic Chemistry arena. Let&apos;s personalize your experience.
         </p>
       </div>
 
@@ -94,22 +96,13 @@ function StepName({
           />
         </div>
 
-        {err && (
-          <p className="text-xs text-red-500 font-medium">{err}</p>
-        )}
+        {err && <p className="text-xs text-red-500 font-medium">{err}</p>}
 
         <button
           onClick={validate}
           className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors text-sm tracking-wide mt-2"
         >
           Continue →
-        </button>
-
-        <button
-          onClick={onSkip}
-          className="w-full text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors py-1"
-        >
-          Skip Setup
         </button>
       </div>
     </div>
@@ -119,12 +112,12 @@ function StepName({
 // ── Step 2 — Journey / Level ──────────────────────────────────────────────
 
 const LEVELS = [
-  { id: "high_school",       icon: "🏫", label: "High School",         sub: "Starting Class 11–12 organic chemistry" },
-  { id: "college",           icon: "🎓", label: "College",             sub: "Undergraduate organic chemistry" },
-  { id: "graduate",          icon: "🔬", label: "Graduate",            sub: "Advanced study & research" },
-  { id: "jee_competitive",   icon: "📝", label: "JEE / Competitive",   sub: "JEE Mains & Advanced preparation" },
-  { id: "neet_medical",      icon: "🩺", label: "NEET / Medical",      sub: "NEET & medical entrance preparation" },
-  { id: "other",             icon: "✨", label: "Other",               sub: "Self-study or another purpose" },
+  { id: "high_school",     icon: "🏫", label: "High School",       sub: "Starting Class 11–12 organic chemistry" },
+  { id: "college",         icon: "🎓", label: "College",           sub: "Undergraduate organic chemistry" },
+  { id: "graduate",        icon: "🔬", label: "Graduate",          sub: "Advanced study & research" },
+  { id: "jee_competitive", icon: "📝", label: "JEE / Competitive", sub: "JEE Mains & Advanced preparation" },
+  { id: "neet_medical",    icon: "🩺", label: "NEET / Medical",    sub: "NEET & medical entrance preparation" },
+  { id: "other",           icon: "✨", label: "Other",             sub: "Self-study or another purpose" },
 ];
 
 function StepLevel({
@@ -176,17 +169,17 @@ function StepLevel({
 // ── Step 3 — Goals ────────────────────────────────────────────────────────
 
 const GOALS = [
-  { id: "reactions_mechanisms",  icon: "🔬", label: "Reactions & Mechanisms",      sub: "Arrow-pushing fluency & mechanism mastery" },
-  { id: "named_reactions",       icon: "📖", label: "Named Reactions",             sub: "Grignard, Aldol, Wittig & more" },
-  { id: "organic_pyqs",          icon: "📝", label: "Organic Chemistry PYQs",      sub: "JEE / NEET previous year questions" },
-  { id: "concepts_visual",       icon: "🎬", label: "Concepts & Visual Learning",  sub: "Animations, living molecules, diagrams" },
-  { id: "exam_preparation",      icon: "🎯", label: "Exam Preparation",            sub: "Score optimisation, time management" },
-  { id: "everything",            icon: "⚡", label: "Everything",                  sub: "Master all aspects of Organic Chemistry" },
+  { id: "reactions_mechanisms", icon: "🔬", label: "Reactions & Mechanisms",     sub: "Arrow-pushing fluency & mechanism mastery" },
+  { id: "named_reactions",      icon: "📖", label: "Named Reactions",            sub: "Grignard, Aldol, Wittig & more" },
+  { id: "organic_pyqs",         icon: "📝", label: "Organic Chemistry PYQs",     sub: "JEE / NEET previous year questions" },
+  { id: "concepts_visual",      icon: "🎬", label: "Concepts & Visual Learning", sub: "Animations, living molecules, diagrams" },
+  { id: "exam_preparation",     icon: "🎯", label: "Exam Preparation",           sub: "Score optimisation, time management" },
+  { id: "everything",           icon: "⚡", label: "Everything",                 sub: "Master all aspects of Organic Chemistry" },
 ];
 
 function StepGoals({
-  selected, toggle, onComplete,
-}: { selected: string[]; toggle: (id: string) => void; onComplete: () => void; }) {
+  selected, toggle, onComplete, saving,
+}: { selected: string[]; toggle: (id: string) => void; onComplete: () => void; saving: boolean; }) {
   return (
     <div className="max-w-sm mx-auto px-6 pt-12">
       <div className="text-center mb-8">
@@ -220,9 +213,10 @@ function StepGoals({
 
       <button
         onClick={onComplete}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors text-sm"
+        disabled={saving}
+        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-colors text-sm"
       >
-        🚀 Launch ChemClash
+        {saving ? "Saving…" : "🚀 Launch ChemClash"}
       </button>
     </div>
   );
@@ -231,26 +225,37 @@ function StepGoals({
 // ── Main onboarding page ──────────────────────────────────────────────────
 
 export default function OnboardingPage() {
-  const router = useRouter();
+  const router        = useRouter();
+  const account       = useAuthStore((s) => s.account);
+  const initialized   = useAuthStore((s) => s.initialized);
+  const updateAccount = useAuthStore((s) => s.updateAccount);
 
   const [step,      setStep]      = useState(1);
   const [firstName, setFirstName] = useState("");
   const [level,     setLevel]     = useState("");
   const [goals,     setGoals]     = useState<string[]>([]);
-  const [ready,     setReady]     = useState(false);
+  const [saving,    setSaving]    = useState(false);
 
-  // If already completed onboarding, redirect immediately.
+  // Auth guard + already-onboarded redirect
   useEffect(() => {
-    if (localStorage.getItem(LS_ONBOARDING_DONE) === "1") {
-      router.replace("/");
-    } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setReady is intentional hydration guard
-      setReady(true);
+    if (!initialized) return;
+    if (!account) {
+      router.replace("/login");
+      return;
     }
-  }, [router]);
+    if (account.onboarding_done) {
+      router.replace("/");
+      return;
+    }
+    // Pre-fill name from account if available
+    if (account.display_name && !firstName) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrating form from server account on mount
+      setFirstName(account.display_name);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialized, account]);
 
   function toggleGoal(id: string) {
-    // "Everything" is exclusive: selecting it deselects all others and vice-versa
     if (id === "everything") {
       setGoals(goals.includes("everything") ? [] : ["everything"]);
       return;
@@ -259,35 +264,33 @@ export default function OnboardingPage() {
     setGoals(withoutAll.includes(id) ? withoutAll.filter((g) => g !== id) : [...withoutAll, id]);
   }
 
-  function persist(prefs: OnboardingPrefs) {
-    localStorage.setItem(LS_ONBOARDING_DONE,  "1");
-    localStorage.setItem(LS_ONBOARDING_PREFS, JSON.stringify(prefs));
-    localStorage.setItem(LS_USER_NAME,         prefs.firstName.trim());
-    // Preserve existing anon UUID (do NOT overwrite with email for backward compat)
-    const existingId = localStorage.getItem("chemclash_user_id");
-    if (!existingId || existingId === "ssr-placeholder") {
-      const newId = typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `anon-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      localStorage.setItem("chemclash_user_id", newId);
-      useChemStore.setState({ userId: newId });
+  async function handleComplete() {
+    setSaving(true);
+    try {
+      await updateAccount({
+        display_name:     firstName.trim() || account?.display_name || "Player",
+        level,
+        goals,
+        onboarding_done:  true,
+      });
+      // Write legacy localStorage keys so existing pages still work
+      localStorage.setItem(LS_ONBOARDING_DONE, "1");
+      localStorage.setItem(LS_USER_NAME, firstName.trim() || account?.display_name || "Player");
+      router.replace("/tour");
+    } catch {
+      setSaving(false);
     }
-    useChemStore.setState({ username: prefs.firstName.trim() });
   }
 
-  function handleSkip() {
-    // Use a placeholder name and skip the rest of onboarding
-    const name = firstName.trim() || "Player";
-    persist({ firstName: name, email: "", level: "", goals: [] });
-    router.replace("/");
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-7 h-7 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+      </div>
+    );
   }
 
-  function handleComplete() {
-    persist({ firstName: firstName.trim() || "Player", email: "", level, goals });
-    router.replace("/");
-  }
-
-  if (!ready) return null;
+  if (!account) return null;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -307,7 +310,6 @@ export default function OnboardingPage() {
           firstName={firstName}
           setFirstName={setFirstName}
           onContinue={() => setStep(2)}
-          onSkip={handleSkip}
         />
       )}
       {step === 2 && (
@@ -322,6 +324,7 @@ export default function OnboardingPage() {
           selected={goals}
           toggle={toggleGoal}
           onComplete={handleComplete}
+          saving={saving}
         />
       )}
     </div>

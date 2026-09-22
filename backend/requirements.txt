@@ -9,6 +9,11 @@ python-dotenv>=1.0.0
 motor>=3.5.0
 pymongo>=4.8.0
 
+# Authentication
+bcrypt>=4.0.0
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.9     # required by fastapi Form parsing
+
 # LLM SDKs — install only what you need
 openai>=1.30.0
 

@@ -51,7 +51,8 @@ _PYQ_BY_ID: dict[str, dict] = {q["id"]: q for q in _PYQ_DB}
 
 class AnswerSubmission(BaseModel):
     user_id: str = Field(..., min_length=1, max_length=80)
-    pyq_id: str = Field(..., pattern=r"^PYQ-\d{3}$")
+    # Accept real PYQ ids (PYQ-NNN) and client-side fallback ids (FB-NNN / CC-NNN etc.)
+    pyq_id: str = Field(..., pattern=r"^[A-Z]{2,4}-\d{3,}$")
     chosen_answer: str = Field(..., min_length=1, max_length=1)   # "A" | "B" | "C" | "D"
 
 

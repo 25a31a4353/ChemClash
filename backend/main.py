@@ -113,6 +113,12 @@ from routers.user import user_router as _user_router  # noqa: E402
 app.include_router(_user_router)   # prefix="/user" is declared inside user_router
 
 # ═════════════════════════════════════════════════════════════════════════════
+# SECTION 14b — AUTH ROUTES  (email/password accounts + JWT session cookies)
+# ═════════════════════════════════════════════════════════════════════════════
+from routers.auth import router as _auth_router  # noqa: E402
+app.include_router(_auth_router)   # prefix="/auth" is declared inside auth router
+
+# ═════════════════════════════════════════════════════════════════════════════
 # SECTION 15 — SNAP-TO-SOLVE  (image-based Socratic doubt resolution)
 # ═════════════════════════════════════════════════════════════════════════════
 

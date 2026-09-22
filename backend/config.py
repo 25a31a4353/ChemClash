@@ -43,3 +43,15 @@ LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.2"))
 MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 MONGODB_URL: str = os.getenv("MONGODB_URL", "")
 MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "chemclash")
+
+# ── Authentication ────────────────────────────────────────────────────────────
+# JWT_SECRET — used to sign/verify session tokens.
+# In development a random fallback is generated at startup. In production,
+# set a stable secret so tokens survive server restarts.
+import secrets as _secrets
+JWT_SECRET: str = os.getenv(
+    "JWT_SECRET",
+    _secrets.token_hex(32),  # random dev fallback — set stable value in prod
+)
+JWT_ALGORITHM: str = "HS256"
+JWT_EXPIRE_DAYS: int = int(os.getenv("JWT_EXPIRE_DAYS", "30"))
