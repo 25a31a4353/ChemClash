@@ -8,9 +8,10 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000",
   },
 
-  // Standalone output: bundles only the files needed to run the app — reduces
-  // cold-start time on Vercel / Docker by ~60–70% vs. the default output.
-  output: "standalone",
+  // Standalone output is intended for self-hosted Docker environments.
+  // On Vercel, standalone mode must be disabled so Vercel uses its standard
+  // deployment pipeline and avoids the Turbopack ENOENT next-server.js.nft.json error.
+  output: process.env.VERCEL ? undefined : "standalone",
 
   // Compiler-level optimisations
   compiler: {
