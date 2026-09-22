@@ -420,7 +420,14 @@ export default function TutorShortsPage() {
           </p>
         </div>
 
-        {/* Concept filter */}
+        {/* Coming-soon notice */}
+        <div className="mb-6 flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <span className="text-lg flex-shrink-0">🎥</span>
+          <p className="text-xs text-amber-800 font-medium leading-relaxed">
+            <span className="font-bold">Coming soon —</span> Videos by local tutors will be uploaded shortly.
+          </p>
+        </div>
+
         <div className="mb-6 overflow-x-auto pb-1">
           <div className="flex gap-2 w-max">
             <button
