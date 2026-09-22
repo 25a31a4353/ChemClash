@@ -174,6 +174,7 @@ export default function ProfilePage() {
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault();
+    if (!account) return;
     setPwErr("");
     if (pwNew.length < 6) { setPwErr("New password must be at least 6 characters."); return; }
     if (pwNew !== pwConfirm) { setPwErr("Passwords do not match."); return; }
