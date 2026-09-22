@@ -106,6 +106,10 @@ export default function LoginPage() {
         setError("An account with this email already exists. Try logging in.");
       } else if (msg.includes("401") || msg.includes("Invalid email or password")) {
         setError("Invalid email or password. Please try again.");
+      } else if (msg.includes("503") || msg.includes("suspend") || msg.includes("Service Unavailable")) {
+        setError("The ChemClash backend server on Render is currently suspended or waking up. Please verify the Render service is active.");
+      } else if (msg.includes("DNS_HOSTNAME_RESOLVED_PRIVATE") || msg.includes("could not be found")) {
+        setError("Routing configuration error: Backend resolved to a private hostname. Verify BACKEND_URL is set to a public HTTPS URL.");
       } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("Load failed")) {
         setError(
           typeof window !== "undefined" && window.location.protocol === "https:"
