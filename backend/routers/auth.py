@@ -52,7 +52,7 @@ if _BACKEND_DIR not in sys.path:
     sys.path.insert(0, _BACKEND_DIR)
 
 import bcrypt
-from fastapi import APIRouter, Cookie, Header, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Header, HTTPException, Request, Response, status
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -80,24 +80,47 @@ if MONGODB_URL:
 # JSON file fallback  (same pattern as user_profiles.py)
 _DATA_DIR = Path(__file__).parent.parent / "data"
 _ACCOUNTS_PATH = _DATA_DIR / "accounts.json"
+_last_mtime: float = 0.0
 
 
 def _load_accounts() -> dict[str, dict]:
+    global _last_mtime
     if not _ACCOUNTS_PATH.exists():
         return {}
     try:
+        _last_mtime = _ACCOUNTS_PATH.stat().st_mtime
         return json.loads(_ACCOUNTS_PATH.read_text(encoding="utf-8"))
     except Exception:
         return {}
 
 
+def _sync_accounts_cache() -> None:
+    global _last_mtime, _ACCOUNTS, _EMAIL_INDEX
+    if not _ACCOUNTS_PATH.exists():
+        return
+    try:
+        mtime = _ACCOUNTS_PATH.stat().st_mtime
+        if mtime != _last_mtime:
+            _last_mtime = mtime
+            data = json.loads(_ACCOUNTS_PATH.read_text(encoding="utf-8"))
+            _ACCOUNTS = data
+            _EMAIL_INDEX = {v["email"]: k for k, v in _ACCOUNTS.items() if "email" in v}
+    except Exception:
+        pass
+
+
 def _save_accounts(accounts: dict[str, dict]) -> None:
+    global _last_mtime
     _DATA_DIR.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=_DATA_DIR, suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(accounts, f, indent=2, default=str)
         os.replace(tmp, _ACCOUNTS_PATH)
+        try:
+            _last_mtime = _ACCOUNTS_PATH.stat().st_mtime
+        except OSError:
+            pass
     except Exception:
         try:
             os.unlink(tmp)
@@ -109,7 +132,7 @@ def _save_accounts(accounts: dict[str, dict]) -> None:
 _ACCOUNTS: dict[str, dict] = _load_accounts()
 # secondary index: lower-cased email → user_id
 _EMAIL_INDEX: dict[str, str] = {
-    v["email"]: k for k, v in _ACCOUNTS.items()
+    v["email"]: k for k, v in _ACCOUNTS.items() if "email" in v
 }
 
 
@@ -158,12 +181,8 @@ async def _find_by_email(email: str) -> dict | None:
                 return doc
         except Exception as exc:
             logger.warning("Auth DB read failed (%s)", exc)
+    _sync_accounts_cache()
     uid = _EMAIL_INDEX.get(email)
-    if not uid:
-        fresh = _load_accounts()
-        _ACCOUNTS.update(fresh)
-        _EMAIL_INDEX.update({v["email"]: k for k, v in fresh.items() if "email" in v})
-        uid = _EMAIL_INDEX.get(email)
     return _ACCOUNTS.get(uid) if uid else None
 
 
@@ -175,10 +194,7 @@ async def _find_by_id(user_id: str) -> dict | None:
                 return doc
         except Exception as exc:
             logger.warning("Auth DB read failed (%s)", exc)
-    if user_id not in _ACCOUNTS:
-        fresh = _load_accounts()
-        _ACCOUNTS.update(fresh)
-        _EMAIL_INDEX.update({v["email"]: k for k, v in fresh.items() if "email" in v})
+    _sync_accounts_cache()
     return _ACCOUNTS.get(user_id)
 
 
@@ -264,26 +280,42 @@ _COOKIE_NAME = "cc_session"
 _COOKIE_MAX_AGE = JWT_EXPIRE_DAYS * 86400  # seconds
 
 
-def _set_cookie(response: Response, token: str) -> None:
-    is_prod = os.getenv("ENVIRONMENT") == "production" or os.getenv("RENDER") == "true"
+def _is_https(request: Request | None) -> bool:
+    if os.getenv("ENVIRONMENT") == "production" or os.getenv("RENDER") == "true":
+        return True
+    if request:
+        proto = request.headers.get("x-forwarded-proto", "").lower()
+        if proto == "https" or request.url.scheme == "https":
+            return True
+        origin = request.headers.get("origin", "").lower()
+        if origin.startswith("https://"):
+            return True
+        referer = request.headers.get("referer", "").lower()
+        if referer.startswith("https://"):
+            return True
+    return False
+
+
+def _set_cookie(response: Response, token: str, request: Request | None = None) -> None:
+    is_secure = _is_https(request)
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         httponly=True,
-        samesite="none" if is_prod else "lax",
+        samesite="none" if is_secure else "lax",
         max_age=_COOKIE_MAX_AGE,
-        secure=True if is_prod else False,
+        secure=is_secure,
         path="/",
     )
 
 
-def _clear_cookie(response: Response) -> None:
-    is_prod = os.getenv("ENVIRONMENT") == "production" or os.getenv("RENDER") == "true"
+def _clear_cookie(response: Response, request: Request | None = None) -> None:
+    is_secure = _is_https(request)
     response.delete_cookie(
         key=_COOKIE_NAME,
         path="/",
-        samesite="none" if is_prod else "lax",
-        secure=True if is_prod else False,
+        samesite="none" if is_secure else "lax",
+        secure=is_secure,
     )
 
 
@@ -312,7 +344,7 @@ async def _require_auth(
 # ── POST /auth/signup ─────────────────────────────────────────────────────────
 
 @router.post("/signup", summary="Create a new account")
-async def signup(body: SignupRequest, response: Response):
+async def signup(body: SignupRequest, request: Request, response: Response):
     email = body.email.lower().strip()
     existing = await _find_by_email(email)
     if existing:
@@ -339,14 +371,14 @@ async def signup(body: SignupRequest, response: Response):
     await _insert_account(account)
 
     token = _make_token(user_id)
-    _set_cookie(response, token)
+    _set_cookie(response, token, request)
     return {"ok": True, "token": token, "account": _public(account)}
 
 
 # ── POST /auth/login ──────────────────────────────────────────────────────────
 
 @router.post("/login", summary="Log in to an existing account")
-async def login(body: LoginRequest, response: Response):
+async def login(body: LoginRequest, request: Request, response: Response):
     email = body.email.lower().strip()
     account = await _find_by_email(email)
     if not account or not _verify_password(body.password, account.get("password_hash", "")):
@@ -356,15 +388,15 @@ async def login(body: LoginRequest, response: Response):
         )
 
     token = _make_token(account["user_id"])
-    _set_cookie(response, token)
+    _set_cookie(response, token, request)
     return {"ok": True, "token": token, "account": _public(account)}
 
 
 # ── POST /auth/logout ─────────────────────────────────────────────────────────
 
 @router.post("/logout", summary="Clear session cookie")
-async def logout(response: Response):
-    _clear_cookie(response)
+async def logout(request: Request, response: Response):
+    _clear_cookie(response, request)
     return {"ok": True}
 
 

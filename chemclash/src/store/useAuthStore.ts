@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Checks if a valid session cookie or token exists; hydrates account if so.
   // Called once on app mount; subsequent page navigations are instant.
   initAuth: async () => {
-    if (get().initialized) return;
+    if (get().initialized || get().loading) return;
     set({ loading: true });
     try {
       const account = await authGetMe();
@@ -98,7 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const { account } = await authLogin(email, password);
-      set({ account, loading: false });
+      set({ account, loading: false, initialized: true });
       syncAccountToStorage(account);
       useChemStore.setState({
         username: account.display_name,
@@ -121,7 +121,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const { account } = await authSignup(email, password, displayName);
-      set({ account, loading: false });
+      set({ account, loading: false, initialized: true });
       syncAccountToStorage(account);
       useChemStore.setState({
         username: account.display_name,
@@ -143,7 +143,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     await authLogout();
     clearAccountStorage();
-    set({ account: null });
+    set({ account: null, initialized: true });
     useChemStore.setState({
       username: "player",
       userId: "",

@@ -5,7 +5,27 @@
  * Falls back to http://localhost:8000 for local development — no config needed.
  */
 
-const BASE = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+/**
+ * Resolves the backend API base URL dynamically.
+ * - In production HTTPS: if NEXT_PUBLIC_BACKEND_URL is not set or starts with http:// (e.g. localhost fallback),
+ *   returns "" (relative URL) so requests route through Next.js proxy rewrites on the same origin.
+ *   This guarantees zero Mixed Content errors and prevents cross-site cookie partitioning.
+ * - If NEXT_PUBLIC_BACKEND_URL is set to an HTTPS URL, returns that URL.
+ * - In local dev (HTTP), returns configured URL or http://localhost:8000.
+ */
+export function getBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const configured = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (window.location.protocol === "https:") {
+      if (!configured || configured.startsWith("http://")) {
+        return "";
+      }
+      return configured;
+    }
+    return configured || "http://localhost:8000";
+  }
+  return process.env.NEXT_PUBLIC_BACKEND_URL ?? process.env.BACKEND_URL ?? "http://localhost:8000";
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -100,7 +120,8 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     ...((init?.headers as Record<string, string>) ?? {}),
   };
 
-  const res = await fetch(`${BASE}${path}`, {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}${path}`, {
     credentials: "include",
     ...init,
     headers,
@@ -240,7 +261,8 @@ export function streamHint(
   onToken: (token: string) => void,
   onDone: () => void
 ): () => void {
-  const url = `${BASE}/api/hint/stream?source=${encodeURIComponent(source)}&target=${encodeURIComponent(target)}`;
+  const base = getBaseUrl();
+  const url = `${base}/api/hint/stream?source=${encodeURIComponent(source)}&target=${encodeURIComponent(target)}`;
   const es = new EventSource(url);
 
   es.onmessage = (e) => {
@@ -334,7 +356,8 @@ export async function fetchCurriculumModule(
  * Called once on app mount from layout.tsx; never blocks the UI.
  */
 export function pingBackend(): void {
-  fetch(`${BASE}/api/ping`).catch(() => {/* silent — non-critical */});
+  const base = getBaseUrl();
+  fetch(`${base}/api/ping`).catch(() => {/* silent — non-critical */});
 }
 
 // ── Auth endpoints ─────────────────────────────────────────────────────────

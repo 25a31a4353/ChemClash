@@ -37,6 +37,29 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
+
+  // Reverse-proxy API, auth, and user requests to the backend server.
+  // This enables same-origin cookies and eliminates cross-origin Mixed Content blocks.
+  async rewrites() {
+    const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      process.env.BACKEND_URL ||
+      "http://localhost:8000";
+    return [
+      {
+        source: "/auth/:path*",
+        destination: `${backendUrl}/auth/:path*`,
+      },
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+      {
+        source: "/user/:path*",
+        destination: `${backendUrl}/user/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

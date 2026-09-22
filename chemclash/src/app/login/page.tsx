@@ -107,7 +107,11 @@ export default function LoginPage() {
       } else if (msg.includes("401") || msg.includes("Invalid email or password")) {
         setError("Invalid email or password. Please try again.");
       } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("Load failed")) {
-        setError("Cannot reach the ChemClash backend server. Please verify the backend is running at http://localhost:8000.");
+        setError(
+          typeof window !== "undefined" && window.location.protocol === "https:"
+            ? "Cannot reach the ChemClash backend server. Please check your connection and try again."
+            : "Cannot reach the ChemClash backend server. Please verify the backend is running at http://localhost:8000."
+        );
       } else {
         setError(msg.replace(/^API \d+: /, ""));
       }

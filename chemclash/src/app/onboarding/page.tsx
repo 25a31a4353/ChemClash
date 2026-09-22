@@ -244,7 +244,11 @@ export default function OnboardingPage() {
       return;
     }
     if (account.onboarding_done) {
-      router.replace("/");
+      if (!account.tour_done) {
+        router.replace("/tour");
+      } else {
+        router.replace("/");
+      }
       return;
     }
     // Pre-fill name from account if available
