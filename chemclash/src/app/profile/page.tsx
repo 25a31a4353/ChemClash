@@ -101,7 +101,7 @@ export default function ProfilePage() {
   const [nameErr,   setNameErr]   = useState("");
   const [nameSaving, setNameSaving] = useState(false);
 
-  const [phone,     setPhone]     = useState("");
+  const [phone,     setPhone]     = useState(() => (typeof window !== "undefined" ? (localStorage.getItem(LS_PHONE) ?? "") : ""));
   const [editPhone, setEditPhone] = useState(false);
   const [phoneVal,  setPhoneVal]  = useState("");
 
@@ -113,13 +113,6 @@ export default function ProfilePage() {
   const [pwErr,     setPwErr]     = useState("");
   const [pwSaving,  setPwSaving]  = useState(false);
   const [pwOk,      setPwOk]      = useState(false);
-
-  // Load phone from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setPhone(localStorage.getItem(LS_PHONE) ?? "");
-    }
-  }, []);
 
   if (!initialized) {
     return <LogoSpinner label="Loading profile…" />;

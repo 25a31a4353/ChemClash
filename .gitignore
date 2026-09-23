@@ -15,3 +15,6 @@ Thumbs.db
 
 # Local storage data
 backend/data/
+
+# Project DNA Documentation (kept locally)
+CHEMCLASH_PROJECT_DNA.md
