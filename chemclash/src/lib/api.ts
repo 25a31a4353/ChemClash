@@ -229,7 +229,8 @@ export async function snapAnalyze(
   imageB64: string,
   mediaType: string = "image/jpeg",
   persona: SnapPersona = "socratic",
-  language: SnapLanguage = "english"
+  language: SnapLanguage = "english",
+  fileName?: string
 ): Promise<SnapResponse> {
   return apiFetch<SnapResponse>("/api/snap-analyze", {
     method: "POST",
@@ -238,6 +239,7 @@ export async function snapAnalyze(
       media_type: mediaType,
       persona,
       language,
+      file_name: fileName,
     }),
   });
 }
@@ -286,7 +288,7 @@ export function streamHint(
 // ── Challenge bank endpoints ───────────────────────────────────────────────
 
 export interface Challenge {
-  id: number;
+  id: number | string;
   nucleophile: string;
   electrophile: string;
   shouldReact: boolean;

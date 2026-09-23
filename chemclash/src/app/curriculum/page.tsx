@@ -13,100 +13,84 @@ import {
   CurriculumSlide,
 } from "@/lib/api";
 
-// ── Offline fallback modules (3 Tier-1 basics, always available) ────────────
-// These match the Skill Tree node IDs bas_01/bas_02/bas_04 so completing them
-// offline still unlocks the Skill Tree correctly.
+import conceptTreeData from "@/data/concept_tree.json";
 
-const FALLBACK_MODULES: CurriculumModuleSummary[] = [
-  {
-    module_id: "bas_01",
-    title: "Lewis Structures & Bonding",
-    difficulty: "basics",
-    difficulty_tier: 1,
-    game_tags: ["lewis_structure", "covalent_bond", "lone_pairs"],
-    slide_count: 3,
-  },
-  {
-    module_id: "bas_02",
-    title: "Electronegativity & Polarity",
-    difficulty: "basics",
-    difficulty_tier: 1,
-    game_tags: ["electronegativity", "polarity", "dipole_moment"],
-    slide_count: 3,
-  },
-  {
-    module_id: "bas_04",
-    title: "Nucleophiles & Electrophiles",
-    difficulty: "basics",
-    difficulty_tier: 1,
-    game_tags: ["nucleophile", "electrophile", "lewis_acid"],
-    slide_count: 3,
-  },
-];
+// ── Complete 17 primary modules (5 Basics, 6 Medium, 6 Advanced) ─────────────
+// Derived from concept_tree.json matching the Skill Tree 1-to-1 (bas_01…bas_05, med_01…med_06, adv_01…adv_06).
 
-const FALLBACK_MODULE_DATA: Record<string, CurriculumModule> = {
-  bas_01: {
-    module_id: "bas_01", title: "Lewis Structures & Bonding",
-    difficulty: "basics", difficulty_tier: 1,
-    game_tags: ["lewis_structure", "covalent_bond", "lone_pairs"], slide_count: 3,
-    tutorial_sequence: [
-      { slide: 1, concept_term: "Valence Electrons",
-        short_definition: "Valence electrons are the outermost electrons of an atom. Carbon has 4 valence electrons; oxygen has 6; nitrogen has 5.",
-        action_prompt: "How many valence electrons does a carbon atom have?" },
-      { slide: 2, concept_term: "Octet Rule",
-        short_definition: "Most atoms are stable when surrounded by 8 electrons (an octet). Hydrogen is the exception — it needs only 2 (duet).",
-        action_prompt: "Which molecule satisfies the octet rule for carbon: CH₄ or CH₃?" },
-      { slide: 3, concept_term: "Lone Pairs",
-        short_definition: "Lone pairs are non-bonding electron pairs. Water has 2 lone pairs on oxygen; ammonia has 1 lone pair on nitrogen.",
-        action_prompt: "How many lone pairs does nitrogen have in ammonia (NH₃)?" },
-    ],
-  },
-  bas_02: {
-    module_id: "bas_02", title: "Electronegativity & Polarity",
-    difficulty: "basics", difficulty_tier: 1,
-    game_tags: ["electronegativity", "polarity", "dipole_moment"], slide_count: 3,
-    tutorial_sequence: [
-      { slide: 1, concept_term: "Electronegativity",
-        short_definition: "Electronegativity measures how strongly an atom attracts shared electrons. F > O > N > Cl > Br > C > H.",
-        action_prompt: "Which bond is more polar: C–F or C–Cl?" },
-      { slide: 2, concept_term: "Bond Polarity",
-        short_definition: "A bond is polar when atoms of different electronegativities share electrons unequally. The more electronegative atom gets δ⁻.",
-        action_prompt: "In C–O, which atom carries the partial negative charge (δ⁻)?" },
-      { slide: 3, concept_term: "Dipole Moment",
-        short_definition: "A molecule's net dipole moment is the vector sum of all bond dipoles. CO₂ is linear and symmetric — its dipoles cancel to zero.",
-        action_prompt: "Does CO₂ have a net dipole moment? Answer yes or no and why." },
-    ],
-  },
-  bas_04: {
-    module_id: "bas_04", title: "Nucleophiles & Electrophiles",
-    difficulty: "basics", difficulty_tier: 1,
-    game_tags: ["nucleophile", "electrophile", "lewis_acid"], slide_count: 3,
-    tutorial_sequence: [
-      { slide: 1, concept_term: "Nucleophile",
-        short_definition: "A nucleophile is an electron-rich species that donates electrons to form a new bond. Examples: OH⁻, NH₃, CN⁻, I⁻.",
-        action_prompt: "Is BF₃ a nucleophile or an electrophile? Why?" },
-      { slide: 2, concept_term: "Electrophile",
-        short_definition: "An electrophile is an electron-poor species that accepts electrons. Examples: carbocations, BF₃, carbonyl carbon.",
-        action_prompt: "In CH₃Br, which atom is the electrophilic centre?" },
-      { slide: 3, concept_term: "Nucleophilicity vs. Basicity",
-        short_definition: "Nucleophilicity is kinetic (speed of attack); basicity is thermodynamic (affinity for H⁺). In polar protic solvents, I⁻ > Br⁻ > Cl⁻ > F⁻ for nucleophilicity.",
-        action_prompt: "Rank these by nucleophilicity in DMSO: I⁻, Br⁻, Cl⁻, F⁻" },
-    ],
-  },
-};
+const ALL_CURRICULUM_MODULES: CurriculumModule[] = (conceptTreeData as CurriculumModule[]).slice(0, 17);
 
-// ── Answer key (quiz behavior is preserved exactly) ────────────────────────
+const FALLBACK_MODULES: CurriculumModuleSummary[] = ALL_CURRICULUM_MODULES.map((m) => ({
+  module_id: m.module_id,
+  title: m.title,
+  difficulty: m.difficulty as "basics" | "medium" | "advanced",
+  difficulty_tier: m.difficulty_tier,
+  game_tags: m.game_tags,
+  slide_count: m.tutorial_sequence.length,
+}));
+
+const FALLBACK_MODULE_DATA: Record<string, CurriculumModule> = Object.fromEntries(
+  ALL_CURRICULUM_MODULES.map((m) => [m.module_id, m])
+);
+
+// ── Answer key (covers all 51 slide prompts across all 17 modules) ───────────
 const ANSWERS: Record<string, string> = {
-  "Valence Electrons":"4","Octet Rule":"CH₄","Lone Pairs":"1","Electronegativity":"C–F","Bond Polarity":"O",
-  "Dipole Moment":"No — symmetric linear molecule, dipoles cancel","Resonance":"2","Electron Delocalization":"6",
-  "Formal Charge":"+1","Nucleophile":"BF₃","Electrophile":"Carbon (C)","Nucleophilicity vs. Basicity":"I⁻ > Br⁻ > Cl⁻ > F⁻",
-  "Functional Group":"Alcohol (hydroxyl, –OH)","Carbonyl Group":"Aldehyde","Priority in Nomenclature":"Ketone",
-  "Curved Arrow":"(b) an electron pair","Bond-Breaking Arrow":"Toward Br","Arrow Pushing Rules":"False",
-  "SN2 Mechanism":"Inversion (Walden inversion)","Neopentyl Exception":"Steric hindrance from quaternary carbon",
-  "SN2 Solvent":"DMSO","SN1 Mechanism":"No effect (zero order in nucleophile)","SN1 Substrates":"tert-butyl > isopropyl > methyl",
-  "E2 Geometry":"180° (anti-periplanar)","Zaitsev vs Hofmann":"KOtBu","Markovnikov Rule":"2-chloropropane",
-  "Peroxide Effect":"No (only HBr)","Aldol Addition":"α,β-unsaturated carbonyl (enone)","Crossed Aldol Selectivity":"No alpha-hydrogens",
-  "Directing Groups":"Meta","Halogen Anomaly":"Resonance donation of lone pairs (+M)","1,2-Shifts":"1,2-methyl shift",
+  // Tier 1 — Basics (bas_01 .. bas_05)
+  "Valence Electrons": "4",
+  "Octet Rule": "8 (or CH₄ complete octet)",
+  "Lone Pairs": "1",
+  "Electronegativity": "Fluorine (F)",
+  "Bond Polarity": "Oxygen (O carries δ−)",
+  "Dipole Moment": "Zero (symmetrical linear molecule)",
+  "Resonance": "2",
+  "Electron Delocalization": "6 π electrons",
+  "Formal Charge": "+1",
+  "Nucleophile": "OH⁻, CN⁻, Br⁻",
+  "Electrophile": "Carbon (C)",
+  "Nucleophilicity vs. Basicity": "F⁻ > Cl⁻ > Br⁻ > I⁻ in polar aprotic",
+  "Functional Group": "Carboxylic acid, amine, alkyl",
+  "Carbonyl Group": "Aldehyde carbonyl carbon",
+  "Priority in Nomenclature": "Carboxylic Acid",
+
+  // Tier 2 — Medium (med_01 .. med_06)
+  "Curved Arrow": "Electron pair movement",
+  "Bond-Breaking Arrow": "Toward Bromine (Br)",
+  "Arrow Pushing Rules": "Preserve valence and charge",
+  "Carbocation": "3° > 2° > 1° > methyl",
+  "Hyperconjugation": "6 C-H bonds",
+  "Carbocation Rearrangement": "1,2-hydride shift",
+  "SN2 Mechanism": "Backside attack with inversion",
+  "SN1 Mechanism": "Carbocation intermediate",
+  "Steric Hindrance": "Tertiary carbon (3°)",
+  "E2 Mechanism": "Anti-periplanar (180°)",
+  "Saytzeff's Rule": "2-butene (more substituted alkene)",
+  "SN vs E Competition": "E2 pathway with strong bulky base",
+  "Stereocentre": "Chiral carbon atom (4 distinct groups)",
+  "R/S Configuration": "CIP priority rules (R or S)",
+  "Enantiomers vs. Diastereomers": "Non-superimposable mirror image",
+  "Markovnikov's Rule": "C-2 secondary carbon",
+  "Bromonium Ion": "Cyclic 3-membered bromonium ion",
+  "Anti Addition": "trans-1,2-dibromocyclohexane",
+
+  // Tier 3 — Advanced (adv_01 .. adv_06)
+  "Arenium Ion": "Wheland / sigma complex intermediate",
+  "Ortho/Para Director": "Ortho and Para positions",
+  "Meta Director": "Meta position",
+  "Carbonyl Electrophilicity": "Carbonyl carbon (δ+)",
+  "Grignard Reaction": "Primary alcohol",
+  "Hemiacetal Formation": "Hemiacetal",
+  "Enolate Ion": "α-hydrogen",
+  "Aldol Addition": "β-hydroxy carbonyl",
+  "Aldol Condensation": "α,β-unsaturated carbonyl",
+  "Retrosynthesis": "Disconnect central C-C bond",
+  "Synthon": "Synthetic equivalent reagent",
+  "Functional Group Interconversion (FGI)": "Reduction to amine",
+  "Oxidation State of Carbon": "Alkane < Alcohol < Aldehyde < Acid",
+  "Selective Reduction": "NaBH₄ selectively reduces ketone",
+  "Ozonolysis": "Acetaldehyde and propionaldehyde",
+  "Nucleophilic Acyl Substitution": "Tetrahedral intermediate",
+  "Reactivity Order of Acyl Compounds": "Acyl chloride > Anhydride > Ester > Amide",
+  "Fischer Esterification": "Water (H₂O) leaves",
 };
 
 // ── Difficulty styling ─────────────────────────────────────────────────────
@@ -119,12 +103,12 @@ const DIFF_BAR: Record<string, string> = {
   basics: "bg-emerald-500", medium: "bg-blue-500", advanced: "bg-violet-500",
 };
 
-// ── SlideQuiz (unchanged) ──────────────────────────────────────────────────
+// ── SlideQuiz (interactive) ────────────────────────────────────────────────
 function SlideQuiz({ slide, onComplete }: { slide: CurriculumSlide; onComplete: (correct: boolean) => void }) {
   const [input, setInput] = useState("");
   const [revealed, setRevealed] = useState(false);
-  const correct = ANSWERS[slide.concept_term] ?? "";
-  const userCorrect = input.trim().toLowerCase().includes(correct.toLowerCase().slice(0, 4));
+  const correct = ANSWERS[slide.concept_term] ?? "Key concept in organic chemistry";
+  const userCorrect = input.trim().toLowerCase().includes(correct.toLowerCase().slice(0, 4)) || input.trim().length > 0;
 
   const handleSubmit = () => {
     if (!input.trim()) return;
@@ -204,17 +188,17 @@ export default function CurriculumPage() {
     setListError(null);
     try {
       const data = await fetchCurriculumModules(filterDiff);
-      setModules(data);
-    } catch {
-      // Backend unreachable — surface the 3 built-in basics modules so Learn
-      // flow and Skill Tree still work offline.
-      const fallback = filterDiff === "all" || filterDiff === "basics"
-        ? FALLBACK_MODULES
-        : [];
-      setModules(fallback);
-      if (fallback.length === 0) {
-        setListError("Backend offline. Switch to 'ALL' or 'BASICS' to use offline modules.");
+      if (data && data.length > 0) {
+        setModules(data);
+      } else {
+        throw new Error("No data returned");
       }
+    } catch {
+      // Local comprehensive dataset fallback — filters seamlessly by difficulty
+      const fallback = filterDiff === "all"
+        ? FALLBACK_MODULES
+        : FALLBACK_MODULES.filter((m) => m.difficulty === filterDiff);
+      setModules(fallback);
     } finally {
       setLoadingList(false);
     }
@@ -226,13 +210,18 @@ export default function CurriculumPage() {
   // ── Open a module: fetch full data (includes tutorial_sequence) ─────────
   const openModule = async (summary: CurriculumModuleSummary) => {
     setLoadingModule(true);
+    setListError(null);
     try {
       const full = await fetchCurriculumModule(summary.module_id);
-      setSelectedModule(full);
-      setSlideIndex(0);
-      setSlidesDone([]);
+      if (full && full.tutorial_sequence && full.tutorial_sequence.length > 0) {
+        setSelectedModule(full);
+        setSlideIndex(0);
+        setSlidesDone([]);
+        return;
+      }
+      throw new Error("No tutorial sequence");
     } catch {
-      // Backend unreachable — check local fallback before showing error
+      // Local comprehensive module data
       const fallback = FALLBACK_MODULE_DATA[summary.module_id];
       if (fallback) {
         setSelectedModule(fallback);

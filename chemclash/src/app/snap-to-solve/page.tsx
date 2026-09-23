@@ -236,6 +236,10 @@ function UploadZone({ onFile }: UploadZoneProps) {
     if (!files || files.length === 0) return;
     const file = files[0];
     if (!file.type.startsWith("image/")) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File exceeds 10 MB limit. Please select a smaller file.");
+      return;
+    }
     onFile(file);
   }
 
@@ -257,7 +261,7 @@ function UploadZone({ onFile }: UploadZoneProps) {
         <p className="text-xs text-slate-400">
           Photo of a chemistry question, reaction, or notebook page
         </p>
-        <p className="text-xs text-slate-400">JPEG · PNG · WEBP · up to 5 MB</p>
+        <p className="text-xs text-slate-400">JPEG · PNG · WEBP · up to 10 MB</p>
       </div>
       <input
         ref={inputRef}
@@ -277,6 +281,7 @@ export default function SnapToSolvePage() {
   const [dataUrl, setDataUrl]     = useState<string | null>(null);
   const [b64, setB64]             = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<string>("image/jpeg");
+  const [fileName, setFileName]   = useState<string>("");
   const [response, setResponse]   = useState<SnapResponse | null>(null);
   const [errorMsg, setErrorMsg]   = useState<string | null>(null);
   // Preferences — persist for the session
@@ -284,6 +289,12 @@ export default function SnapToSolvePage() {
   const [language, setLanguage] = useState<SnapLanguage>("english");
 
   function handleFile(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMsg("File size exceeds 10 MB limit. Please upload an image under 10 MB.");
+      setUiState("error");
+      return;
+    }
+    setFileName(file.name);
     fileToBase64(file).then(({ b64: encoded, mediaType: mt, dataUrl: du }) => {
       setB64(encoded);
       setMediaType(mt);
@@ -298,7 +309,7 @@ export default function SnapToSolvePage() {
     if (!b64) return;
     setUiState("loading");
     try {
-      const result = await snapAnalyze(b64, mediaType, persona, language);
+      const result = await snapAnalyze(b64, mediaType, persona, language, fileName);
       setResponse(result);
       setUiState("result");
     } catch (e) {
