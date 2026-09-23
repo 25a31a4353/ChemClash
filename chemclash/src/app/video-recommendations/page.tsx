@@ -10,20 +10,21 @@
  * No YouTube API. No external keys. Search URLs only.
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useChemStore } from "@/store/useChemStore";
 
 // ── Curated concept → video card mapping ──────────────────────────────────
 // Keys are lowercase concept_tag values from pyq_db.json / concept_tree.json.
-// youtube_search is a YouTube search URL — safe MVP without knowing exact video IDs.
+// youtube_search is a YouTube search URL or direct YouTube playlist link.
 
 interface VideoCard {
   concept: string;         // display name
-  title: string;           // recommended video title / search query
+  title: string;           // recommended video title / search query / playlist title
   channel: string;         // channel hint shown to user
   reason: string;          // why it was recommended
-  youtube_search: string;  // https://www.youtube.com/results?search_query=…
+  youtube_search: string;  // https://www.youtube.com/results?search_query=… or https://youtube.com/playlist?list=…
+  type?: "video" | "playlist"; // source / type label
 }
 
 const VIDEO_MAP: Record<string, VideoCard> = {
@@ -199,6 +200,173 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Steric hindrance explains the SN2 reactivity order — a must-know for JEE.",
     youtube_search: "https://www.youtube.com/results?search_query=steric+hindrance+SN2+primary+secondary+tertiary",
   },
+
+  // ── Curated YouTube Playlists: NEET & JEE Organic Chemistry ───────────
+  // Playlist 1: Complete OC Mission 30 for Reneet
+  "purification": {
+    concept: "Purification and Characterisation of Organic Compounds",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "Comprehensive coverage of qualitative & quantitative organic analysis, crystallization, sublimation, and chromatography.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+  "purification_and_characterisation_of_organic_compounds": {
+    concept: "Purification and Characterisation of Organic Compounds",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "Comprehensive coverage of qualitative & quantitative organic analysis, crystallization, sublimation, and chromatography.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+  "characterisation": {
+    concept: "Purification and Characterisation of Organic Compounds",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "Comprehensive coverage of qualitative & quantitative organic analysis, crystallization, sublimation, and chromatography.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+  "goc": {
+    concept: "Some Basic Principles of Organic Chemistry (GOC)",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "General Organic Chemistry fundamentals — inductive effect, electromeric effect, resonance, hyperconjugation, and reactive intermediates.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+  "some_basic_principles_of_organic_chemistry": {
+    concept: "Some Basic Principles of Organic Chemistry (GOC)",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "General Organic Chemistry fundamentals — inductive effect, electromeric effect, resonance, hyperconjugation, and reactive intermediates.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+  "basic_principles_of_organic_chemistry": {
+    concept: "Some Basic Principles of Organic Chemistry (GOC)",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "General Organic Chemistry fundamentals — inductive effect, electromeric effect, resonance, hyperconjugation, and reactive intermediates.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+  "hydrocarbons": {
+    concept: "Hydrocarbons",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "Thorough study of alkanes, alkenes, alkynes, and aromatic hydrocarbons with key addition, substitution, and combustion mechanisms.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+  "hydrocarbon": {
+    concept: "Hydrocarbons",
+    title: "Complete OC Mission 30 for Reneet",
+    channel: "YouTube Playlist",
+    reason: "Thorough study of alkanes, alkenes, alkynes, and aromatic hydrocarbons with key addition, substitution, and combustion mechanisms.",
+    youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+    type: "playlist",
+  },
+
+  // Playlist 2: Complete Organic Chemistry (One Shots - for Quick Exam Preparation)
+  "halogens": {
+    concept: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+    channel: "YouTube Playlist",
+    reason: "One-shot deep dive into haloalkanes and haloarenes, nucleophilic substitution (SN1/SN2), elimination, and polyhalogen compounds.",
+    youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    type: "playlist",
+  },
+  "haloalkanes": {
+    concept: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+    channel: "YouTube Playlist",
+    reason: "One-shot deep dive into haloalkanes and haloarenes, nucleophilic substitution (SN1/SN2), elimination, and polyhalogen compounds.",
+    youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    type: "playlist",
+  },
+  "haloarenes": {
+    concept: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+    channel: "YouTube Playlist",
+    reason: "One-shot deep dive into haloalkanes and haloarenes, nucleophilic substitution (SN1/SN2), elimination, and polyhalogen compounds.",
+    youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    type: "playlist",
+  },
+  "haloalkanes_and_haloarenes": {
+    concept: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+    channel: "YouTube Playlist",
+    reason: "One-shot deep dive into haloalkanes and haloarenes, nucleophilic substitution (SN1/SN2), elimination, and polyhalogen compounds.",
+    youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    type: "playlist",
+  },
+  "organic_compounds_containing_halogens": {
+    concept: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+    channel: "YouTube Playlist",
+    reason: "One-shot deep dive into haloalkanes and haloarenes, nucleophilic substitution (SN1/SN2), elimination, and polyhalogen compounds.",
+    youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    type: "playlist",
+  },
+  "oxygen": {
+    concept: "Organic Compounds Containing Oxygen",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+    channel: "YouTube Playlist",
+    reason: "Complete coverage of alcohols, phenols, ethers, aldehydes, ketones, carboxylic acids, and their derivatives in one shot.",
+    youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    type: "playlist",
+  },
+  "organic_compounds_containing_oxygen": {
+    concept: "Organic Compounds Containing Oxygen",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+    channel: "YouTube Playlist",
+    reason: "Complete coverage of alcohols, phenols, ethers, aldehydes, ketones, carboxylic acids, and their derivatives in one shot.",
+    youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+    type: "playlist",
+  },
+
+  // Playlist 3: ORGANIC CHEMISTRY ONE SHOT NEET 2026
+  "nitrogen": {
+    concept: "Organic Compounds Containing Nitrogen (Amines)",
+    title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
+    channel: "YouTube Playlist",
+    reason: "High-yield one-shot lecture covering aliphatic and aromatic amines, basicity orders, diazotisation, and diazonium salt reactions.",
+    youtube_search: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
+    type: "playlist",
+  },
+  "amines": {
+    concept: "Organic Compounds Containing Nitrogen (Amines)",
+    title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
+    channel: "YouTube Playlist",
+    reason: "High-yield one-shot lecture covering aliphatic and aromatic amines, basicity orders, diazotisation, and diazonium salt reactions.",
+    youtube_search: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
+    type: "playlist",
+  },
+  "organic_compounds_containing_nitrogen": {
+    concept: "Organic Compounds Containing Nitrogen (Amines)",
+    title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
+    channel: "YouTube Playlist",
+    reason: "High-yield one-shot lecture covering aliphatic and aromatic amines, basicity orders, diazotisation, and diazonium salt reactions.",
+    youtube_search: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
+    type: "playlist",
+  },
+  "biomolecules": {
+    concept: "Biomolecules",
+    title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
+    channel: "YouTube Playlist",
+    reason: "Essential NEET one-shot covering carbohydrates (glucose/fructose), amino acids, proteins, enzymes, vitamins, and nucleic acids.",
+    youtube_search: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
+    type: "playlist",
+  },
+  "biomolecule": {
+    concept: "Biomolecules",
+    title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
+    channel: "YouTube Playlist",
+    reason: "Essential NEET one-shot covering carbohydrates (glucose/fructose), amino acids, proteins, enzymes, vitamins, and nucleic acids.",
+    youtube_search: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
+    type: "playlist",
+  },
 };
 
 // Fallback cards shown when the student has no weakness data yet
@@ -229,6 +397,7 @@ const FOUNDATIONAL_CARDS: VideoCard[] = [
 // ── Curated Playlists ─────────────────────────────────────────────────────
 
 interface PlaylistTopic {
+  key: string;
   label: string;
   emoji: string;
 }
@@ -249,9 +418,9 @@ interface CuratedPlaylist {
 
 const CURATED_PLAYLISTS: CuratedPlaylist[] = [
   {
-    title: "Playlist 1 — Purification, GOC & Hydrocarbons",
+    title: "Complete OC Mission 30 for Reneet",
     url: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
-    description: "Master the analytical backbone of Organic Chemistry — from purification techniques to the fundamentals of GOC and all hydrocarbon reactions.",
+    description: "Master the analytical backbone of Organic Chemistry — from purification techniques and qualitative analysis to the fundamentals of GOC and all hydrocarbon reactions.",
     accent: {
       gradient: "from-violet-600 to-purple-700",
       badge: "bg-violet-100 text-violet-700 border-violet-200",
@@ -260,15 +429,15 @@ const CURATED_PLAYLISTS: CuratedPlaylist[] = [
       icon: "🧪",
     },
     topics: [
-      { label: "Purification & Characterisation", emoji: "🔬" },
-      { label: "GOC (Basic Principles)", emoji: "⚛️" },
-      { label: "Hydrocarbons", emoji: "🛢️" },
+      { key: "purification", label: "Purification and Characterisation of Organic Compounds", emoji: "🔬" },
+      { key: "goc", label: "Some Basic Principles of Organic Chemistry (GOC)", emoji: "⚛️" },
+      { key: "hydrocarbons", label: "Hydrocarbons", emoji: "🛢️" },
     ],
   },
   {
-    title: "Playlist 2 — Halogens & Oxygen Compounds",
+    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
     url: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
-    description: "Deep dive into haloalkanes, haloarenes, and all oxygen-containing functional groups — alcohols, ethers, aldehydes, ketones, carboxylic acids and derivatives.",
+    description: "Deep dive into haloalkanes, haloarenes, and all oxygen-containing functional groups — alcohols, phenols, ethers, aldehydes, ketones, carboxylic acids and derivatives in concise one-shots.",
     accent: {
       gradient: "from-blue-600 to-cyan-600",
       badge: "bg-blue-100 text-blue-700 border-blue-200",
@@ -277,33 +446,72 @@ const CURATED_PLAYLISTS: CuratedPlaylist[] = [
       icon: "💧",
     },
     topics: [
-      { label: "Haloalkanes & Haloarenes", emoji: "⚗️" },
-      { label: "Organic Compounds with Oxygen", emoji: "🧬" },
+      { key: "halogens", label: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)", emoji: "⚗️" },
+      { key: "oxygen", label: "Organic Compounds Containing Oxygen", emoji: "🧬" },
     ],
   },
   {
-    title: "Playlist 3 — Nitrogen Compounds & Biomolecules",
+    title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
     url: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
-    description: "Complete coverage of amines, diazonium salts, and the rich world of biomolecules — carbohydrates, proteins, nucleic acids, vitamins, and polymers.",
+    description: "Complete coverage of nitrogen-containing compounds (amines, diazonium salts) and the rich world of biomolecules — carbohydrates, amino acids, proteins, and nucleic acids.",
     accent: {
       gradient: "from-emerald-600 to-teal-600",
       badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
       btn: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200",
       glow: "shadow-emerald-100",
-      icon: "🧬",
+      icon: "🌿",
     },
     topics: [
-      { label: "Amines (Org. Nitrogen)", emoji: "🔵" },
-      { label: "Biomolecules", emoji: "🌿" },
+      { key: "nitrogen", label: "Organic Compounds Containing Nitrogen (Amines)", emoji: "🔵" },
+      { key: "biomolecules", label: "Biomolecules", emoji: "🌿" },
     ],
   },
 ];
 
-// ── Pick cards from weakness list ─────────────────────────────────────────
+// ── Topic Filter Options ──────────────────────────────────────────────────
 
-function pickCards(topWeaknesses: string[]): VideoCard[] {
+interface TopicFilterOption {
+  id: string;
+  label: string;
+  emoji: string;
+}
+
+const TOPIC_FILTERS: TopicFilterOption[] = [
+  { id: "all", label: "All Recommendations", emoji: "✨" },
+  { id: "purification", label: "Purification & Characterisation", emoji: "🔬" },
+  { id: "goc", label: "GOC (Basic Principles)", emoji: "⚛️" },
+  { id: "hydrocarbons", label: "Hydrocarbons", emoji: "🛢️" },
+  { id: "halogens", label: "Haloalkanes & Haloarenes", emoji: "⚗️" },
+  { id: "oxygen", label: "Oxygen Compounds", emoji: "💧" },
+  { id: "nitrogen", label: "Nitrogen Compounds (Amines)", emoji: "🔵" },
+  { id: "biomolecules", label: "Biomolecules", emoji: "🌿" },
+];
+
+// ── Pick cards from weakness list or filter ───────────────────────────────
+
+function pickCards(topWeaknesses: string[], filterKey: string = "all"): VideoCard[] {
   const seen = new Set<string>();
   const cards: VideoCard[] = [];
+
+  if (filterKey !== "all") {
+    const normFilter = filterKey.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    for (const [k, card] of Object.entries(VIDEO_MAP)) {
+      const normKey = k.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+      if (
+        normKey === normFilter ||
+        normKey.includes(normFilter) ||
+        normFilter.includes(normKey) ||
+        card.concept.toLowerCase().includes(normFilter.replace(/_/g, " "))
+      ) {
+        if (!seen.has(card.concept) && !seen.has(card.youtube_search)) {
+          seen.add(card.concept);
+          seen.add(card.youtube_search);
+          cards.push(card);
+        }
+      }
+    }
+    if (cards.length > 0) return cards;
+  }
 
   for (const tag of topWeaknesses) {
     const key = tag.toLowerCase().trim().replace(/[^a-z0-9_]/g, "_");
@@ -316,8 +524,9 @@ function pickCards(topWeaknesses: string[]): VideoCard[] {
       );
       if (matchKey) card = VIDEO_MAP[matchKey];
     }
-    if (card && !seen.has(card.concept)) {
+    if (card && !seen.has(card.concept) && !seen.has(card.youtube_search)) {
       seen.add(card.concept);
+      seen.add(card.youtube_search);
       cards.push(card);
     }
     if (cards.length >= 3) break;
@@ -326,8 +535,9 @@ function pickCards(topWeaknesses: string[]): VideoCard[] {
   // Fill to 3 with foundational cards if needed
   for (const fb of FOUNDATIONAL_CARDS) {
     if (cards.length >= 3) break;
-    if (!seen.has(fb.concept)) {
+    if (!seen.has(fb.concept) && !seen.has(fb.youtube_search)) {
       seen.add(fb.concept);
+      seen.add(fb.youtube_search);
       cards.push(fb);
     }
   }
@@ -344,20 +554,33 @@ function VideoCardUI({ card, index }: { card: VideoCard; index: number }) {
     { border: "border-emerald-200",bg: "bg-emerald-50",tag: "bg-emerald-100 text-emerald-700 border-emerald-200", btn: "bg-emerald-600 hover:bg-emerald-700" },
   ];
   const ac = accentColors[index % accentColors.length];
+  const isPlaylist = card.type === "playlist";
 
   return (
-    <div className={`rounded-2xl border ${ac.border} ${ac.bg} p-5 flex flex-col gap-3`}>
-      {/* Concept tag */}
-      <span className={`self-start text-[0.6rem] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${ac.tag}`}>
-        {card.concept}
-      </span>
+    <div className={`rounded-2xl border ${ac.border} ${ac.bg} p-5 flex flex-col gap-3 shadow-sm`}>
+      {/* Concept tag & Type Badge */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className={`self-start text-[0.6rem] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${ac.tag}`}>
+          {card.concept}
+        </span>
+        {isPlaylist ? (
+          <span className="text-[0.6rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200 flex items-center gap-1">
+            <span>▶</span> YouTube Playlist
+          </span>
+        ) : (
+          <span className="text-[0.6rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
+            <span>🔍</span> Curated Video
+          </span>
+        )}
+      </div>
 
       {/* Title */}
       <p className="text-sm font-bold text-slate-800 leading-snug">{card.title}</p>
 
-      {/* Channel hint */}
+      {/* Channel / Source hint */}
       <p className="text-[0.65rem] text-slate-400 font-medium">
-        Search: <span className="text-slate-500">{card.channel}</span>
+        {isPlaylist ? "Source: " : "Search: "}
+        <span className="text-slate-600 font-semibold">{card.channel}</span>
       </p>
 
       {/* Reason */}
@@ -368,9 +591,9 @@ function VideoCardUI({ card, index }: { card: VideoCard; index: number }) {
         href={card.youtube_search}
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex items-center justify-center gap-2 ${ac.btn} text-white text-xs font-bold rounded-xl py-2.5 transition-colors no-underline`}
+        className={`inline-flex items-center justify-center gap-2 ${ac.btn} text-white text-xs font-bold rounded-xl py-2.5 transition-colors no-underline shadow-sm`}
       >
-        <span>▶</span> Watch on YouTube →
+        <span>▶</span> {isPlaylist ? "Open Playlist on YouTube →" : "Watch on YouTube →"}
       </a>
     </div>
   );
@@ -389,10 +612,15 @@ function PlaylistCard({ playlist, index }: { playlist: CuratedPlaylist; index: n
       <div className={`bg-gradient-to-r ${accent.gradient} px-5 pt-5 pb-6`}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="text-white/70 text-[0.6rem] font-bold uppercase tracking-widest">
-              Curated Playlist {index + 1}
-            </span>
-            <h3 className="text-white font-black text-base leading-snug mt-0.5">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-white/80 text-[0.6rem] font-bold uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded-full">
+                YouTube Playlist {index + 1}
+              </span>
+              <span className="text-white/80 text-[0.6rem] font-bold uppercase tracking-wider">
+                Full Series
+              </span>
+            </div>
+            <h3 className="text-white font-black text-base sm:text-lg leading-snug mt-0.5">
               {playlist.title}
             </h3>
           </div>
@@ -426,7 +654,7 @@ function PlaylistCard({ playlist, index }: { playlist: CuratedPlaylist; index: n
           className={`inline-flex items-center justify-center gap-2 ${accent.btn} text-white text-xs font-bold rounded-xl py-3 shadow-md transition-all no-underline mt-auto`}
         >
           <span className="text-base">▶</span>
-          Open Full Playlist on YouTube →
+          Open Playlist on YouTube →
         </a>
       </div>
     </div>
@@ -439,14 +667,29 @@ export default function VideoRecommendationsPage() {
   const profile        = useChemStore((s) => s.profile);
   const eloRating      = useChemStore((s) => s.eloRating);
   const refreshProfile = useChemStore((s) => s.refreshProfile);
+  const [selectedTopic, setSelectedTopic] = useState<string>("all");
 
   useEffect(() => {
     refreshProfile();
   }, [refreshProfile]);
 
   const topWeaknesses = profile?.top_weaknesses ?? [];
-  const cards = pickCards(topWeaknesses);
+  const cards = pickCards(topWeaknesses, selectedTopic);
   const hasWeaknesses = topWeaknesses.length > 0;
+
+  // Filter curated playlists based on selected topic
+  const displayedPlaylists =
+    selectedTopic === "all"
+      ? CURATED_PLAYLISTS
+      : CURATED_PLAYLISTS.filter((pl) =>
+          pl.topics.some(
+            (t) =>
+              t.key === selectedTopic ||
+              selectedTopic.includes(t.key) ||
+              t.key.includes(selectedTopic) ||
+              t.label.toLowerCase().includes(selectedTopic.toLowerCase())
+          )
+        );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -469,7 +712,7 @@ export default function VideoRecommendationsPage() {
       <main className="max-w-2xl mx-auto px-4 py-10 pb-24">
 
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <p className="text-xs font-semibold tracking-widest text-violet-600 uppercase mb-2">
             Learn Next
           </p>
@@ -477,7 +720,9 @@ export default function VideoRecommendationsPage() {
             🎬 Video <span className="text-violet-600">Recommendations</span>
           </h1>
           <p className="text-sm text-slate-500 leading-relaxed">
-            {hasWeaknesses
+            {selectedTopic !== "all"
+              ? `Filtered to ${TOPIC_FILTERS.find((f) => f.id === selectedTopic)?.label ?? selectedTopic}.`
+              : hasWeaknesses
               ? `Based on your top weakness${topWeaknesses.length > 1 ? "es" : ""} — ${topWeaknesses.slice(0, 2).join(", ")}.`
               : "No weakness data yet. Here are the best places to start."}
           </p>
@@ -485,27 +730,97 @@ export default function VideoRecommendationsPage() {
 
         {/* Weakness pills (if present) */}
         {hasWeaknesses && (
-          <div className="flex flex-wrap gap-2 mb-7">
-            {topWeaknesses.slice(0, 5).map((tag) => (
-              <span
-                key={tag}
-                className="text-[0.65rem] font-semibold bg-red-50 text-red-600 border border-red-200 rounded-full px-2.5 py-0.5"
-              >
-                ⬇ {tag}
-              </span>
-            ))}
+          <div className="mb-6">
+            <p className="text-[0.65rem] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Your Identified Weaknesses
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {topWeaknesses.slice(0, 5).map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setSelectedTopic(selectedTopic === tag ? "all" : tag)}
+                  className={`text-[0.65rem] font-semibold border rounded-full px-2.5 py-0.5 transition-all cursor-pointer ${
+                    selectedTopic === tag
+                      ? "bg-red-600 text-white border-red-600 shadow-sm"
+                      : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                  }`}
+                  title={`Filter by ${tag}`}
+                >
+                  ⬇ {tag}
+                </button>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Topic filter bar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[0.65rem] font-bold uppercase tracking-wider text-slate-400">
+              Filter by Organic Chemistry Topic
+            </span>
+            {selectedTopic !== "all" && (
+              <button
+                type="button"
+                onClick={() => setSelectedTopic("all")}
+                className="text-[0.65rem] font-semibold text-violet-600 hover:text-violet-800 transition-colors cursor-pointer"
+              >
+                Clear filter ×
+              </button>
+            )}
+          </div>
+          <div className="overflow-x-auto pb-1">
+            <div className="flex gap-2 w-max">
+              {TOPIC_FILTERS.map((tf) => (
+                <button
+                  key={tf.id}
+                  type="button"
+                  onClick={() => setSelectedTopic(tf.id)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all whitespace-nowrap cursor-pointer ${
+                    selectedTopic === tf.id
+                      ? "bg-violet-600 text-white border-violet-600 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-violet-300 hover:text-violet-600"
+                  }`}
+                >
+                  <span>{tf.emoji}</span>
+                  {tf.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Cards */}
         <div className="flex flex-col gap-5">
           {cards.map((card, i) => (
-            <VideoCardUI key={card.concept} card={card} index={i} />
+            <VideoCardUI key={`${card.concept}-${card.youtube_search}`} card={card} index={i} />
           ))}
         </div>
 
+        {/* Curated YouTube Playlists Section */}
+        <div className="mt-14 pt-10 border-t border-slate-200">
+          <div className="mb-6">
+            <span className="text-[0.65rem] font-bold uppercase tracking-widest text-violet-600 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-full">
+              Full Series
+            </span>
+            <h2 className="text-xl font-black text-slate-900 mt-2">
+              📚 Complete Organic Chemistry Playlists
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Curated YouTube playlist series covering every NEET & JEE Organic Chemistry topic from foundational principles to advanced problems.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            {displayedPlaylists.map((pl, i) => (
+              <PlaylistCard key={pl.url} playlist={pl} index={i} />
+            ))}
+          </div>
+        </div>
+
         {/* Footer nudge */}
-        <div className="mt-10 bg-white border border-slate-200 rounded-xl p-5 text-center">
+        <div className="mt-12 bg-white border border-slate-200 rounded-xl p-5 text-center shadow-sm">
           <p className="text-sm font-bold text-slate-700 mb-1">
             Want targeted practice after watching?
           </p>
