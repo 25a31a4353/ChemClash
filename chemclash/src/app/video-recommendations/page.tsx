@@ -5,21 +5,20 @@
  *
  * Reads the user's top_weaknesses from the existing Zustand store and maps
  * them to curated YouTube search URLs for the concepts already present in
- * the project (pyq_db.json / concept_tree.json).
+ * the project (pyq_db.json / concept_tree.json) as well as curated
+ * full-series Organic Chemistry playlists for NEET and JEE preparation.
  *
- * No YouTube API. No external keys. Search URLs only.
+ * No YouTube API. No external keys. Search URLs and direct playlist URLs.
  */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useChemStore } from "@/store/useChemStore";
 
-// ── Curated concept → video card mapping ──────────────────────────────────
-// Keys are lowercase concept_tag values from pyq_db.json / concept_tree.json.
-// youtube_search is a YouTube search URL or direct YouTube playlist link.
+// ── Types ──────────────────────────────────────────────────────────────────
 
-interface VideoCard {
-  concept: string;         // display name
+export interface VideoCard {
+  concept: string;         // display name / topic name
   title: string;           // recommended video title / search query / playlist title
   channel: string;         // channel hint shown to user
   reason: string;          // why it was recommended
@@ -27,8 +26,252 @@ interface VideoCard {
   type?: "video" | "playlist"; // source / type label
 }
 
-const VIDEO_MAP: Record<string, VideoCard> = {
-  // ── SN1 / SN2 / Substitution ─────────────────────────────────────────
+export interface PlaylistTopic {
+  key: string;
+  label: string;
+  emoji: string;
+}
+
+export interface CuratedPlaylist {
+  id: string;
+  title: string;
+  url: string;
+  description: string;
+  accent: {
+    gradient: string;
+    badge: string;
+    btn: string;
+    glow: string;
+    icon: string;
+  };
+  topics: PlaylistTopic[];
+}
+
+export interface OrganicTopic {
+  id: string;
+  name: string;
+  aliases: string[];
+  emoji: string;
+}
+
+// ── 7 Organic Chemistry Topics (Existing System IDs) ───────────────────────
+
+export const ORGANIC_TOPICS: OrganicTopic[] = [
+  {
+    id: "purification",
+    name: "Purification and Characterisation of Organic Compounds",
+    aliases: [
+      "purification",
+      "characterisation",
+      "purification_and_characterisation",
+      "purification_and_characterisation_of_organic_compounds",
+      "qualitative_analysis",
+      "quantitative_analysis",
+    ],
+    emoji: "🔬",
+  },
+  {
+    id: "goc",
+    name: "Some Basic Principles of Organic Chemistry (GOC)",
+    aliases: [
+      "goc",
+      "general_organic_chemistry",
+      "some_basic_principles_of_organic_chemistry",
+      "basic_principles_of_organic_chemistry",
+      "inductive_effect",
+      "hyperconjugation",
+      "resonance_effect",
+    ],
+    emoji: "⚛️",
+  },
+  {
+    id: "hydrocarbons",
+    name: "Hydrocarbons",
+    aliases: [
+      "hydrocarbons",
+      "hydrocarbon",
+      "alkanes",
+      "alkenes",
+      "alkynes",
+      "aromatic_hydrocarbons",
+    ],
+    emoji: "🛢️",
+  },
+  {
+    id: "halogens",
+    name: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)",
+    aliases: [
+      "halogens",
+      "halogen",
+      "haloalkanes",
+      "haloarenes",
+      "haloalkanes_and_haloarenes",
+      "organic_compounds_containing_halogens",
+      "alkyl_halides",
+      "aryl_halides",
+    ],
+    emoji: "⚗️",
+  },
+  {
+    id: "oxygen",
+    name: "Organic Compounds Containing Oxygen",
+    aliases: [
+      "oxygen",
+      "alcohols",
+      "phenols",
+      "ethers",
+      "aldehydes",
+      "ketones",
+      "carboxylic_acids",
+      "organic_compounds_containing_oxygen",
+    ],
+    emoji: "💧",
+  },
+  {
+    id: "nitrogen",
+    name: "Organic Compounds Containing Nitrogen (Amines)",
+    aliases: [
+      "nitrogen",
+      "amines",
+      "amine",
+      "diazonium",
+      "organic_compounds_containing_nitrogen",
+      "aniline",
+    ],
+    emoji: "🔵",
+  },
+  {
+    id: "biomolecules",
+    name: "Biomolecules",
+    aliases: [
+      "biomolecules",
+      "biomolecule",
+      "carbohydrates",
+      "amino_acids",
+      "proteins",
+      "nucleic_acids",
+    ],
+    emoji: "🌿",
+  },
+];
+
+// ── The 3 Master YouTube Playlists ─────────────────────────────────────────
+
+export const PLAYLIST_1 = {
+  id: "oc_mission_30",
+  title: "Complete OC Mission 30 for Reneet",
+  url: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
+  channel: "YouTube Playlist",
+  description: "Comprehensive mission series covering complete NEET/JEE Organic Chemistry from purification and GOC to reaction mechanisms and biomolecules.",
+  accent: {
+    gradient: "from-violet-600 to-purple-700",
+    badge: "bg-violet-100 text-violet-700 border-violet-200",
+    btn: "bg-violet-600 hover:bg-violet-700 shadow-violet-200",
+    glow: "shadow-violet-100",
+    icon: "🧪",
+  },
+};
+
+export const PLAYLIST_2 = {
+  id: "oc_one_shots",
+  title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
+  url: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
+  channel: "YouTube Playlist",
+  description: "High-yield one-shot revision playlist covering the entire Organic Chemistry syllabus for quick exam preparation and rapid score boosting.",
+  accent: {
+    gradient: "from-blue-600 to-cyan-600",
+    badge: "bg-blue-100 text-blue-700 border-blue-200",
+    btn: "bg-blue-600 hover:bg-blue-700 shadow-blue-200",
+    glow: "shadow-blue-100",
+    icon: "💧",
+  },
+};
+
+export const PLAYLIST_3 = {
+  id: "oc_one_shot_neet_2026",
+  title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
+  url: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
+  channel: "YouTube Playlist",
+  description: "In-depth one-shot lecture series structured for NEET 2026 aspirants, covering all functional groups, reaction mechanisms, and NCERT-based PYQs.",
+  accent: {
+    gradient: "from-emerald-600 to-teal-600",
+    badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    btn: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200",
+    glow: "shadow-emerald-100",
+    icon: "🌿",
+  },
+};
+
+export const ALL_PLAYLISTS = [PLAYLIST_1, PLAYLIST_2, PLAYLIST_3];
+
+// ── 7 × 3 Topic Mappings (Every playlist mapped to all 7 topics) ────────────
+
+export interface TopicPlaylistMapping {
+  topicId: string;
+  topicName: string;
+  playlistTitle: string;
+  playlistUrl: string;
+  card: VideoCard;
+}
+
+export const TOPIC_PLAYLIST_MAPPINGS: TopicPlaylistMapping[] = ORGANIC_TOPICS.flatMap((topic) =>
+  ALL_PLAYLISTS.map((pl) => ({
+    topicId: topic.id,
+    topicName: topic.name,
+    playlistTitle: pl.title,
+    playlistUrl: pl.url,
+    card: {
+      concept: topic.name,
+      title: pl.title,
+      channel: pl.channel,
+      reason: `${pl.title} — comprehensive coverage of ${topic.name}.`,
+      youtube_search: pl.url,
+      type: "playlist" as const,
+    },
+  }))
+);
+
+// ── Curated Playlists UI Array (All 3 playlists carry all 7 topics) ─────────
+
+const ALL_TOPIC_PILLS: PlaylistTopic[] = ORGANIC_TOPICS.map((t) => ({
+  key: t.id,
+  label: t.name,
+  emoji: t.emoji,
+}));
+
+export const CURATED_PLAYLISTS: CuratedPlaylist[] = ALL_PLAYLISTS.map((pl) => ({
+  id: pl.id,
+  title: pl.title,
+  url: pl.url,
+  description: pl.description,
+  accent: pl.accent,
+  topics: ALL_TOPIC_PILLS,
+}));
+
+// ── Topic Filter Options ───────────────────────────────────────────────────
+
+interface TopicFilterOption {
+  id: string;
+  label: string;
+  emoji: string;
+}
+
+export const TOPIC_FILTERS: TopicFilterOption[] = [
+  { id: "all", label: "All Recommendations", emoji: "✨" },
+  { id: "purification", label: "Purification & Characterisation", emoji: "🔬" },
+  { id: "goc", label: "GOC (Basic Principles)", emoji: "⚛️" },
+  { id: "hydrocarbons", label: "Hydrocarbons", emoji: "🛢️" },
+  { id: "halogens", label: "Haloalkanes & Haloarenes", emoji: "⚗️" },
+  { id: "oxygen", label: "Oxygen Compounds", emoji: "💧" },
+  { id: "nitrogen", label: "Nitrogen Compounds (Amines)", emoji: "🔵" },
+  { id: "biomolecules", label: "Biomolecules", emoji: "🌿" },
+];
+
+// ── Existing Concept → Video Card Mapping ──────────────────────────────────
+// Preserved exactly as existing in the project.
+
+export const VIDEO_MAP: Record<string, VideoCard> = {
+  // ── SN1 / SN2 / Substitution ─────────────────────────────────────────────
   "sn2": {
     concept: "SN2 Mechanism",
     title: "SN2 Reaction Mechanism — Backside Attack & Walden Inversion",
@@ -50,7 +293,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Deciding between SN1 and SN2 is a key JEE skill. Watch the comparison.",
     youtube_search: "https://www.youtube.com/results?search_query=SN1+vs+SN2+mechanism+comparison+JEE",
   },
-  // ── E1 / E2 / Elimination ─────────────────────────────────────────────
+  // ── E1 / E2 / Elimination ─────────────────────────────────────────────────
   "e2": {
     concept: "E2 Elimination",
     title: "E2 Elimination — Anti-Periplanar Geometry & Zaitsev's Rule",
@@ -72,7 +315,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Choosing SN vs E is a high-value skill in JEE Organic Chemistry.",
     youtube_search: "https://www.youtube.com/results?search_query=substitution+vs+elimination+organic+chemistry+JEE",
   },
-  // ── Carbocation ────────────────────────────────────────────────────────
+  // ── Carbocation ──────────────────────────────────────────────────────────
   "carbocation": {
     concept: "Carbocation Stability",
     title: "Carbocation Stability — Hyperconjugation & Rearrangements",
@@ -94,7 +337,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Rearrangements change the expected product and are a common JEE trap.",
     youtube_search: "https://www.youtube.com/results?search_query=carbocation+rearrangement+1+2+hydride+methyl+shift",
   },
-  // ── EAS / Aromatic ─────────────────────────────────────────────────────
+  // ── EAS / Aromatic ───────────────────────────────────────────────────────
   "eas": {
     concept: "Electrophilic Aromatic Substitution",
     title: "EAS — Directing Effects, Ortho/Para vs Meta",
@@ -109,7 +352,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Aromaticity criteria appear in both theory and mechanism questions.",
     youtube_search: "https://www.youtube.com/results?search_query=aromaticity+Huckel+rule+organic+chemistry",
   },
-  // ── Stereochemistry ────────────────────────────────────────────────────
+  // ── Stereochemistry ──────────────────────────────────────────────────────
   "stereochemistry": {
     concept: "Stereochemistry",
     title: "R/S Configuration — CIP Rules Step by Step",
@@ -124,7 +367,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Chiral centres and stereorelationships are core JEE Organic topics.",
     youtube_search: "https://www.youtube.com/results?search_query=chirality+enantiomers+diastereomers+organic+chemistry",
   },
-  // ── Markovnikov / Addition ─────────────────────────────────────────────
+  // ── Markovnikov / Addition ───────────────────────────────────────────────
   "markovnikov": {
     concept: "Markovnikov's Rule",
     title: "Markovnikov's Rule — Regioselectivity in HX Addition",
@@ -139,7 +382,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Alkene addition reactions are the most tested topic in JEE Organic.",
     youtube_search: "https://www.youtube.com/results?search_query=electrophilic+addition+alkenes+HBr+bromine+water",
   },
-  // ── Resonance ──────────────────────────────────────────────────────────
+  // ── Resonance ────────────────────────────────────────────────────────────
   "resonance": {
     concept: "Resonance Structures",
     title: "Resonance Structures — Drawing and Ranking Contributors",
@@ -147,7 +390,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Resonance stability determines reaction outcomes in EAS, carbonyl, and acid/base chemistry.",
     youtube_search: "https://www.youtube.com/results?search_query=resonance+structures+organic+chemistry+ranking",
   },
-  // ── Carbonyl / Aldol ───────────────────────────────────────────────────
+  // ── Carbonyl / Aldol ─────────────────────────────────────────────────────
   "carbonyl": {
     concept: "Carbonyl Chemistry",
     title: "Nucleophilic Addition to Carbonyls — Aldehydes & Ketones",
@@ -162,7 +405,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Aldol mechanisms involve enolate formation which is a common JEE question.",
     youtube_search: "https://www.youtube.com/results?search_query=aldol+reaction+condensation+enolate+organic+chemistry",
   },
-  // ── Lewis / Nucleophile / Electrophile ────────────────────────────────
+  // ── Lewis / Nucleophile / Electrophile ──────────────────────────────────
   "nucleophile": {
     concept: "Nucleophiles & Electrophiles",
     title: "Nucleophiles vs Electrophiles — Recognising Reactants",
@@ -177,7 +420,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Electrophile recognition is the first step in predicting reaction outcomes.",
     youtube_search: "https://www.youtube.com/results?search_query=nucleophile+electrophile+organic+chemistry+basics",
   },
-  // ── Acid / Base ────────────────────────────────────────────────────────
+  // ── Acid / Base ──────────────────────────────────────────────────────────
   "acidity": {
     concept: "Acidity & pKa",
     title: "Organic Acid Strength — Factors Affecting pKa",
@@ -185,7 +428,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     reason: "Relative acidity questions appear frequently in JEE Mains.",
     youtube_search: "https://www.youtube.com/results?search_query=organic+acidity+pKa+factors+JEE",
   },
-  // ── Leaving group / Steric ────────────────────────────────────────────
+  // ── Leaving group / Steric ──────────────────────────────────────────────
   "leaving_group": {
     concept: "Leaving Groups",
     title: "Leaving Group Ability — What Makes a Good Leaving Group?",
@@ -201,8 +444,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     youtube_search: "https://www.youtube.com/results?search_query=steric+hindrance+SN2+primary+secondary+tertiary",
   },
 
-  // ── Curated YouTube Playlists: NEET & JEE Organic Chemistry ───────────
-  // Playlist 1: Complete OC Mission 30 for Reneet
+  // ── Topic-level playlist entries in VIDEO_MAP ────────────────────────────
   "purification": {
     concept: "Purification and Characterisation of Organic Compounds",
     title: "Complete OC Mission 30 for Reneet",
@@ -267,8 +509,6 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     youtube_search: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
     type: "playlist",
   },
-
-  // Playlist 2: Complete Organic Chemistry (One Shots - for Quick Exam Preparation)
   "halogens": {
     concept: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)",
     title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
@@ -325,8 +565,6 @@ const VIDEO_MAP: Record<string, VideoCard> = {
     youtube_search: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
     type: "playlist",
   },
-
-  // Playlist 3: ORGANIC CHEMISTRY ONE SHOT NEET 2026
   "nitrogen": {
     concept: "Organic Compounds Containing Nitrogen (Amines)",
     title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
@@ -370,7 +608,7 @@ const VIDEO_MAP: Record<string, VideoCard> = {
 };
 
 // Fallback cards shown when the student has no weakness data yet
-const FOUNDATIONAL_CARDS: VideoCard[] = [
+export const FOUNDATIONAL_CARDS: VideoCard[] = [
   {
     concept: "Organic Chemistry Fundamentals",
     title: "Introduction to Organic Chemistry — Bonding, Functional Groups, Isomers",
@@ -394,158 +632,113 @@ const FOUNDATIONAL_CARDS: VideoCard[] = [
   },
 ];
 
-// ── Curated Playlists ─────────────────────────────────────────────────────
+// ── Pick cards from weakness list or filter ────────────────────────────────
 
-interface PlaylistTopic {
-  key: string;
-  label: string;
-  emoji: string;
-}
-
-interface CuratedPlaylist {
-  title: string;
-  url: string;
-  description: string;
-  accent: {
-    gradient: string;
-    badge: string;
-    btn: string;
-    glow: string;
-    icon: string;
-  };
-  topics: PlaylistTopic[];
-}
-
-const CURATED_PLAYLISTS: CuratedPlaylist[] = [
-  {
-    title: "Complete OC Mission 30 for Reneet",
-    url: "https://youtube.com/playlist?list=PLY_RLZcWR38c&si=B64yfXuPN2hFZfbT",
-    description: "Master the analytical backbone of Organic Chemistry — from purification techniques and qualitative analysis to the fundamentals of GOC and all hydrocarbon reactions.",
-    accent: {
-      gradient: "from-violet-600 to-purple-700",
-      badge: "bg-violet-100 text-violet-700 border-violet-200",
-      btn: "bg-violet-600 hover:bg-violet-700 shadow-violet-200",
-      glow: "shadow-violet-100",
-      icon: "🧪",
-    },
-    topics: [
-      { key: "purification", label: "Purification and Characterisation of Organic Compounds", emoji: "🔬" },
-      { key: "goc", label: "Some Basic Principles of Organic Chemistry (GOC)", emoji: "⚛️" },
-      { key: "hydrocarbons", label: "Hydrocarbons", emoji: "🛢️" },
-    ],
-  },
-  {
-    title: "Complete Organic Chemistry (One Shots - for Quick Exam Preparation)",
-    url: "https://youtube.com/playlist?list=PLJyab0VQDBGUlZybgOULmNV1vbvWmUGxn&si=y-H96gQrUhKK5M_8",
-    description: "Deep dive into haloalkanes, haloarenes, and all oxygen-containing functional groups — alcohols, phenols, ethers, aldehydes, ketones, carboxylic acids and derivatives in concise one-shots.",
-    accent: {
-      gradient: "from-blue-600 to-cyan-600",
-      badge: "bg-blue-100 text-blue-700 border-blue-200",
-      btn: "bg-blue-600 hover:bg-blue-700 shadow-blue-200",
-      glow: "shadow-blue-100",
-      icon: "💧",
-    },
-    topics: [
-      { key: "halogens", label: "Organic Compounds Containing Halogens (Haloalkanes and Haloarenes)", emoji: "⚗️" },
-      { key: "oxygen", label: "Organic Compounds Containing Oxygen", emoji: "🧬" },
-    ],
-  },
-  {
-    title: "ORGANIC CHEMISTRY ONE SHOT NEET 2026",
-    url: "https://youtube.com/playlist?list=PLWE6zIJIGejd-7VudTKaFSX9ziIi7b1X_&si=arKlH8Aa9n2xurHP",
-    description: "Complete coverage of nitrogen-containing compounds (amines, diazonium salts) and the rich world of biomolecules — carbohydrates, amino acids, proteins, and nucleic acids.",
-    accent: {
-      gradient: "from-emerald-600 to-teal-600",
-      badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
-      btn: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200",
-      glow: "shadow-emerald-100",
-      icon: "🌿",
-    },
-    topics: [
-      { key: "nitrogen", label: "Organic Compounds Containing Nitrogen (Amines)", emoji: "🔵" },
-      { key: "biomolecules", label: "Biomolecules", emoji: "🌿" },
-    ],
-  },
-];
-
-// ── Topic Filter Options ──────────────────────────────────────────────────
-
-interface TopicFilterOption {
-  id: string;
-  label: string;
-  emoji: string;
-}
-
-const TOPIC_FILTERS: TopicFilterOption[] = [
-  { id: "all", label: "All Recommendations", emoji: "✨" },
-  { id: "purification", label: "Purification & Characterisation", emoji: "🔬" },
-  { id: "goc", label: "GOC (Basic Principles)", emoji: "⚛️" },
-  { id: "hydrocarbons", label: "Hydrocarbons", emoji: "🛢️" },
-  { id: "halogens", label: "Haloalkanes & Haloarenes", emoji: "⚗️" },
-  { id: "oxygen", label: "Oxygen Compounds", emoji: "💧" },
-  { id: "nitrogen", label: "Nitrogen Compounds (Amines)", emoji: "🔵" },
-  { id: "biomolecules", label: "Biomolecules", emoji: "🌿" },
-];
-
-// ── Pick cards from weakness list or filter ───────────────────────────────
-
-function pickCards(topWeaknesses: string[], filterKey: string = "all"): VideoCard[] {
-  const seen = new Set<string>();
+export function pickCards(topWeaknesses: string[], filterKey: string = "all"): VideoCard[] {
+  const seenUrls = new Set<string>();
   const cards: VideoCard[] = [];
 
+  const addCard = (card: VideoCard) => {
+    if (!seenUrls.has(card.youtube_search)) {
+      seenUrls.add(card.youtube_search);
+      cards.push(card);
+      return true;
+    }
+    return false;
+  };
+
+  // Case 1: Topic filter is active
   if (filterKey !== "all") {
     const normFilter = filterKey.toLowerCase().replace(/[^a-z0-9_]/g, "_");
-    for (const [k, card] of Object.entries(VIDEO_MAP)) {
+
+    // Match one of our 7 organic topics
+    const matchedTopic = ORGANIC_TOPICS.find(
+      (t) =>
+        t.id === normFilter ||
+        t.aliases.includes(normFilter) ||
+        normFilter.includes(t.id) ||
+        t.name.toLowerCase().includes(normFilter.replace(/_/g, " "))
+    );
+
+    if (matchedTopic) {
+      // 1. Add the playlists mapped to this topic
+      const topicMatches = TOPIC_PLAYLIST_MAPPINGS.filter((m) => m.topicId === matchedTopic.id);
+      for (const tm of topicMatches) {
+        addCard(tm.card);
+      }
+
+      // 2. Add any specific concept videos from VIDEO_MAP matching this topic
+      for (const [k, v] of Object.entries(VIDEO_MAP)) {
+        if (v.type !== "playlist" && matchedTopic.aliases.some((alias) => k.includes(alias) || alias.includes(k))) {
+          addCard(v);
+        }
+      }
+
+      if (cards.length > 0) return cards;
+    }
+
+    // Direct search in VIDEO_MAP if not matching a primary topic
+    for (const [k, v] of Object.entries(VIDEO_MAP)) {
       const normKey = k.toLowerCase().replace(/[^a-z0-9_]/g, "_");
       if (
         normKey === normFilter ||
         normKey.includes(normFilter) ||
         normFilter.includes(normKey) ||
-        card.concept.toLowerCase().includes(normFilter.replace(/_/g, " "))
+        v.concept.toLowerCase().includes(normFilter.replace(/_/g, " "))
       ) {
-        if (!seen.has(card.concept) && !seen.has(card.youtube_search)) {
-          seen.add(card.concept);
-          seen.add(card.youtube_search);
-          cards.push(card);
-        }
+        addCard(v);
       }
     }
     if (cards.length > 0) return cards;
   }
 
+  // Case 2: Recommendations based on student weaknesses
   for (const tag of topWeaknesses) {
-    const key = tag.toLowerCase().trim().replace(/[^a-z0-9_]/g, "_");
-    // exact match first
-    let card = VIDEO_MAP[key];
-    // partial match fallback
-    if (!card) {
+    const normTag = tag.toLowerCase().trim().replace(/[^a-z0-9_]/g, "_");
+
+    // A: Check if weakness matches any of the 7 organic topics
+    const matchedTopic = ORGANIC_TOPICS.find(
+      (t) =>
+        t.id === normTag ||
+        t.aliases.includes(normTag) ||
+        normTag.includes(t.id) ||
+        t.name.toLowerCase().includes(normTag.replace(/_/g, " "))
+    );
+
+    if (matchedTopic) {
+      const topicMatches = TOPIC_PLAYLIST_MAPPINGS.filter((m) => m.topicId === matchedTopic.id);
+      for (const tm of topicMatches) {
+        addCard(tm.card);
+        if (cards.length >= 3) break;
+      }
+    }
+
+    // B: Exact match in VIDEO_MAP
+    if (VIDEO_MAP[normTag]) {
+      addCard(VIDEO_MAP[normTag]);
+    } else {
+      // C: Partial match in VIDEO_MAP
       const matchKey = Object.keys(VIDEO_MAP).find(
-        (k) => key.includes(k) || k.includes(key)
+        (k) => normTag.includes(k) || k.includes(normTag)
       );
-      if (matchKey) card = VIDEO_MAP[matchKey];
+      if (matchKey) {
+        addCard(VIDEO_MAP[matchKey]);
+      }
     }
-    if (card && !seen.has(card.concept) && !seen.has(card.youtube_search)) {
-      seen.add(card.concept);
-      seen.add(card.youtube_search);
-      cards.push(card);
-    }
+
     if (cards.length >= 3) break;
   }
 
-  // Fill to 3 with foundational cards if needed
+  // Case 3: Fill to 3 with foundational cards if fewer than 3 recommendations
   for (const fb of FOUNDATIONAL_CARDS) {
     if (cards.length >= 3) break;
-    if (!seen.has(fb.concept) && !seen.has(fb.youtube_search)) {
-      seen.add(fb.concept);
-      seen.add(fb.youtube_search);
-      cards.push(fb);
-    }
+    addCard(fb);
   }
 
   return cards;
 }
 
-// ── Video card component ──────────────────────────────────────────────────
+// ── Video card component ───────────────────────────────────────────────────
 
 function VideoCardUI({ card, index }: { card: VideoCard; index: number }) {
   const accentColors = [
@@ -599,13 +792,13 @@ function VideoCardUI({ card, index }: { card: VideoCard; index: number }) {
   );
 }
 
-// ── Curated Playlist Card ─────────────────────────────────────────────────
+// ── Curated Playlist Card ──────────────────────────────────────────────────
 
 function PlaylistCard({ playlist, index }: { playlist: CuratedPlaylist; index: number }) {
   const { accent } = playlist;
   return (
     <div
-      className={`relative rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-lg flex flex-col`}
+      className="relative rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-lg flex flex-col"
       style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.07)" }}
     >
       {/* Gradient header */}
@@ -637,7 +830,7 @@ function PlaylistCard({ playlist, index }: { playlist: CuratedPlaylist; index: n
         <div className="flex flex-wrap gap-1.5">
           {playlist.topics.map((t) => (
             <span
-              key={t.label}
+              key={`${playlist.id}-${t.key}`}
               className={`inline-flex items-center gap-1 text-[0.6rem] font-semibold px-2.5 py-1 rounded-full border ${accent.badge}`}
             >
               <span>{t.emoji}</span>
@@ -814,7 +1007,7 @@ export default function VideoRecommendationsPage() {
 
           <div className="flex flex-col gap-6">
             {displayedPlaylists.map((pl, i) => (
-              <PlaylistCard key={pl.url} playlist={pl} index={i} />
+              <PlaylistCard key={pl.id} playlist={pl} index={i} />
             ))}
           </div>
         </div>
